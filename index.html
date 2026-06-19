@@ -876,10 +876,13 @@
                   <input type="text" id="incident-approver" />
                 </div>
               </div>
+
               <div class="form-group">
-                <label>Problem Description *</label>
-                <textarea id="incident-description" required></textarea>
+                <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
+                <textarea id="incident-description" required placeholder="พิมพ์รายละเอียดปัญหา และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+                <ul class="attachments-list" id="incident-staged-attachments" style="margin-top: 8px;"></ul>
               </div>
+
               <div class="form-row" style="align-items:flex-end;">
                 <div class="form-group">
                   <label>Reference (optional)</label>
@@ -1645,7 +1648,7 @@
       { q: "Request new TM1 user", a: "Use Service Request > Access Request and specify the role." }
     ];
 
-    // Added elements from web.txt
+    // Added elements
     const exportIncBtn = document.getElementById("btn-export-inc");
     const exportReqBtn = document.getElementById("btn-export-req");
     const btnExportJson = document.getElementById("btn-export-json");
@@ -1892,7 +1895,7 @@
       });
     });
 
-    // ================== ASSIGNMENT & EMAIL (From web.txt) ==================
+    // ================== ASSIGNMENT & EMAIL ==================
     async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const prev = ticket.assignedTo || null;
       if (prev === newAssigneeId) return;
@@ -1909,15 +1912,79 @@
         const assignee = getUserById(newAssigneeId);
         if (assignee && assignee.email) {
           if (fromDetail) {
-            const subject = `[ITSM] You have been assigned ticket ${ticket.id}`;
-            const body = `Dear ${assignee.name},\n\nYou have been assigned to ticket ${ticket.id}: "${ticket.title}".\nPlease log in to the portal to review the request.\n\nBest Regards,\nIT Service Management`;
-            alert(`📧 (Simulation) Sending Email Notification...\n---------------------------------------------------\nTo: ${assignee.email}\nSubject: ${subject}\n\n${body}`);
+            const subject = encodeURIComponent(`[ITSM] You have been assigned ticket ${ticket.id}`);
+            const body = encodeURIComponent(`Dear ${assignee.name},\n\nYou have been assigned to ticket ${ticket.id}: "${ticket.title}".\nPlease log in to the portal to review the request.\n\nBest Regards,\nIT Service Management`);
+            window.location.href = `mailto:${assignee.email}?subject=${subject}&body=${body}`;
           } else {
-            console.log(`📧 Email sent to ${assignee.email} regarding ticket ${ticket.id}`);
+            console.log(`📧 Email prepared for ${assignee.email} regarding ticket ${ticket.id}`);
           }
         }
       }
     }
+
+    // ================== PASTE IMAGE IN INCIDENT FORM ==================
+    let incidentStagedAttachments = [];
+    const incidentDescInput = document.getElementById("incident-description");
+    const incidentStagedList = document.getElementById("incident-staged-attachments");
+
+    incidentDescInput.addEventListener("paste", (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      
+      const images = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          images.push(items[i].getAsFile());
+        }
+      }
+      
+      if (!images.length) return; 
+      
+      images.forEach(file => {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+          showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 500KB)`);
+          return;
+        }
+        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
+          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`);
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          incidentStagedAttachments.push({
+            id: `${Date.now()}-${Math.random()}`,
+            name: `pasted-image-${Date.now()}.png`,
+            type: file.type,
+            size: file.size,
+            dataUrl: evt.target.result
+          });
+          renderIncidentStagedAttachments();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    function renderIncidentStagedAttachments() {
+      incidentStagedList.innerHTML = "";
+      incidentStagedAttachments.forEach((a, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${a.dataUrl}" class="attachment-preview" />
+          <div style="flex:1;">
+            <div><strong>${a.name}</strong></div>
+            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${index})">X</button>
+        `;
+        incidentStagedList.appendChild(li);
+      });
+    }
+
+    window.removeIncidentStaged = function(index) {
+      incidentStagedAttachments.splice(index, 1);
+      renderIncidentStagedAttachments();
+    };
 
     // ================== CREATING TICKETS (with email) ==================
     incidentForm.addEventListener("submit", async (e) => {
@@ -1938,14 +2005,18 @@
       const reference = document.getElementById("incident-reference").value.trim();
       
       if (!requester || !dept || !email || !system || !title || !category || !impact || !priority || !description) {
-        alert("Please fill in all required (*) fields."); return;
+        alert("Please fill in all required (*) fields.");
+        return;
       }
       
       const now = new Date().toISOString();
       const incident = {
         id: generateId("INC"), type: "Incident", requester, dept, phone, email, system, module, title,
         category, impact, priority, dueDate: due || null, approver, reference, description,
-        status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], attachments: [],
+        status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
+        
+        attachments: [...incidentStagedAttachments], 
+        
         sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
       };
 
@@ -1953,6 +2024,9 @@
       incidents.unshift(incident);
       
       incidentForm.reset();
+      incidentStagedAttachments = [];
+      renderIncidentStagedAttachments();
+
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
       renderIncidents(); renderDashboard(); renderMyTickets(); renderAdminTable();
       showToast(`Created Incident ${incident.id}`);
@@ -1987,7 +2061,8 @@
       const description = document.getElementById("request-description").value.trim();
 
       if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !approver || !description) {
-        alert("Please fill in all required (*) fields."); return;
+        alert("Please fill in all required (*) fields.");
+        return;
       }
 
       const now = new Date().toISOString();
@@ -2017,7 +2092,7 @@
       }
     });
 
-    // ================== EXPORT CSV (From web.txt) ==================
+    // ================== EXPORT CSV ==================
     function downloadCSV(filename, rows) {
       if (!rows || !rows.length) { alert("No data for export."); return; }
       const processValue = (v) => {
@@ -2063,7 +2138,7 @@
       downloadCSV("requests.csv", rows);
     });
 
-    // ================== EXPORT JSON (From web.txt) ==================
+    // ================== EXPORT JSON ==================
     btnExportJson.addEventListener("click", () => {
       const data = { incidents, requests, users: systemUsers, auditLogs, timestamp: new Date().toISOString() };
       const dataStr = JSON.stringify(data, null, 2);
@@ -2076,7 +2151,6 @@
       URL.revokeObjectURL(url);
       showToast("Data exported for backup.");
     });
-
 
     // ================== RENDER FUNCTIONS ==================
     function renderDashboard() {
@@ -2149,10 +2223,12 @@
     }
 
     function renderRequests() {
-      const statusFilter = requestStatusFilter.value; const categoryFilter = requestCategoryFilter.value;
+      const statusFilter = requestStatusFilter.value;
+      const categoryFilter = requestCategoryFilter.value;
       const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value;
       const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase();
-      const fromVal = requestDateFrom.value; const toVal = requestDateTo.value;
+      const fromVal = requestDateFrom.value;
+      const toVal = requestDateTo.value;
       const search = requestSearch.value.trim().toLowerCase();
       requestTableBody.innerHTML = "";
       requests.filter(r => !statusFilter || r.status === statusFilter)
@@ -2217,7 +2293,9 @@
     }
 
     // ================== DETAIL MODAL & UPDATING TICKETS ==================
-    function findTicket(kind, id) { return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id); }
+    function findTicket(kind, id) { 
+      return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id);
+    }
     
     async function updateTicket(kind, ticket) {
       const colName = kind === "incident" ? "incidents" : "requests";
@@ -2238,7 +2316,8 @@
       detailTitle.textContent = `${t.type} Detail`; detailSubtitle.textContent = `${t.id} • ${t.title}`;
       detailIdSpan.textContent = t.id; detailTypeSpan.textContent = t.type;
       detailSubjectInput.value = t.title; detailSystemInput.value = t.system || "";
-      detailModuleInput.value = t.module || ""; detailAssigneeSelect.value = t.assignedTo || "";
+      detailModuleInput.value = t.module || "";
+      detailAssigneeSelect.value = t.assignedTo || "";
       detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)";
       detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
       detailRequesterDeptSpan.textContent = `${t.requester || "-"}${t.dept ? " / " + t.dept : ""}`;
@@ -2268,7 +2347,7 @@
       
       const newAssignee = detailAssigneeSelect.value || null;
       if (t.assignedTo !== newAssignee) {
-        await assignTicket(t, newAssignee, true); // Now uses the mailto logic
+        await assignTicket(t, newAssignee, true); 
       }
       
       if (t.sla) {
@@ -2300,7 +2379,7 @@
       
       await updateTicket(currentDetail.kind, t);
       logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
-      detailNoteInput.value = ""; renderAll(); // Need full refresh for now
+      detailNoteInput.value = ""; renderAll(); 
     });
 
     // ================== ADMIN DELETE & BULK ==================
