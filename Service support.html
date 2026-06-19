@@ -1,0 +1,3145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Finance System Service Portal – Incident & Request</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- ================== CSS ================== -->
+  
+<style>
+  :root {
+    --banpu-primary: #2a2681;
+    --banpu-primary-dark: #1d1a5e;
+    --banpu-accent: #2fbf8f;
+    --banpu-bg: #f4f6fb;
+    --banpu-card-bg: #ffffff;
+    --banpu-border: #d9e2f2;
+    --banpu-text: #111827;
+    --banpu-muted: #6b7280;
+  }
+  * {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at top, #eef1ff, #f4f6fb);
+    color: var(--banpu-text);
+  }
+  /* Login */
+  #login-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, #e7ebff, #f4f6fb);
+  }
+  .login-card {
+    background: var(--banpu-card-bg);
+    padding: 22px 26px;
+    border-radius: 18px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+    max-width: 380px;
+    width: 100%;
+    border: 1px solid var(--banpu-border);
+  }
+  .login-card h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    text-align: center;
+    color: var(--banpu-primary);
+    letter-spacing: 0.02em;
+  }
+  .login-card p {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: var(--banpu-muted);
+    text-align: center;
+  }
+  .login-field {
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .login-field label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: #374151;
+  }
+  .login-field select,
+  .login-field input[type="password"] {
+    width: 100%;
+    padding: 9px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--banpu-border);
+    font-size: 13px;
+    outline: none;
+    background: #f9fafb;
+  }
+  .login-field select:focus,
+  .login-field input[type="password"]:focus {
+    border-color: var(--banpu-primary);
+    box-shadow: 0 0 0 1px rgba(42, 38, 129, 0.16);
+    background: #ffffff;
+  }
+  #login-btn {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--banpu-primary), var(--banpu-accent));
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 6px;
+    box-shadow: 0 14px 26px rgba(42, 38, 129, 0.45);
+    transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+  }
+  #login-btn:hover {
+    filter: brightness(1.03);
+    box-shadow: 0 16px 32px rgba(42, 38, 129, 0.5);
+    transform: translateY(-1px);
+  }
+  #login-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 16px rgba(42, 38, 129, 0.35);
+  }
+  .login-note {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--banpu-muted);
+    text-align: left;
+    line-height: 1.4;
+  }
+  .login-note code {
+    background: #eef2ff;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    color: var(--banpu-primary);
+    border: 1px solid #d4dcff;
+  }
+  /* App Container */
+  #app-root {
+    display: none;
+  }
+  .app-container {
+    max-width: 1300px;
+    margin: 18px auto;
+    padding: 16px 18px 20px;
+    background: var(--banpu-card-bg);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+    border: 1px solid var(--banpu-border);
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    color: var(--banpu-primary);
+  }
+  .subtitle {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--banpu-muted);
+  }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .user-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: var(--banpu-primary);
+    font-size: 12px;
+    border: 1px solid #d4dcff;
+  }
+  .role-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    background: var(--banpu-primary);
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    background: linear-gradient(135deg, var(--banpu-primary), var(--banpu-accent));
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(42, 38, 129, 0.38);
+    transition: transform 0.1s, box-shadow 0.1s, filter 0.1s, background 0.1s;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    filter: brightness(1.03);
+    box-shadow: 0 14px 30px rgba(42, 38, 129, 0.45);
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 12px rgba(42, 38, 129, 0.3);
+  }
+  .btn-secondary {
+    background: #eef2ff;
+    color: var(--banpu-primary);
+    box-shadow: none;
+    border: 1px solid #d4dcff;
+  }
+  .btn-secondary:hover {
+    background: #e0e5ff;
+  }
+  .btn-danger {
+    background: #f97373;
+    box-shadow: none;
+    color: #ffffff;
+    border: 1px solid #f87171;
+  }
+  .btn-danger:hover {
+    background: #ef4444;
+  }
+  .btn-small {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--banpu-border);
+    margin-bottom: 10px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+    border-radius: 10px 10px 0 0;
+    flex-shrink: 0;
+    background: transparent;
+  }
+  .nav-tab:hover {
+    background: #f3f4ff;
+  }
+  .nav-tab.active {
+    color: var(--banpu-primary);
+    border-bottom-color: var(--banpu-primary);
+    font-weight: 600;
+    background: #eef2ff;
+  }
+  .section {
+    display: none;
+    margin-top: 12px;
+  }
+  .section.active {
+    display: block;
+  }
+  /* Layout */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr;
+    gap: 14px;
+  }
+  @media (max-width: 980px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .card {
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid var(--banpu-border);
+  }
+  .card h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    color: #111827;
+  }
+  .card small {
+    color: var(--banpu-muted);
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  /* Form */
+  .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .form-group {
+    flex: 1 1 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+  }
+  label {
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    color: #374151;
+  }
+  label span.en {
+    font-weight: 400;
+    font-size: 10px;
+    color: var(--banpu-muted);
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea {
+    padding: 6px 9px;
+    border-radius: 8px;
+    border: 1px solid var(--banpu-border);
+    font-size: 12px;
+    outline: none;
+    background: #ffffff;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--banpu-primary);
+    box-shadow: 0 0 0 1px rgba(42, 38, 129, 0.14);
+  }
+  textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+  /* Table */
+  .table-container {
+    margin-top: 8px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--banpu-border);
+  }
+  thead {
+    background: #f3f4ff;
+  }
+  th,
+  td {
+    padding: 6px 7px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    font-weight: 600;
+    color: #374151;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .status-open {
+    background: #eef2ff;
+    color: var(--banpu-primary);
+  }
+  .status-in-progress {
+    background: #fef3c7;
+    color: #b45309;
+  }
+  .status-pending {
+    background: #fffbeb;
+    color: #92400e;
+  }
+  .status-closed {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .status-cancelled {
+    background: #e5e7eb;
+    color: #4b5563;
+  }
+  .status-escalated {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+  .filters strong {
+    margin-right: 4px;
+    color: #374151;
+  }
+  .filters select,
+  .filters input[type="text"],
+  .filters input[type="date"] {
+    min-width: 110px;
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--banpu-border);
+    background: #ffffff;
+  }
+  .filters input[type="text"] {
+    min-width: 150px;
+  }
+  .muted {
+    font-size: 11px;
+    color: var(--banpu-muted);
+    margin-top: 4px;
+  }
+  .danger-text {
+    color: #b91c1c;
+    font-size: 11px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: #e5e7eb;
+    color: #374151;
+    margin-right: 4px;
+  }
+  .badge-primary {
+    background: #dbeafe;
+    color: var(--banpu-primary);
+  }
+  .badge-green {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .badge-amber {
+    background: #fef3c7;
+    color: #b45309;
+  }
+  .flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  /* Modal Detail */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-backdrop.active {
+    display: flex;
+  }
+  .modal {
+    background: #ffffff;
+    max-width: 960px;
+    width: 96%;
+    max-height: 92vh;
+    border-radius: 18px;
+    padding: 14px;
+    overflow: auto;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--banpu-border);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--banpu-primary);
+  }
+  .close-btn {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    color: #4b5563;
+  }
+  .modal-body {
+    font-size: 13px;
+    display: grid;
+    grid-template-columns: 1.1fr 1.1fr;
+    gap: 10px;
+  }
+  @media (max-width: 900px) {
+    .modal-body {
+      grid-template-columns: 1fr;
+    }
+  }
+  .detail-block {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 8px;
+    border: 1px solid var(--banpu-border);
+  }
+  .detail-block h3 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #111827;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+  .detail-label {
+    font-weight: 500;
+    color: #4b5563;
+  }
+  .detail-value {
+    text-align: right;
+    color: #111827;
+  }
+  .detail-edit-field {
+    width: 100%;
+    margin-top: 3px;
+  }
+  .detail-edit-field input,
+  .detail-edit-field select,
+  .detail-edit-field textarea {
+    width: 100%;
+    font-size: 12px;
+  }
+  .notes-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    max-height: 160px;
+    overflow: auto;
+  }
+  .notes-list li {
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed #e5e7eb;
+    font-size: 12px;
+  }
+  .note-meta {
+    font-size: 10px;
+    color: var(--banpu-muted);
+  }
+  .note-tag {
+    font-size: 10px;
+    border-radius: 999px;
+    padding: 1px 6px;
+    margin-right: 4px;
+  }
+  .note-tag-internal {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  .note-tag-public {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .attachments-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    max-height: 160px;
+    overflow: auto;
+  }
+  .attachments-list li {
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed #e5e7eb;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .attachment-preview {
+    max-width: 60px;
+    max-height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid #e5e7eb;
+  }
+  .dropzone {
+    border: 1px dashed #9ca3af;
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 11px;
+    text-align: center;
+    background: #f9fafb;
+    color: var(--banpu-muted);
+    margin-top: 6px;
+  }
+  .dropzone.focused {
+    border-color: var(--banpu-primary);
+    background: #eef2ff;
+    color: var(--banpu-primary);
+  }
+  /* Toast notifications */
+  #toast-container {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2000;
+  }
+  .toast {
+    background: #020617;
+    color: #f9fafb;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
+    max-width: 260px;
+  }
+  /* Knowledge base */
+  .kb-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 6px 0 0;
+    font-size: 12px;
+  }
+  .kb-list li {
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 1px solid var(--banpu-border);
+    margin-bottom: 4px;
+  }
+  .kb-list strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+  .pill-sla-ok {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 11px;
+  }
+  .pill-sla-breach {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 11px;
+  }
+</style>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- ================== LOGIN ================== -->
+  <div id="login-root">
+    <div class="login-card">
+      <h1>ITSM Service Portal</h1>
+      <p>Select a user to test Role-Based Access (Admin / Manager / Support / User)</p>
+      <div class="login-field">
+        <label for="login-user">Select Account</label>
+        <select id="login-user">
+          <!-- Filled by JS -->
+        </select>
+      </div>
+      <!-- Password Field Added -->
+      <div class="login-field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Enter password (Default: 12345)" />
+      </div>
+      <button id="login-btn">Login</button>
+      <div class="login-note">
+        Roles:
+        <br/>- <code>Admin</code>: Full permissions, Admin Dashboard, Bulk, SLA, Audit
+        <br/>- <code>Manager</code>: View all tickets + Assign/Re-assign
+        <br/>- <code>Support</code>: View all tickets, update status, Internal notes
+        <br/>- <code>User</code>: Create Incident/Request + view own My Tickets
+      </div>
+    </div>
+  </div>
+  <!-- ================== APP ================== -->
+  <div id="app-root">
+    <div class="app-container">
+      <div class="top-bar">
+        <div>
+          <h1>Finance System Service Portal – Incident & Request</h1>
+          <div class="subtitle">
+            Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Demo - localStorage).
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <div class="user-pill">
+            <span id="current-user-label">User: -</span>
+            <span class="role-badge" id="current-role-label">-</span>
+          </div>
+          <button class="btn-secondary btn-small" id="logout-btn">Log out</button>
+        </div>
+      </div>
+      <div class="top-bar" style="margin-bottom:4px;">
+        <div class="muted">
+          SLA Template: P1 = 4h, P2 = 8h, P3 = 24h, P4 = 48h (Response/Resolution use the same simple template)
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-secondary btn-small" id="btn-export-inc">Export Incidents CSV</button>
+          <button class="btn-secondary btn-small" id="btn-export-req">Export Requests CSV</button>
+          <button class="btn-danger btn-small" id="btn-clear-all" title="Clear all data from localStorage">
+            Clear all data
+          </button>
+        </div>
+      </div>
+      <!-- Tabs -->
+      <div class="tabs" id="tabs">
+        <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
+        <div class="nav-tab" data-target="incident-section">Incidents</div>
+        <div class="nav-tab" data-target="request-section">Requests</div>
+        <div class="nav-tab" data-target="mytickets-section">My Tickets</div>
+        <div class="nav-tab" data-target="reports-section" data-roles="admin,manager">Reports</div>
+        <div class="nav-tab" data-target="admin-section" data-roles="admin,manager">Admin Dashboard</div>
+        <div class="nav-tab" data-target="audit-section" data-roles="admin,manager">Audit Log</div>
+        <div class="nav-tab" data-target="kb-section">Knowledge Base</div>
+        <div class="nav-tab" data-target="user-section" data-roles="admin">User Management</div>
+      </div>
+      <!-- ========== Dashboard Section ========== -->
+      <div id="dashboard-section" class="section active">
+        <div class="grid">
+          <div class="card">
+            <h2>Overview</h2>
+            <small>
+              Summary Incident & Request + SLA
+              <span class="badge badge-primary" id="badge-total"></span>
+              <span class="badge badge-green" id="badge-sla-ok"></span>
+              <span class="badge badge-amber" id="badge-sla-breach"></span>
+            </small>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div>
+                <strong>Incident vs Request</strong>
+                <canvas id="typeChart" height="130"></canvas>
+              </div>
+              <div>
+                <strong>Tickets by Status</strong>
+                <canvas id="statusChart" height="160"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Latest Tickets</h2>
+            <small>5 most recent tickets from Incident and Request</small>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Assigned To</th>
+                    <th>Status</th>
+                    <th>SLA</th>
+                    <th>Created At</th>
+                  </tr>
+                </thead>
+                <tbody id="latest-table-body"></tbody>
+              </table>
+            </div>
+            <div class="muted">
+              * SLA breach / auto escalation is checked every 1 minute and on page refresh
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ========== Incident Section ========== -->
+      <div id="incident-section" class="section">
+        <div class="grid">
+          <div class="card">
+            <h2>Open Incident</h2>
+            <small>Use for system down, slow performance, errors, or issues impacting operations.</small>
+            <form id="incident-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Requester *</label>
+                  <input type="text" id="incident-requester" required />
+                </div>
+                <div class="form-group">
+                  <label>Department *</label>
+                  <input type="text" id="incident-dept" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Phone</label>
+                  <input type="tel" id="incident-phone" />
+                </div>
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" id="incident-email" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>System *</label>
+                  <select id="incident-system" required>
+                    <option value="">-- Select --</option>
+                    <option value="TM1">TM1</option>
+                    <option value="BPC">BPC</option>
+                    <option value="Oracle">Oracle</option>
+                    <option value="SAP">SAP</option>
+                    <option value="Network">Network</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Module</label>
+                  <input type="text" id="incident-module" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Subject *</label>
+                  <input type="text" id="incident-title" required />
+                </div>
+                <div class="form-group">
+                  <label>Category *</label>
+                  <select id="incident-category" required>
+                    <option value="">-- Select --</option>
+                    <option value="Application">Application</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Network">Network</option>
+                    <option value="Access / Permission">Access / Permission</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Impact *</label>
+                  <select id="incident-impact" required>
+                    <option value="">-- Select --</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Priority / SLA *</label>
+                  <select id="incident-priority" required>
+                    <option value="">-- Select --</option>
+                    <option value="P1 - Critical (4h)">P1 - Critical (4h)</option>
+                    <option value="P2 - High (8h)">P2 - High (8h)</option>
+                    <option value="P3 - Medium (24h)">P3 - Medium (24h)</option>
+                    <option value="P4 - Low (48h)">P4 - Low (48h)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Required by (optional)</label>
+                  <input type="date" id="incident-due" />
+                </div>
+                <div class="form-group">
+                  <label>Approver (optional)</label>
+                  <input type="text" id="incident-approver" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Problem Description *</label>
+                <textarea id="incident-description" required></textarea>
+              </div>
+              <div class="form-row" style="align-items:flex-end;">
+                <div class="form-group">
+                  <label>Reference (optional)</label>
+                  <input type="text" id="incident-reference" />
+                </div>
+                <button type="submit" class="btn">Submit Incident</button>
+              </div>
+            </form>
+            <div class="muted">
+              Once saved, the Incident will have SLA according to Priority (P1: 4h, P2: 8h, P3: 24h, P4: 48h)
+            </div>
+          </div>
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <h2>Incident List</h2>
+                <small>Filter + Search + Assigned To + Date range</small>
+              </div>
+            </div>
+            <div class="filters">
+              <strong>Filter:</strong>
+              <select id="incident-status-filter">
+  <option value="">All Status</option>
+  <option value="Open">Open</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Pending User">Pending User</option>
+  <option value="Closed">Closed</option>
+  <option value="Cancelled">Cancelled</option>
+</select>
+              <select id="incident-category-filter">
+                <option value="">All Categories</option>
+                <option value="Application">Application</option>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Network">Network</option>
+                <option value="Access / Permission">Access / Permission</option>
+                <option value="Others">Others</option>
+              </select>
+              <select id="incident-system-filter">
+                <option value="">All Systems</option>
+                <option value="TM1">TM1</option>
+                <option value="BPC">BPC</option>
+                <option value="Oracle">Oracle</option>
+                <option value="SAP">SAP</option>
+                <option value="Network">Network</option>
+                <option value="Others">Others</option>
+              </select>
+              <input type="text" id="incident-assignee-search" placeholder="Assigned To" />
+              <input type="date" id="incident-date-from" />
+              <input type="date" id="incident-date-to" />
+              <input type="text" id="incident-search" placeholder="Search ID/Subject" />
+              <button type="button" class="btn-secondary btn-small" id="incident-clear-filter">Clear</button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>System</th>
+                    <th>Priority</th>
+                    <th>Assigned</th>
+                    <th>Status</th>
+                    <th>SLA</th>
+                    <th>Action</th>
+                    <th>Requester</th>
+                  </tr>
+                </thead>
+                <tbody id="incident-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ========== Request Section ========== -->
+      <div id="request-section" class="section">
+        <div class="grid">
+          <div class="card">
+            <h2>Open Service Request</h2>
+            <small>Request: Access / Change / Service / Report / Dashboard</small>
+            <form id="request-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Requester *</label>
+                  <input type="text" id="request-requester" required />
+                </div>
+                <div class="form-group">
+                  <label>Department *</label>
+                  <input type="text" id="request-dept" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Phone</label>
+                  <input type="tel" id="request-phone" />
+                </div>
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" id="request-email" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>System *</label>
+                  <select id="request-system" required>
+                    <option value="">-- Select --</option>
+                    <option value="TM1">TM1</option>
+                    <option value="BPC">BPC</option>
+                    <option value="Oracle">Oracle</option>
+                    <option value="SAP">SAP</option>
+                    <option value="Power BI">Power BI</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Module</label>
+                  <input type="text" id="request-module" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Subject *</label>
+                  <input type="text" id="request-title" required />
+                </div>
+                <div class="form-group">
+                  <label>Request Type *</label>
+                  <select id="request-type" required>
+                    <option value="">-- Select --</option>
+                    <option value="Access Request">Access Request</option>
+                    <option value="Change Request">Change Request</option>
+                    <option value="Service Request">Service Request</option>
+                    <option value="Report / Dashboard">Report / Dashboard</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Category *</label>
+                  <select id="request-category" required>
+                    <option value="">-- Select --</option>
+                    <option value="Application">Application</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Access / Permission">Access / Permission</option>
+                    <option value="Reporting / Dashboard">Reporting / Dashboard</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Impact *</label>
+                  <select id="request-impact" required>
+                    <option value="">-- Select --</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Requested Due Date *</label>
+                  <input type="date" id="request-due" required />
+                </div>
+                <div class="form-group">
+                  <label>Approver *</label>
+                  <input type="text" id="request-approver" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Reference</label>
+                  <input type="text" id="request-ref" />
+                </div>
+                <div class="form-group">
+                  <label>Remark</label>
+                  <input type="text" id="request-remark" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Request Description *</label>
+                <textarea id="request-description" required></textarea>
+              </div>
+              <div class="form-row" style="align-items:flex-end;">
+                <div class="form-group"></div>
+                <button type="submit" class="btn">Submit Request</button>
+              </div>
+            </form>
+          </div>
+          <div class="card">
+            <h2>Request List</h2>
+            <small>Filter + Date range + Assigned To</small>
+            <div class="filters">
+              <strong>Filter:</strong>
+             <select id="request-status-filter">
+  <option value="">All Status</option>
+  <option value="Open">Open</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Pending User">Pending User</option>
+  <option value="Closed">Closed</option>
+  <option value="Cancelled">Cancelled</option>
+</select>
+              <select id="request-category-filter">
+                <option value="">All Categories</option>
+                <option value="Application">Application</option>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Access / Permission">Access / Permission</option>
+                <option value="Reporting / Dashboard">Reporting / Dashboard</option>
+                <option value="Others">Others</option>
+              </select>
+              <select id="request-system-filter">
+                <option value="">All Systems</option>
+                <option value="TM1">TM1</option>
+                <option value="BPC">BPC</option>
+                <option value="Oracle">Oracle</option>
+                <option value="SAP">SAP</option>
+                <option value="Power BI">Power BI</option>
+                <option value="Others">Others</option>
+              </select>
+              <select id="request-type-filter">
+                <option value="">All Request Types</option>
+                <option value="Access Request">Access Request</option>
+                <option value="Change Request">Change Request</option>
+                <option value="Service Request">Service Request</option>
+                <option value="Report / Dashboard">Report / Dashboard</option>
+                <option value="Others">Others</option>
+              </select>
+              <input type="text" id="request-assignee-search" placeholder="Assigned To" />
+              <input type="date" id="request-date-from" />
+              <input type="date" id="request-date-to" />
+              <input type="text" id="request-search" placeholder="Search ID/Subject" />
+              <button type="button" class="btn-secondary btn-small" id="request-clear-filter">Clear</button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>System</th>
+                    <th>Request Type</th>
+                    <th>Assigned</th>
+                    <th>Status</th>
+                    <th>SLA</th>
+                    <th>Action</th>
+                    <th>Due</th>
+                  </tr>
+                </thead>
+                <tbody id="request-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ========== My Tickets Section ========== -->
+      <div id="mytickets-section" class="section">
+        <div class="card">
+          <h2>My Tickets</h2>
+          <small>Tickets you created or assigned to you (Incident + Request)</small>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Type</th>
+                  <th>Subject</th>
+                  <th>Status</th>
+                  <th>SLA</th>
+                  <th>Created At</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="mytickets-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- ========== Reports Section ========== -->
+      <div id="reports-section" class="section">
+        <div class="grid">
+          <div class="card">
+            <h2>Advanced Report</h2>
+            <small>Aging, Resolution Rate, Staff Performance</small>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Bucket (days)</th>
+                    <th>0-1</th>
+                    <th>1-3</th>
+                    <th>3-7</th>
+                    <th>>7</th>
+                  </tr>
+                </thead>
+                <tbody id="aging-row"></tbody>
+              </table>
+            </div>
+            <br/>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody id="resolution-row"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Staff Performance</h2>
+            <small>Number of tickets resolved by assignee</small>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Staff</th>
+                    <th>Resolved</th>
+                    <th>SLA Met</th>
+                    <th>SLA Breach</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-row"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ========== Admin Dashboard Section ========== -->
+      <div id="admin-section" class="section">
+        <div class="grid">
+        <div class="card">
+          <div class="flex-between">
+            <div>
+              <h2>Admin Dashboard</h2>
+              <small>Assign / Re-assign / Close / Reopen / Delete / Bulk Actions / SLA view</small>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <select id="admin-bulk-action" style="font-size:11px; padding:4px 8px; border-radius:999px;">
+                <option value="">Bulk Action...</option>
+                <option value="close">Close</option>
+                <option value="reopen">Reopen</option>
+                <option value="delete">Delete</option>
+              </select>
+              <select id="admin-bulk-assignee" style="font-size:11px; padding:4px 8px; border-radius:999px;">
+                <option value="">Assign To...</option>
+              </select>
+              <button class="btn btn-small" id="admin-bulk-apply">Apply</button>
+            </div>
+          </div>
+          <div class="filters" style="margin-top:6px;">
+            <strong>Filter:</strong>
+            <select id="admin-status-filter">
+  <option value="">All Status</option>
+  <option value="Open">Open</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Pending User">Pending User</option>
+  <option value="Closed">Closed</option>
+  <option value="Cancelled">Cancelled</option>
+</select>
+            <input type="text" id="admin-assignee-search" placeholder="Assigned To" />
+            <input type="date" id="admin-date-from" />
+            <input type="date" id="admin-date-to" />
+            <input type="text" id="admin-search" placeholder="Search ID/Subject" />
+            <button class="btn-secondary btn-small" id="admin-clear-filter">Clear</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="admin-select-all" /></th>
+                  <th>ID</th>
+                  <th>Type</th>
+                  <th>Subject</th>
+                  <th>Priority</th>
+                  <th>Assigned</th>
+                  <th>Status</th>
+                  <th>SLA</th>
+                  <th>Age (d)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body"></tbody>
+            </table>
+          </div>
+          <div class="muted">
+            * Auto Escalation: when SLA breach is detected, ticket is marked as Escalated and an Audit Log entry is created.
+          </div>
+        </div>
+        <!-- New Data Management Card -->
+        <div class="card">
+          <h2>Data Management (SharePoint)</h2>
+          <small>Backup data to file or Restore from file</small>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            <div class="muted" style="line-height:1.4;">
+              เนื่องจากข้อจำกัดด้านความปลอดภัยของ Browser การบันทึกข้อมูลลง SharePoint โดยตรงจำเป็นต้องใช้ API ขั้นสูง<br/>
+              ระบบจึงใช้การ <strong>Export ข้อมูลเป็นไฟล์</strong> เพื่อให้คุณนำไปวางใน SharePoint ด้วยตนเองได้อย่างปลอดภัย
+            </div>
+            <a href="https://banpugroup.sharepoint.com/:f:/r/sites/BANPUFinance/Shared%20Documents/test?csf=1&web=1&e=kfm7Me" target="_blank" class="btn btn-secondary" style="text-decoration:none; text-align:center;">
+              📂 Open SharePoint Folder
+            </a>
+            <div style="display:flex; gap:6px;">
+              <button class="btn" id="btn-export-json">⬇️ Export Data (JSON)</button>
+              <label class="btn btn-secondary" style="cursor:pointer; margin-bottom:0;">
+                ⬆️ Import Data (JSON)
+                <input type="file" id="btn-import-json" accept=".json" style="display:none;" />
+              </label>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+      <!-- ========== Audit Log Section ========== -->
+      <div id="audit-section" class="section">
+        <div class="card">
+          <h2>Audit Log</h2>
+          <small>Records all key actions: create, update, assign, close, reopen, delete, SLA auto escalation, etc.</small>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Action</th>
+                  <th>Ticket</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody id="audit-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+     <!-- ========== Knowledge Base Section ========== -->
+<div id="kb-section" class="section">
+  <div class="card">
+    <h2>Knowledge Base / FAQ</h2>
+    <small>Sample KB entries to reduce repeated incidents</small>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Search KB</label>
+        <input type="text" id="kb-search" placeholder="e.g. TM1 login, BPC slow..." />
+      </div>
+    </div>
+    <ul class="kb-list" id="kb-list"></ul>
+  </div>
+</div>
+            
+<!-- ========== User Management Section ========== -->
+<div id="user-section" class="section">
+  <div class="card">
+    <h2>User Management</h2>
+    <small>สร้าง / ลบ / แก้ไข User</small>
+    <form id="user-form" style="margin-top: 10px;">
+      <!-- Row 1: User ID, Name, Email -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>User ID *</label>
+          <input type="text" id="user-id" required />
+        </div>
+        <div class="form-group">
+          <label>Name *</label>
+          <input type="text" id="user-name" required />
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="user-email" required />
+        </div>
+      </div>
+      <!-- Row 2: Role, Assign to, Password -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Role *</label>
+          <select id="user-role" required>
+            <option value="">-- Select --</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="support">Support</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+        <div class="form-group" style="align-items: flex-start;">
+          <label>Assign to</label>
+          <!-- เปลี่ยนเป็น Checkbox และจัด Style ให้ดูเหมาะสม -->
+          <input type="checkbox" id="user-assign-to" style="width: 20px; height: 20px; margin-top: 6px;" />
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="text" id="user-password" required />
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-small" type="submit" id="user-submit-btn">Add User</button>
+          <button class="btn btn-small btn-secondary" type="button" id="user-cancel-btn" style="display:none;">Cancel</button>
+        </div>
+      </div>
+    </form>
+    <div class="table-container" style="margin-top: 12px;">
+      <table>
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Assign to</th> <!-- Added Assign to Column Header -->
+            <th>Password</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="user-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+          </div>
+          <ul class="kb-list" id="kb-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detail-backdrop">
+    <div class="modal detail-modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="detail-title"></div>
+          <div class="muted" id="detail-subtitle"></div>
+        </div>
+        <button class="close-btn" id="detail-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-block">
+          <h3>Main Info & Edit</h3>
+          <div class="detail-row">
+            <div class="detail-label">ID</div>
+            <div class="detail-value" id="detail-id"></div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Type</div>
+            <div class="detail-value" id="detail-type"></div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Subject</div>
+          </div>
+          <div class="detail-edit-field">
+            <input type="text" id="detail-subject-input" />
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">System / Module</div>
+          </div>
+          <div class="detail-edit-field">
+            <input type="text" id="detail-system-input" placeholder="System" style="margin-bottom:4px;" />
+            <input type="text" id="detail-module-input" placeholder="Module" />
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Assigned To</div>
+          </div>
+          <div class="detail-edit-field">
+            <select id="detail-assignee-select"></select>
+          </div>
+          <div class="detail-row" style="margin-top:4px;">
+            <div class="detail-label">Status</div>
+          </div>
+          <div class="detail-edit-field">
+        <select id="detail-status-select">
+  <option value="Open">Open</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Pending User">Pending User</option>
+  <option value="Closed">Closed</option>
+  <option value="Cancelled">Cancelled</option>
+</select>
+          </div>
+          <div class="detail-row" style="margin-top:4px;">
+            <div class="detail-label">Priority</div>
+          </div>
+          <div class="detail-edit-field">
+            <select id="detail-priority-select">
+              <option value="P1 - Critical (4h)">P1 - Critical (4h)</option>
+              <option value="P2 - High (8h)">P2 - High (8h)</option>
+              <option value="P3 - Medium (24h)">P3 - Medium (24h)</option>
+              <option value="P4 - Low (48h)">P4 - Low (48h)</option>
+            </select>
+          </div>
+          <div class="detail-row" style="margin-top:4px;">
+            <div class="detail-label">Due Date</div>
+          </div>
+          <div class="detail-edit-field">
+            <input type="date" id="detail-due-input" />
+          </div>
+          <div class="detail-row" style="margin-top:6px;">
+            <div class="detail-label">Requester / Dept</div>
+            <div class="detail-value" id="detail-requester-dept"></div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Created</div>
+            <div class="detail-value" id="detail-created"></div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Approver</div>
+            <div class="detail-value" id="detail-approver"></div>
+          </div>
+          <div class="detail-row" style="margin-top:4px;">
+            <div class="detail-label">Description</div>
+          </div>
+          <div class="detail-edit-field">
+            <textarea id="detail-description-input"></textarea>
+          </div>
+          <button class="btn btn-small" id="detail-save-btn" style="margin-top:6px;">Save Changes</button>
+        </div>
+        <div class="detail-block">
+          <h3>Notes (Internal / Public)</h3>
+          <ul class="notes-list" id="detail-notes-list"></ul>
+          <textarea id="detail-note-input" placeholder="Add notes, e.g. status update, user feedback, etc."></textarea>
+          <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+            <label style="font-size:11px;">
+              <input type="radio" name="note-visibility" value="public" checked /> Public
+            </label>
+            <label style="font-size:11px;">
+              <input type="radio" name="note-visibility" value="internal" /> Internal (visible only to Support/Admin/Manager)
+            </label>
+          </div>
+          <button class="btn btn-small" id="detail-add-note-btn" style="margin-top:4px;">Add Note</button>
+        </div>
+        <div class="detail-block">
+          <h3>Attachments</h3>
+          <div class="muted">
+            Max 5 files per ticket, each up to 500KB, to avoid filling localStorage.
+          </div>
+          <ul class="attachments-list" id="detail-attachments-list"></ul>
+          <input type="file" id="detail-file-input" multiple />
+          <div class="dropzone" id="detail-dropzone">
+            Drag & Drop files here or choose files above<br/>
+            Or use <strong>Ctrl+V</strong> to paste an image from clipboard while focused in this box.
+          </div>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:6px;">
+        * Attachments are stored as Base64 in localStorage (for Demo / small team usage).
+      </div>
+    </div>
+  </div>
+  <!-- Toast -->
+  <div id="toast-container"></div>
+  <!-- ================== JAVASCRIPT ================== -->
+  <script>
+    // ===== User & Role setup =====
+    // ใช้ systemUsers เป็นแหล่งข้อมูลหลักเพียงแหล่งเดียว (Init จาก localStorage หรือ Default)
+    let systemUsers = JSON.parse(localStorage.getItem("itsm_users") || "[]");
+    
+    // ถ้ายังไม่มีข้อมูล ให้สร้าง Default Users
+    if (systemUsers.length === 0) {
+      systemUsers = [
+        { id: "admin", name: "Admin", role: "admin", email: "admin@example.com", password: "12345", assignTo: false },
+        { id: "mgr1", name: "Manager A", role: "manager", email: "manager@example.com", password: "12345", assignTo: true },
+        { id: "sup1", name: "Support 1", role: "support", email: "support1@example.com", password: "12345", assignTo: true },
+        { id: "sup2", name: "Support 2", role: "support", email: "support2@example.com", password: "12345", assignTo: true },
+        { id: "user1", name: "User 1", role: "user", email: "user1@example.com", password: "12345", assignTo: false },
+        { id: "user2", name: "User 2", role: "user", email: "user2@example.com", password: "12345", assignTo: false },
+      ];
+      localStorage.setItem("itsm_users", JSON.stringify(systemUsers));
+    }
+
+    const SLA_TEMPLATES = {
+      P1: { responseHours: 1, resolutionHours: 4 },
+      P2: { responseHours: 2, resolutionHours: 8 },
+      P3: { responseHours: 4, resolutionHours: 24 },
+      P4: { responseHours: 8, resolutionHours: 48 },
+    };
+    const MAX_ATTACHMENTS_PER_TICKET = 5;
+    const MAX_ATTACHMENT_SIZE_BYTES = 500 * 1024; // 500KB approx
+    const LOCALSTORAGE_SOFT_LIMIT = 4_000_000; // char length
+    let currentUser = null;
+    // ===== Data in localStorage =====
+    let incidents = JSON.parse(localStorage.getItem("itsm_incidents") || "[]");
+    let requests = JSON.parse(localStorage.getItem("itsm_requests") || "[]");
+    let auditLogs = JSON.parse(localStorage.getItem("itsm_audit") || "[]");
+    // ===== DOM =====
+    const loginRoot = document.getElementById("login-root");
+    const appRoot = document.getElementById("app-root");
+    const loginUserSelect = document.getElementById("login-user");
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const currentUserLabel = document.getElementById("current-user-label");
+    const currentRoleLabel = document.getElementById("current-role-label");
+    const tabs = document.querySelectorAll(".nav-tab");
+    const sections = document.querySelectorAll(".section");
+    const toastContainer = document.getElementById("toast-container");
+    // Detail modal
+    const detailBackdrop = document.getElementById("detail-backdrop");
+    const detailCloseBtn = document.getElementById("detail-close-btn");
+    const detailTitle = document.getElementById("detail-title");
+    const detailSubtitle = document.getElementById("detail-subtitle");
+    const detailIdSpan = document.getElementById("detail-id");
+    const detailTypeSpan = document.getElementById("detail-type");
+    const detailSubjectInput = document.getElementById("detail-subject-input");
+    const detailSystemInput = document.getElementById("detail-system-input");
+    const detailModuleInput = document.getElementById("detail-module-input");
+    const detailAssigneeSelect = document.getElementById("detail-assignee-select");
+    const detailStatusSelect = document.getElementById("detail-status-select");
+    const detailPrioritySelect = document.getElementById("detail-priority-select");
+    const detailDueInput = document.getElementById("detail-due-input");
+    const detailRequesterDeptSpan = document.getElementById("detail-requester-dept");
+    const detailCreatedSpan = document.getElementById("detail-created");
+    const detailApproverSpan = document.getElementById("detail-approver");
+    const detailDescriptionInput = document.getElementById("detail-description-input");
+    const detailSaveBtn = document.getElementById("detail-save-btn");
+    const detailNotesList = document.getElementById("detail-notes-list");
+    const detailNoteInput = document.getElementById("detail-note-input");
+    const detailAddNoteBtn = document.getElementById("detail-add-note-btn");
+    const detailAttachmentsList = document.getElementById("detail-attachments-list");
+    const detailFileInput = document.getElementById("detail-file-input");
+    const detailDropzone = document.getElementById("detail-dropzone");
+    let currentDetail = null; // { kind, id }
+    // Dashboard elements
+    const latestTableBody = document.getElementById("latest-table-body");
+    const badgeTotal = document.getElementById("badge-total");
+    const badgeSlaOk = document.getElementById("badge-sla-ok");
+    const badgeSlaBreach = document.getElementById("badge-sla-breach");
+    let typeChart, statusChart;
+    // Incident elements
+    const incidentForm = document.getElementById("incident-form");
+    const incidentTableBody = document.getElementById("incident-table-body");
+    const incidentStatusFilter = document.getElementById("incident-status-filter");
+    const incidentCategoryFilter = document.getElementById("incident-category-filter");
+    const incidentSystemFilter = document.getElementById("incident-system-filter");
+    const incidentAssigneeSearch = document.getElementById("incident-assignee-search");
+    const incidentDateFrom = document.getElementById("incident-date-from");
+    const incidentDateTo = document.getElementById("incident-date-to");
+    const incidentSearch = document.getElementById("incident-search");
+    const incidentClearFilter = document.getElementById("incident-clear-filter");
+    // Request elements
+    const requestForm = document.getElementById("request-form");
+    const requestTableBody = document.getElementById("request-table-body");
+    const requestStatusFilter = document.getElementById("request-status-filter");
+    const requestCategoryFilter = document.getElementById("request-category-filter");
+    const requestSystemFilter = document.getElementById("request-system-filter");
+    const requestTypeFilter = document.getElementById("request-type-filter");
+    const requestAssigneeSearch = document.getElementById("request-assignee-search");
+    const requestDateFrom = document.getElementById("request-date-from");
+    const requestDateTo = document.getElementById("request-date-to");
+    const requestSearch = document.getElementById("request-search");
+    const requestClearFilter = document.getElementById("request-clear-filter");
+    // My tickets
+    const myTicketsBody = document.getElementById("mytickets-table-body");
+    // Reports
+    const agingRow = document.getElementById("aging-row");
+    const resolutionRow = document.getElementById("resolution-row");
+    const staffRow = document.getElementById("staff-row");
+    // Admin
+    const adminTableBody = document.getElementById("admin-table-body");
+    const adminBulkAction = document.getElementById("admin-bulk-action");
+    const adminBulkAssignee = document.getElementById("admin-bulk-assignee");
+    const adminBulkApply = document.getElementById("admin-bulk-apply");
+    const adminSelectAll = document.getElementById("admin-select-all");
+    const adminStatusFilter = document.getElementById("admin-status-filter");
+    const adminAssigneeSearch = document.getElementById("admin-assignee-search");
+    const adminDateFrom = document.getElementById("admin-date-from");
+    const adminDateTo = document.getElementById("admin-date-to");
+    const adminSearch = document.getElementById("admin-search");
+    const adminClearFilter = document.getElementById("admin-clear-filter");
+    // Audit
+    const auditTableBody = document.getElementById("audit-table-body");
+    // KB
+    const kbSearch = document.getElementById("kb-search");
+    const kbList = document.getElementById("kb-list");
+    // Export + Clear
+    const exportIncBtn = document.getElementById("btn-export-inc");
+    const exportReqBtn = document.getElementById("btn-export-req");
+    const clearAllBtn = document.getElementById("btn-clear-all");
+
+    // SharePoint Link
+    const btnExportJson = document.getElementById("btn-export-json");
+    const btnImportJson = document.getElementById("btn-import-json");
+
+    // ===== Export / Import Functions =====
+    btnExportJson.addEventListener("click", () => {
+      const data = {
+        incidents,
+        requests,
+        users: systemUsers,
+        auditLogs,
+        timestamp: new Date().toISOString()
+      };
+      const dataStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ITSM_Data_Backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Data exported. Please upload this file to SharePoint.");
+    });
+
+    btnImportJson.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.incidents) incidents = data.incidents;
+          if (data.requests) requests = data.requests;
+          if (data.users) systemUsers = data.users;
+          if (data.auditLogs) auditLogs = data.auditLogs;
+          
+          saveData();
+          localStorage.setItem("itsm_users", JSON.stringify(systemUsers));
+          localStorage.setItem("itsm_audit", JSON.stringify(auditLogs));
+          
+          renderAll();
+          showToast("Data imported successfully!");
+          // Reset input
+          e.target.value = "";
+        } catch (err) {
+          alert("Error importing file. Invalid JSON format.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // ===== Helper =====
+    function getUserById(id) {
+      return systemUsers.find(u => u.id === id) || null;
+    }
+    function getUserName(id) {
+      const u = getUserById(id);
+      return u ? u.name : "";
+    }
+    function formatDateTime(d) {
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return "-";
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      const hh = String(date.getHours()).padStart(2, "0");
+      const mi = String(date.getMinutes()).padStart(2, "0");
+      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+    }
+    function formatDateOnly(d) {
+      if (!d) return "-";
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return "-";
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      return `${dd}/${mm}/${yyyy}`;
+    }
+    function generateId(prefix) {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const rand = Math.floor(Math.random() * 9000) + 1000;
+      return `${prefix}-${yyyy}${mm}${dd}-${rand}`;
+    }
+    function getPriorityCode(priorityText) {
+      if (!priorityText) return "P3";
+      return priorityText.split(" ")[0] || "P3";
+    }
+    function computeSlaForTicket(priorityText, createdISO) {
+      const code = getPriorityCode(priorityText);
+      const tpl = SLA_TEMPLATES[code] || SLA_TEMPLATES.P3;
+      const created = new Date(createdISO);
+      return {
+        priorityCode: code,
+        responseDueAt: new Date(created.getTime() + tpl.responseHours * 3600000).toISOString(),
+        resolutionDueAt: new Date(created.getTime() + tpl.resolutionHours * 3600000).toISOString(),
+        firstResponseAt: null,
+        resolvedAt: null,
+        responseBreached: false,
+        resolutionBreached: false,
+        escalated: false
+      };
+    }
+    function calcAgeDays(createdISO) {
+      const c = new Date(createdISO);
+      if (isNaN(c.getTime())) return "-";
+      const diff = Date.now() - c.getTime();
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+    function showToast(msg) {
+      const div = document.createElement("div");
+      div.className = "toast";
+      div.textContent = msg;
+      toastContainer.appendChild(div);
+      setTimeout(() => {
+        div.remove();
+      }, 4000);
+    }
+    function logAudit(action, ticketId, message) {
+      if (!currentUser) return;
+      const entry = {
+        time: new Date().toISOString(),
+        userId: currentUser.id,
+        userName: currentUser.name,
+        role: currentUser.role,
+        action,
+        ticketId,
+        message
+      };
+      auditLogs.unshift(entry);
+      localStorage.setItem("itsm_audit", JSON.stringify(auditLogs));
+      renderAuditLog();
+    }
+    function saveData() {
+      localStorage.setItem("itsm_incidents", JSON.stringify(incidents));
+      localStorage.setItem("itsm_requests", JSON.stringify(requests));
+      // Soft check size
+      const size = (localStorage.getItem("itsm_incidents") || "").length +
+                   (localStorage.getItem("itsm_requests") || "").length;
+      if (size > LOCALSTORAGE_SOFT_LIMIT) {
+        showToast("Warning: storage is getting large and may approach localStorage limit.");
+      }
+    }
+  function statusClassName(status, escalated) {
+  if (escalated) return "status-escalated";
+  if (status === "Open") return "status-open";
+  if (status === "In Progress") return "status-in-progress";
+  if (status === "Pending User") return "status-pending";
+  if (status === "Closed") return "status-closed";
+  if (status === "Cancelled") return "status-cancelled";
+  return "";
+}
+    function slaLabel(ticket) {
+      if (!ticket.sla) return "-";
+      const s = ticket.sla;
+      if (s.resolutionBreached || s.responseBreached) return "Breach";
+      if (s.resolvedAt) return "Met";
+      return "In Progress";
+    }
+
+    // ===== Function to Populate Dropdowns based on Checkbox =====
+    function populateAssigneeDropdowns() {
+        const validAssignees = systemUsers.filter(u => u.assignTo === true);
+        
+        // 1. Admin Bulk Assign Dropdown
+        adminBulkAssignee.innerHTML = `<option value="">Assign To...</option>`;
+        validAssignees.forEach(u => {
+            const opt = document.createElement("option");
+            opt.value = u.id;
+            opt.textContent = `${u.name} (${u.role})`;
+            adminBulkAssignee.appendChild(opt);
+        });
+
+        // 2. Detail Modal Assign Dropdown
+        detailAssigneeSelect.innerHTML = `<option value="">(Unassigned)</option>`;
+        validAssignees.forEach(u => {
+            const opt = document.createElement("option");
+            opt.value = u.id;
+            opt.textContent = `${u.name} (${u.role})`;
+            detailAssigneeSelect.appendChild(opt);
+        });
+    }
+
+    // ===== Login =====
+    function initLogin() {
+      // fill select from systemUsers
+      loginUserSelect.innerHTML = "";
+      systemUsers.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u.id;
+        opt.textContent = `${u.name} (${u.role})`;
+        loginUserSelect.appendChild(opt);
+      });
+      const savedId = localStorage.getItem("itsm_current_user");
+      if (savedId) {
+        const user = getUserById(savedId);
+        if (user) {
+          setCurrentUser(user);
+          return;
+        }
+      }
+      loginRoot.style.display = "flex";
+      appRoot.style.display = "none";
+    }
+    function setCurrentUser(user) {
+      currentUser = user;
+      localStorage.setItem("itsm_current_user", user.id);
+      currentUserLabel.textContent = `User: ${user.name}`;
+      currentRoleLabel.textContent = user.role.toUpperCase();
+      loginRoot.style.display = "none";
+      appRoot.style.display = "block";
+      // role based tabs
+      tabs.forEach(tab => {
+        const roles = tab.getAttribute("data-roles");
+        if (!roles) {
+          tab.style.display = "inline-flex";
+        } else {
+          const allowed = roles.split(",").map(s => s.trim());
+          tab.style.display = allowed.includes(user.role) ? "inline-flex" : "none";
+        }
+      });
+      
+      // Populate dropdowns when logging in (or refreshing)
+      populateAssigneeDropdowns();
+      
+      // initial render
+      renderAll();
+    }
+    loginBtn.addEventListener("click", () => {
+      const id = loginUserSelect.value;
+      const passwordInput = document.getElementById("login-password");
+      const password = passwordInput.value; // Get entered password
+
+      const user = getUserById(id);
+      
+      if (!user) {
+        alert("Please select a user.");
+        return;
+      }
+
+      // Password Check Logic
+      // Note: Default password is "12345" if not changed in User Management
+      if (user.password && user.password !== password) {
+        alert("Incorrect password. Please try again.");
+        return;
+      }
+      
+      // Clear password field for security
+      passwordInput.value = "";
+
+      setCurrentUser(user);
+      showToast(`Welcome, ${user.name}`);
+    });
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("itsm_current_user");
+      currentUser = null;
+      appRoot.style.display = "none";
+      loginRoot.style.display = "flex";
+    });
+    // ===== Tabs =====
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const targetId = tab.getAttribute("data-target");
+        if (!targetId) return;
+        tabs.forEach(t => t.classList.remove("active"));
+        sections.forEach(s => s.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(targetId).classList.add("active");
+        if (targetId === "reports-section") renderReports();
+        if (targetId === "admin-section") renderAdminTable();
+        if (targetId === "audit-section") renderAuditLog();
+        if (targetId === "mytickets-section") renderMyTickets();
+      });
+    });
+    // ===== Ticket Creation =====
+    incidentForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const requester = document.getElementById("incident-requester").value.trim();
+      const dept = document.getElementById("incident-dept").value.trim();
+      const phone = document.getElementById("incident-phone").value.trim();
+      const email = document.getElementById("incident-email").value.trim();
+      const system = document.getElementById("incident-system").value;
+      const module = document.getElementById("incident-module").value.trim();
+      const title = document.getElementById("incident-title").value.trim();
+      const category = document.getElementById("incident-category").value;
+      const impact = document.getElementById("incident-impact").value;
+      const priority = document.getElementById("incident-priority").value;
+      const due = document.getElementById("incident-due").value;
+      const approver = document.getElementById("incident-approver").value.trim();
+      const description = document.getElementById("incident-description").value.trim();
+      const reference = document.getElementById("incident-reference").value.trim();
+      if (!requester || !dept || !email || !system || !title || !category || !impact || !priority || !description) {
+        alert("Please fill in all required (*) fields.");
+        return;
+      }
+      const now = new Date().toISOString();
+      const incident = {
+        id: generateId("INC"),
+        type: "Incident",
+        requester,
+        dept,
+        phone,
+        email,
+        system,
+        module,
+        title,
+        category,
+        impact,
+        priority,
+        dueDate: due || null,
+        approver,
+        reference,
+        description,
+        status: "Open",
+        createdAt: now,
+        updatedAt: now,
+        assignedTo: null,
+        notes: [],
+        attachments: [],
+        sla: computeSlaForTicket(priority, now),
+        createdBy: currentUser ? currentUser.id : null
+      };
+      incidents.unshift(incident);
+      saveData();
+
+      incidentForm.reset();
+      logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
+      renderIncidents();
+      renderDashboard();
+      renderMyTickets();
+      renderAdminTable();
+      showToast(`Created Incident ${incident.id}`);
+
+      // --- Notify Admin via Outlook (mailto) ---
+      // ย้ายมาไว้ท้ายสุดเพื่อให้ UI อัปเดตเสร็จก่อน แล้วค่อยเด้ง Outlook
+      const admin = systemUsers.find(u => u.role === 'admin');
+      if (admin && admin.email) {
+        const subject = encodeURIComponent(`[ITSM] New Incident: ${incident.id} - ${incident.title}`);
+        const body = encodeURIComponent(
+`Dear Admin,
+
+A new incident has been submitted.
+
+ID: ${incident.id}
+Requester: ${requester}
+System: ${system}
+Priority: ${priority}
+Description: ${description}
+
+Please check the dashboard.`
+        );
+        // เปิด Outlook / Mail Client
+        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}`;
+      }
+      // -------------------------
+    });
+
+    requestForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const requester = document.getElementById("request-requester").value.trim();
+      const dept = document.getElementById("request-dept").value.trim();
+      const phone = document.getElementById("request-phone").value.trim();
+      const email = document.getElementById("request-email").value.trim();
+      const system = document.getElementById("request-system").value;
+      const module = document.getElementById("request-module").value.trim();
+      const title = document.getElementById("request-title").value.trim();
+      const type = document.getElementById("request-type").value;
+      const category = document.getElementById("request-category").value;
+      const impact = document.getElementById("request-impact").value;
+      const due = document.getElementById("request-due").value;
+      const approver = document.getElementById("request-approver").value.trim();
+      const reference = document.getElementById("request-ref").value.trim();
+      const remark = document.getElementById("request-remark").value.trim();
+      const description = document.getElementById("request-description").value.trim();
+      if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !approver || !description) {
+        alert("Please fill in all required (*) fields.");
+        return;
+      }
+      const now = new Date().toISOString();
+      const req = {
+        id: generateId("REQ"),
+        type: "Request",
+        requester,
+        dept,
+        phone,
+        email,
+        system,
+        module,
+        title,
+        requestType: type,
+        category,
+        impact,
+        dueDate: due,
+        approver,
+        reference,
+        remark,
+        description,
+        status: "Open",
+        createdAt: now,
+        updatedAt: now,
+        assignedTo: null,
+        notes: [],
+        attachments: [],
+        sla: computeSlaForTicket("P3 - Medium (24h)", now), // default P3
+        createdBy: currentUser ? currentUser.id : null
+      };
+      requests.unshift(req);
+      saveData();
+
+      requestForm.reset();
+      logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
+      renderRequests();
+      renderDashboard();
+      renderMyTickets();
+      renderAdminTable();
+      showToast(`Created Request ${req.id}`);
+
+      // --- Notify Admin via Outlook (mailto) ---
+      const admin = systemUsers.find(u => u.role === 'admin');
+      if (admin && admin.email) {
+        const subject = encodeURIComponent(`[ITSM] New Service Request: ${req.id} - ${req.title}`);
+        const body = encodeURIComponent(
+`Dear Admin,
+
+A new request has been submitted.
+
+ID: ${req.id}
+Requester: ${requester}
+Type: ${type}
+System: ${system}
+Description: ${description}
+
+Please check the dashboard.`
+        );
+        // เปิด Outlook / Mail Client
+        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}`;
+      }
+      // -------------------------
+    });
+    // ===== Render Functions =====
+    function renderDashboard() {
+      const incidentCount = incidents.length;
+      const requestCount = requests.length;
+      const total = incidentCount + requestCount;
+      const all = [...incidents, ...requests];
+      const slaOk = all.filter(t => t.sla && t.sla.resolvedAt && !t.sla.resolutionBreached).length;
+      const slaBreach = all.filter(t => t.sla && (t.sla.resolutionBreached || t.sla.responseBreached)).length;
+      badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`;
+      badgeSlaOk.textContent = `SLA Met: ${slaOk}`;
+      badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
+      const statusOpen = all.filter(t => t.status === "Open").length;
+      const statusInProgress = all.filter(t => t.status === "In Progress").length;
+      const statusPending = all.filter(t => t.status === "Pending User").length;
+      const statusClosed = all.filter(t => t.status === "Closed").length;
+	const statusCancelled = all.filter(t => t.status === "Cancelled").length;
+      // Charts
+      const typeCtx = document.getElementById("typeChart").getContext("2d");
+      if (typeChart) typeChart.destroy();
+      typeChart = new Chart(typeCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Incident", "Request"],
+          datasets: [{ data: [incidentCount, requestCount] }]
+        },
+        options: {
+          plugins: {
+            legend: { position: "bottom" }
+          },
+          cutout: "60%"
+        }
+      });
+      const statusCtx = document.getElementById("statusChart").getContext("2d");
+      if (statusChart) statusChart.destroy();
+      statusChart = new Chart(statusCtx, {
+        type: "bar",
+       data: {
+  labels: ["Open", "In Progress", "Pending User", "Closed", "Cancelled"],
+  datasets: [{
+    label: "Count",
+    data: [statusOpen, statusInProgress, statusPending, statusClosed, statusCancelled]
+  }]
+},
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, precision: 0 } }
+        }
+      });
+      // latest
+      latestTableBody.innerHTML = "";
+      all
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .forEach(t => {
+          const tr = document.createElement("tr");
+          const cls = statusClassName(t.status, t.sla && t.sla.escalated);
+          tr.innerHTML = `
+            <td>${t.id}</td>
+            <td>${t.type}</td>
+            <td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td>
+            <td>${getUserName(t.assignedTo) || "-"}</td>
+            <td><span class="status-pill ${cls}">${t.status}</span></td>
+            <td>${slaLabel(t)}</td>
+            <td>${formatDateTime(t.createdAt)}</td>
+          `;
+          latestTableBody.appendChild(tr);
+        });
+    }
+    function filterByDateRange(createdISO, fromVal, toVal) {
+      const dt = new Date(createdISO);
+      if (isNaN(dt.getTime())) return false;
+      if (fromVal) {
+        const from = new Date(fromVal + "T00:00:00");
+        if (dt < from) return false;
+      }
+      if (toVal) {
+        const to = new Date(toVal + "T23:59:59");
+        if (dt > to) return false;
+      }
+      return true;
+    }
+    function renderIncidents() {
+      const statusFilter = incidentStatusFilter.value;
+      const categoryFilter = incidentCategoryFilter.value;
+      const systemFilter = incidentSystemFilter.value;
+      const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase();
+      const fromVal = incidentDateFrom.value;
+      const toVal = incidentDateTo.value;
+      const search = incidentSearch.value.trim().toLowerCase();
+      incidentTableBody.innerHTML = "";
+      incidents
+        .filter(i => !statusFilter || i.status === statusFilter)
+        .filter(i => !categoryFilter || i.category === categoryFilter)
+        .filter(i => !systemFilter || i.system === systemFilter)
+        .filter(i => filterByDateRange(i.createdAt, fromVal, toVal))
+        .filter(i => {
+          if (!assigneeSearch) return true;
+          const name = (getUserName(i.assignedTo) || "").toLowerCase();
+          return name.includes(assigneeSearch);
+        })
+        .filter(i => {
+          if (!search) return true;
+          const text = [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase();
+          return text.includes(search);
+        })
+        .forEach(i => {
+          const tr = document.createElement("tr");
+          const cls = statusClassName(i.status, i.sla && i.sla.escalated);
+          tr.innerHTML = `
+            <td>${i.id}</td>
+            <td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td>
+            <td>${i.system}</td>
+            <td>${i.priority}</td>
+            <td>${getUserName(i.assignedTo) || "-"}</td>
+            <td><span class="status-pill ${cls}">${i.status}</span></td>
+            <td>${slaLabel(i)}</td>
+            <td>
+              <button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button>
+            </td>
+            <td>${i.requester}</td>
+          `;
+          incidentTableBody.appendChild(tr);
+        });
+    }
+    function renderRequests() {
+      const statusFilter = requestStatusFilter.value;
+      const categoryFilter = requestCategoryFilter.value;
+      const systemFilter = requestSystemFilter.value;
+      const typeFilter = requestTypeFilter.value;
+      const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase();
+      const fromVal = requestDateFrom.value;
+      const toVal = requestDateTo.value;
+      const search = requestSearch.value.trim().toLowerCase();
+      requestTableBody.innerHTML = "";
+      requests
+        .filter(r => !statusFilter || r.status === statusFilter)
+        .filter(r => !categoryFilter || r.category === categoryFilter)
+        .filter(r => !systemFilter || r.system === systemFilter)
+        .filter(r => !typeFilter || r.requestType === typeFilter)
+        .filter(r => filterByDateRange(r.createdAt, fromVal, toVal))
+        .filter(r => {
+          if (!assigneeSearch) return true;
+          const name = (getUserName(r.assignedTo) || "").toLowerCase();
+          return name.includes(assigneeSearch);
+        })
+        .filter(r => {
+          if (!search) return true;
+          const text = [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category]
+            .join(" ")
+            .toLowerCase();
+          return text.includes(search);
+        })
+        .forEach(r => {
+          const tr = document.createElement("tr");
+          const cls = statusClassName(r.status, r.sla && r.sla.escalated);
+          tr.innerHTML = `
+            <td>${r.id}</td>
+            <td title="${(r.description || "").replace(/"/g, "&quot;")}">${r.title}</td>
+            <td>${r.system}</td>
+            <td>${r.requestType}</td>
+            <td>${getUserName(r.assignedTo) || "-"}</td>
+            <td><span class="status-pill ${cls}">${r.status}</span></td>
+            <td>${slaLabel(r)}</td>
+            <td>
+              <button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button>
+            </td>
+            <td>${formatDateOnly(r.dueDate)}</td>
+          `;
+          requestTableBody.appendChild(tr);
+        });
+    }
+    function renderMyTickets() {
+      if (!currentUser) return;
+      myTicketsBody.innerHTML = "";
+      const all = [...incidents, ...requests].filter(t =>
+        t.createdBy === currentUser.id || t.assignedTo === currentUser.id
+      );
+      all
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .forEach(t => {
+          const tr = document.createElement("tr");
+          const cls = statusClassName(t.status, t.sla && t.sla.escalated);
+          tr.innerHTML = `
+            <td>${t.id}</td>
+            <td>${t.type}</td>
+            <td>${t.title}</td>
+            <td><span class="status-pill ${cls}">${t.status}</span></td>
+            <td>${slaLabel(t)}</td>
+            <td>${formatDateTime(t.createdAt)}</td>
+            <td>
+              <button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">
+                Detail
+              </button>
+            </td>
+          `;
+          myTicketsBody.appendChild(tr);
+        });
+    }
+    function renderReports() {
+      const all = [...incidents, ...requests];
+      // Aging buckets
+      const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
+      all.forEach(t => {
+        const days = calcAgeDays(t.createdAt);
+        if (days <= 1) buckets["0-1"]++;
+        else if (days <= 3) buckets["1-3"]++;
+        else if (days <= 7) buckets["3-7"]++;
+        else buckets[">7"]++;
+      });
+      agingRow.innerHTML = `
+        <tr>
+          <td>Count</td>
+          <td>${buckets["0-1"]}</td>
+          <td>${buckets["1-3"]}</td>
+          <td>${buckets["3-7"]}</td>
+          <td>${buckets[">7"]}</td>
+        </tr>
+      `;
+      const resolved = all.filter(t => t.status === "Closed");
+      const slaMet = resolved.filter(t => t.sla && !t.sla.resolutionBreached).length;
+      const resolutionRate = all.length ? ((resolved.length / all.length) * 100).toFixed(1) : "0.0";
+      const slaMetRate = resolved.length ? ((slaMet / resolved.length) * 100).toFixed(1) : "0.0";
+      resolutionRow.innerHTML = `
+        <tr><td>Total Tickets</td><td>${all.length}</td></tr>
+        <tr><td>Resolved</td><td>${resolved.length}</td></tr>
+        <tr><td>Resolution Rate</td><td>${resolutionRate}%</td></tr>
+        <tr><td>SLA Met (Resolved)</td><td>${slaMet} (${slaMetRate}%)</td></tr>
+      `;
+      // Staff performance
+      const byStaff = {};
+      resolved.forEach(t => {
+        const ass = t.assignedTo || "unassigned";
+        if (!byStaff[ass]) byStaff[ass] = { resolved: 0, slaMet: 0, slaBreach: 0 };
+        byStaff[ass].resolved++;
+        if (t.sla && !t.sla.resolutionBreached) byStaff[ass].slaMet++;
+        if (t.sla && t.sla.resolutionBreached) byStaff[ass].slaBreach++;
+      });
+      staffRow.innerHTML = "";
+      Object.entries(byStaff).forEach(([id, info]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${getUserName(id) || "(Unassigned)"}</td>
+          <td>${info.resolved}</td>
+          <td>${info.slaMet}</td>
+          <td>${info.slaBreach}</td>
+        `;
+        staffRow.appendChild(tr);
+      });
+    }
+    function renderAdminTable() {
+      if (!currentUser || !["admin", "manager"].includes(currentUser.role)) return;
+      const statusFilter = adminStatusFilter.value;
+      const assigneeSearch = adminAssigneeSearch.value.trim().toLowerCase();
+      const fromVal = adminDateFrom.value;
+      const toVal = adminDateTo.value;
+      const search = adminSearch.value.trim().toLowerCase();
+      const all = [...incidents, ...requests];
+      adminTableBody.innerHTML = "";
+      all
+        .filter(t => !statusFilter || t.status === statusFilter)
+        .filter(t => filterByDateRange(t.createdAt, fromVal, toVal))
+        .filter(t => {
+          if (!assigneeSearch) return true;
+          const name = (getUserName(t.assignedTo) || "").toLowerCase();
+          return name.includes(assigneeSearch);
+        })
+        .filter(t => {
+          if (!search) return true;
+          const text = [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase();
+          return text.includes(search);
+        })
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .forEach(t => {
+          const tr = document.createElement("tr");
+          const cls = statusClassName(t.status, t.sla && t.sla.escalated);
+          const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" :
+                     t.sla.resolvedAt ? "met" : "inprogress") : "-";
+          const slaHtml = t.sla
+            ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>`
+            : "-";
+          const kind = t.type === "Incident" ? "incident" : "request";
+          tr.innerHTML = `
+            <td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td>
+            <td>${t.id}</td>
+            <td>${t.type}</td>
+            <td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td>
+            <td>${t.priority || "-"}</td>
+            <td>${getUserName(t.assignedTo) || "-"}</td>
+            <td><span class="status-pill ${cls}">${t.status}</span></td>
+            <td>${slaHtml}</td>
+            <td>${calcAgeDays(t.createdAt)}</td>
+            <td>
+              <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button>
+              <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button>
+            </td>
+          `;
+          adminTableBody.appendChild(tr);
+        });
+      adminSelectAll.checked = false;
+    }
+    function renderAuditLog() {
+      auditTableBody.innerHTML = "";
+      auditLogs.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${formatDateTime(a.time)}</td>
+          <td>${a.userName}</td>
+          <td>${a.role}</td>
+          <td>${a.action}</td>
+          <td>${a.ticketId || "-"}</td>
+          <td>${a.message}</td>
+        `;
+        auditTableBody.appendChild(tr);
+      });
+    }
+    // KB
+    const KB_ENTRIES = [
+      {
+        q: "TM1 login error invalid credential",
+        a: "Check that the AD account is not locked and the password is correct. If still failing, contact Support to reset."
+      },
+      {
+        q: "BPC report is slow",
+        a: "Try clearing cache / logging out and logging in again. If slow only for some reports, open an Incident and attach a screenshot and run time."
+      },
+      {
+        q: "Request new TM1 user",
+        a: "Use Service Request > Access Request and specify the role. Attach approval email from line manager."
+      }
+    ];
+    function renderKB() {
+      const search = kbSearch.value.trim().toLowerCase();
+      kbList.innerHTML = "";
+      KB_ENTRIES
+        .filter(e => {
+          if (!search) return true;
+          return e.q.toLowerCase().includes(search) || e.a.toLowerCase().includes(search);
+        })
+        .forEach(e => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${e.q}</strong><span>${e.a}</span>`;
+          kbList.appendChild(li);
+        });
+    }
+    kbSearch.addEventListener("input", renderKB);
+    // ===== Filters reset =====
+    incidentClearFilter.addEventListener("click", () => {
+      incidentStatusFilter.value = "";
+      incidentCategoryFilter.value = "";
+      incidentSystemFilter.value = "";
+      incidentAssigneeSearch.value = "";
+      incidentDateFrom.value = "";
+      incidentDateTo.value = "";
+      incidentSearch.value = "";
+      renderIncidents();
+    });
+    requestClearFilter.addEventListener("click", () => {
+      requestStatusFilter.value = "";
+      requestCategoryFilter.value = "";
+      requestSystemFilter.value = "";
+      requestTypeFilter.value = "";
+      requestAssigneeSearch.value = "";
+      requestDateFrom.value = "";
+      requestDateTo.value = "";
+      requestSearch.value = "";
+      renderRequests();
+    });
+    adminClearFilter.addEventListener("click", () => {
+      adminStatusFilter.value = "";
+      adminAssigneeSearch.value = "";
+      adminDateFrom.value = "";
+      adminDateTo.value = "";
+      adminSearch.value = "";
+      renderAdminTable();
+    });
+    [
+      incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter,
+      incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch
+    ]
+     .forEach(el => el.addEventListener("input", renderIncidents));
+    [
+      requestStatusFilter, requestCategoryFilter, requestSystemFilter,
+      requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch
+    ]
+     .forEach(el => el.addEventListener("input", renderRequests));
+    [
+      adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch
+    ]
+     .forEach(el => el.addEventListener("input", renderAdminTable));
+    // ===== Detail modal =====
+    function findTicket(kind, id) {
+      if (kind === "incident") return incidents.find(i => i.id === id);
+      if (kind === "request") return requests.find(r => r.id === id);
+      return null;
+    }
+    function updateTicket(kind, ticket) {
+      if (kind === "incident") {
+        const idx = incidents.findIndex(i => i.id === ticket.id);
+        if (idx >= 0) incidents[idx] = ticket;
+      } else if (kind === "request") {
+        const idx = requests.findIndex(r => r.id === ticket.id);
+        if (idx >= 0) requests[idx] = ticket;
+      }
+    }
+    function openDetail(kind, id) {
+      const t = findTicket(kind, id);
+      if (!t) return;
+      currentDetail = { kind, id };
+      detailTitle.textContent = `${t.type} Detail`;
+      detailSubtitle.textContent = `${t.id} • ${t.title}`;
+      detailIdSpan.textContent = t.id;
+      detailTypeSpan.textContent = t.type;
+      detailSubjectInput.value = t.title;
+      detailSystemInput.value = t.system || "";
+      detailModuleInput.value = t.module || "";
+      detailAssigneeSelect.value = t.assignedTo || "";
+      detailStatusSelect.value = t.status;
+      detailPrioritySelect.value = t.priority || "P3 - Medium (24h)";
+      detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
+      detailRequesterDeptSpan.textContent = `${t.requester || "-"}${t.dept ? " / " + t.dept : ""}`;
+      detailCreatedSpan.textContent = formatDateTime(t.createdAt);
+      detailApproverSpan.textContent = t.approver || "-";
+      detailDescriptionInput.value = t.description || "";
+      renderDetailNotes(t);
+      renderDetailAttachments(t);
+      detailBackdrop.classList.add("active");
+    }
+    function closeDetail() {
+      detailBackdrop.classList.remove("active");
+      currentDetail = null;
+    }
+    detailCloseBtn.addEventListener("click", closeDetail);
+    detailBackdrop.addEventListener("click", (e) => {
+      if (e.target === detailBackdrop) closeDetail();
+    });
+    function renderDetailNotes(ticket) {
+      detailNotesList.innerHTML = "";
+      const notes = ticket.notes || [];
+      const visibleNotes = notes.filter(n => {
+        if (n.visibility === "internal" && (!currentUser || currentUser.role === "user")) return false;
+        return true;
+      });
+      if (!visibleNotes.length) {
+        const li = document.createElement("li");
+        li.textContent = "No notes yet.";
+        li.style.color = "#9ca3af";
+        detailNotesList.appendChild(li);
+        return;
+      }
+      visibleNotes
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .forEach(n => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div>
+              <span class="note-tag ${n.visibility === "internal" ? "note-tag-internal" : "note-tag-public"}">
+                ${n.visibility === "internal" ? "Internal" : "Public"}
+              </span>
+              ${n.text}
+            </div>
+            <div class="note-meta">${formatDateTime(n.createdAt)} • ${n.authorName}</div>
+          `;
+          detailNotesList.appendChild(li);
+        });
+    }
+    function renderDetailAttachments(ticket) {
+      detailAttachmentsList.innerHTML = "";
+      const atts = ticket.attachments || [];
+      if (!atts.length) {
+        const li = document.createElement("li");
+        li.textContent = "No attachments yet.";
+        li.style.color = "#9ca3af";
+        detailAttachmentsList.appendChild(li);
+        return;
+      }
+      atts.forEach(a => {
+        const li = document.createElement("li");
+        const isImg = a.type && a.type.startsWith("image/");
+        li.innerHTML = `
+          ${isImg ? `<img src="${a.dataUrl}" class="attachment-preview" />` : ""}
+          <div style="flex:1;">
+            <div><strong>${a.name}</strong></div>
+            <div class="note-meta">${a.type || "unknown"} • ${(a.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <a href="${a.dataUrl}" download="${a.name}" class="btn btn-small btn-secondary">Download</a>
+        `;
+        detailAttachmentsList.appendChild(li);
+      });
+    }
+    detailSaveBtn.addEventListener("click", () => {
+      if (!currentDetail) return;
+      const t = findTicket(currentDetail.kind, currentDetail.id);
+      if (!t) return;
+      t.title = detailSubjectInput.value.trim() || t.title;
+      t.system = detailSystemInput.value.trim();
+      t.module = detailModuleInput.value.trim();
+      t.status = detailStatusSelect.value;
+      t.priority = detailPrioritySelect.value;
+      t.dueDate = detailDueInput.value || null;
+      t.description = detailDescriptionInput.value.trim();
+      const newAssignee = detailAssigneeSelect.value || null;
+      if (t.assignedTo !== newAssignee) {
+        assignTicket(t, newAssignee, true);
+      }
+      // SLA update on resolve
+    if (t.sla) {
+  if (t.status !== "Open" && !t.sla.firstResponseAt) {
+    t.sla.firstResponseAt = new Date().toISOString();
+  }
+  // ถ้า Closed หรือ Cancelled ให้ถือว่าจบ SLA
+  if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) {
+    t.sla.resolvedAt = new Date().toISOString();
+  }
+}
+      t.updatedAt = new Date().toISOString();
+      updateTicket(currentDetail.kind, t);
+      saveData();
+      logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal");
+      renderDetailNotes(t);
+      renderDetailAttachments(t);
+      renderAll(); // refresh tables/dashboard
+      showToast("Changes saved.");
+    });
+    detailAddNoteBtn.addEventListener("click", () => {
+      if (!currentDetail) return;
+      const t = findTicket(currentDetail.kind, currentDetail.id);
+      if (!t) return;
+      const text = detailNoteInput.value.trim();
+      if (!text) return;
+      const radios = document.querySelectorAll('input[name="note-visibility"]');
+      let visibility = "public";
+      radios.forEach(r => {
+        if (r.checked) visibility = r.value;
+      });
+      if (!Array.isArray(t.notes)) t.notes = [];
+      const note = {
+        text,
+        createdAt: new Date().toISOString(),
+        visibility,
+        authorId: currentUser.id,
+        authorName: currentUser.name
+      };
+      t.notes.push(note);
+      // first response timestamp (for SLA) if support/admin/manager adds a note
+      if (t.sla && !t.sla.firstResponseAt && ["support", "admin", "manager"].includes(currentUser.role)) {
+        t.sla.firstResponseAt = new Date().toISOString();
+      }
+      t.updatedAt = new Date().toISOString();
+      updateTicket(currentDetail.kind, t);
+      saveData();
+      logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
+      detailNoteInput.value = "";
+      renderDetailNotes(t);
+      renderAll();
+    });
+    function handleAttachments(files) {
+      if (!currentDetail) return;
+      const t = findTicket(currentDetail.kind, currentDetail.id);
+      if (!t) return;
+      if (!Array.isArray(t.attachments)) t.attachments = [];
+      const existingCount = t.attachments.length;
+      const fileArr = Array.from(files || []);
+      if (!fileArr.length) return;
+      if (existingCount + fileArr.length > MAX_ATTACHMENTS_PER_TICKET) {
+        alert(`Max ${MAX_ATTACHMENTS_PER_TICKET} files per ticket. You can add ${MAX_ATTACHMENTS_PER_TICKET - existingCount} more.`);
+        return;
+      }
+      let processed = 0;
+      fileArr.forEach(file => {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+          showToast(`File ${file.name} is larger than 500KB and will not be attached.`);
+          processed++;
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          t.attachments.push({
+            id: `${Date.now()}-${Math.random()}`,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            dataUrl: e.target.result
+          });
+          processed++;
+          if (processed === fileArr.length) {
+            updateTicket(currentDetail.kind, t);
+            saveData();
+            logAudit("ADD_ATTACHMENT", t.id, `Attached ${fileArr.length} file(s)`);
+            renderDetailAttachments(t);
+            renderAll();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    detailFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length) {
+        handleAttachments(e.target.files);
+        detailFileInput.value = "";
+      }
+    });
+    detailDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      detailDropzone.classList.add("focused");
+    });
+    detailDropzone.addEventListener("dragleave", () => {
+      detailDropzone.classList.remove("focused");
+    });
+    detailDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      detailDropzone.classList.remove("focused");
+      const files = e.dataTransfer.files;
+      if (files && files.length) handleAttachments(files);
+    });
+    document.addEventListener("paste", (e) => {
+      if (!currentDetail) return;
+      const modal = document.querySelector(".detail-modal");
+      if (!modal.contains(document.activeElement)) return;
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      const images = [];
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        if (it.type.startsWith("image/")) images.push(it.getAsFile());
+      }
+      if (!images.length) return;
+      handleAttachments(images);
+    });
+    // Open detail buttons & delete buttons
+    document.addEventListener("click", (e) => {
+      const btnDetail = e.target.closest("[data-detail-kind]");
+      if (btnDetail) {
+        const kind = btnDetail.getAttribute("data-detail-kind");
+        const id = btnDetail.getAttribute("data-id");
+        openDetail(kind, id);
+        return;
+      }
+      const btnDel = e.target.closest("[data-admin-delete-kind]");
+      if (btnDel) {
+        const kind = btnDel.getAttribute("data-admin-delete-kind");
+        const id = btnDel.getAttribute("data-id");
+        if (!confirm(`Delete ticket ${id}?`)) return;
+        if (kind === "incident") {
+          incidents = incidents.filter(i => i.id !== id);
+        } else {
+          requests = requests.filter(r => r.id !== id);
+        }
+        saveData();
+        logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard");
+        renderAll();
+      }
+    });
+    // ===== Assign / Status (Admin + Detail) =====
+    function assignTicket(ticket, newAssigneeId, fromDetail = false) {
+      const prev = ticket.assignedTo || null;
+      if (prev === newAssigneeId) return;
+      ticket.assignedTo = newAssigneeId || null;
+      ticket.updatedAt = new Date().toISOString();
+      const newName = getUserName(newAssigneeId) || "(Unassigned)";
+      logAudit("ASSIGN", ticket.id, `Assigned to ${newName}`);
+      
+      if (currentUser && currentUser.id === newAssigneeId) {
+        showToast(`Ticket ${ticket.id} assigned to you.`);
+      }
+
+      // --- ส่วนที่เพิ่มใหม่: ฟังก์ชันส่งอีเมลแจ้งเตือน ---
+      if (newAssigneeId) {
+        const assignee = getUserById(newAssigneeId);
+        // ตรวจสอบว่ามีข้อมูลอีเมลหรือไม่
+        if (assignee && assignee.email) {
+          // ถ้ามาจากหน้า Detail (กด Save Changes) ให้เด้ง Alert แจ้งเตือน
+          if (fromDetail) {
+            const subject = `[ITSM] You have been assigned ticket ${ticket.id}`;
+            const body = `Dear ${assignee.name},\n\nYou have been assigned to ticket ${ticket.id}: "${ticket.title}".\nPlease log in to the portal to review the request.\n\nBest Regards,\nIT Service Management`;
+            
+            // จำลองการส่งอีเมลด้วย Alert
+            alert(`📧 (Simulation) Sending Email Notification...\n---------------------------------------------------\nTo: ${assignee.email}\nSubject: ${subject}\n\n${body}`);
+          } else {
+            // ถ้ามาจากหน้า Admin (Bulk Assign) ให้แค่ Log เพื่อไม่ให้ Alert เด้งรัวๆ
+            console.log(`📧 Email sent to ${assignee.email} regarding ticket ${ticket.id}`);
+          }
+        }
+      }
+    }
+
+    // ===== Bulk Admin =====
+    adminSelectAll.addEventListener("change", () => {
+      const checked = adminSelectAll.checked;
+      document.querySelectorAll(".admin-select").forEach(cb => {
+        cb.checked = checked;
+      });
+    });
+    adminBulkApply.addEventListener("click", () => {
+      const action = adminBulkAction.value;
+      const assignId = adminBulkAssignee.value || null;
+      const selected = Array.from(document.querySelectorAll(".admin-select"))
+        .filter(cb => cb.checked)
+        .map(cb => ({
+          kind: cb.getAttribute("data-kind"),
+          id: cb.getAttribute("data-id")
+        }));
+      if (!selected.length) {
+        alert("Please select at least one ticket.");
+        return;
+      }
+      if (!action && !assignId) {
+        alert("Select a Bulk Action or Assign To value first.");
+        return;
+      }
+      selected.forEach(sel => {
+        const t = findTicket(sel.kind, sel.id);
+        if (!t) return;
+        if (assignId) {
+          assignTicket(t, assignId);
+        }
+        if (action === "close") {
+          t.status = "Closed";
+          if (t.sla && !t.sla.resolvedAt) {
+            t.sla.resolvedAt = new Date().toISOString();
+          }
+          logAudit("BULK_CLOSE", t.id, "Bulk close");
+        }
+        if (action === "reopen") {
+          t.status = "Open";
+          logAudit("BULK_REOPEN", t.id, "Bulk reopen");
+        }
+        if (action === "delete") {
+          if (sel.kind === "incident") {
+            incidents = incidents.filter(i => i.id !== sel.id);
+          } else {
+            requests = requests.filter(r => r.id !== sel.id);
+          }
+          logAudit("BULK_DELETE", sel.id, "Bulk delete");
+          return;
+        }
+        t.updatedAt = new Date().toISOString();
+        updateTicket(sel.kind, t);
+      });
+      saveData();
+      renderAll();
+      showToast("Bulk action completed.");
+    });
+    // ===== Auto SLA / Escalation =====
+    function checkSLA() {
+      const all = [...incidents, ...requests];
+      const now = new Date();
+      all.forEach(t => {
+        if (!t.sla) return;
+        const sla = t.sla;
+        const resDue = new Date(sla.resolutionDueAt);
+        const respDue = new Date(sla.responseDueAt);
+        if (!sla.firstResponseAt && now > respDue && !sla.responseBreached) {
+          sla.responseBreached = true;
+          logAudit("SLA_RESPONSE_BREACH", t.id, "Response time breached");
+        }
+        if (!sla.resolvedAt && now > resDue && !sla.resolutionBreached) {
+          sla.resolutionBreached = true;
+          if (!sla.escalated) {
+            sla.escalated = true;
+            logAudit("AUTO_ESCALATION", t.id, "Auto escalated due to resolution SLA breach");
+          }
+        }
+      });
+      saveData();
+      renderDashboard();
+      renderAdminTable();
+      renderIncidents();
+      renderRequests();
+      renderMyTickets();
+    }
+    setInterval(checkSLA, 60000); // check every 1 min
+    // ===== Export CSV =====
+ function downloadCSV(filename, rows) {
+  if (!rows || !rows.length) {
+    alert("No data for export.");
+    return;
+  }
+  const processValue = (v) => {
+    if (v === null || v === undefined) return "";
+    const s = String(v).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const csv = rows.map(row => row.map(processValue).join(",")).join("\n");
+  // สำคัญ: ใส่ BOM นำหน้า csv เพื่อให้ Excel รู้ว่าเป็น UTF-8
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+    exportIncBtn.addEventListener("click", () => {
+      const header = [
+        "ID","Type","Requester","Dept","Phone","Email","System","Module",
+        "Title","Category","Impact","Priority","DueDate","Approver","Reference",
+        "Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue",
+        "SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached",
+        "NotesCount","AttachmentsCount"
+      ];
+      const rows = [header, ...incidents.map(i => [
+        i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module,
+        i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "",
+        i.approver, i.reference, i.status, getUserName(i.assignedTo),
+        formatDateTime(i.createdAt), formatDateTime(i.updatedAt),
+        i.sla ? formatDateTime(i.sla.responseDueAt) : "",
+        i.sla ? formatDateTime(i.sla.resolutionDueAt) : "",
+        i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "",
+        i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "",
+        i.sla ? i.sla.responseBreached : "",
+        i.sla ? i.sla.resolutionBreached : "",
+        (i.notes || []).length,
+        (i.attachments || []).length
+      ])];
+      downloadCSV("incidents.csv", rows);
+    });
+    exportReqBtn.addEventListener("click", () => {
+      const header = [
+        "ID","Type","Requester","Dept","Phone","Email","System","Module",
+        "Title","RequestType","Category","Impact","DueDate","Approver","Reference",
+        "Remark","Status","AssignedTo","CreatedAt","UpdatedAt",
+        "SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt",
+        "SLA_ResponseBreached","SLA_ResolutionBreached","NotesCount","AttachmentsCount"
+      ];
+      const rows = [header, ...requests.map(r => [
+        r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,
+        r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "",
+        r.approver,r.reference,r.remark,r.status,
+        getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt),
+        r.sla ? formatDateTime(r.sla.responseDueAt) : "",
+        r.sla ? formatDateTime(r.sla.resolutionDueAt) : "",
+        r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "",
+        r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "",
+        r.sla ? r.sla.responseBreached : "",
+        r.sla ? r.sla.resolutionBreached : "",
+        (r.notes || []).length,
+        (r.attachments || []).length
+      ])];
+      downloadCSV("requests.csv", rows);
+    });
+    // Clear all
+    clearAllBtn.addEventListener("click", () => {
+      if (!confirm("Delete all Incidents, Requests, and Audit Logs?")) return;
+      incidents = [];
+      requests = [];
+      auditLogs = [];
+      localStorage.removeItem("itsm_incidents");
+      localStorage.removeItem("itsm_requests");
+      localStorage.removeItem("itsm_audit");
+      renderAll();
+      showToast("All data has been cleared.");
+    });
+    // ===== Main render all =====
+    function renderAll() {
+      renderIncidents();
+      renderRequests();
+      renderMyTickets();
+      renderDashboard();
+      renderAdminTable();
+      renderAuditLog();
+      renderKB();
+    }
+    // ===== Init =====
+    initLogin();
+    checkSLA(); // initial SLA check on load
+
+/************************************
+ * USER MANAGEMENT
+ ************************************/
+const userTableBody = document.getElementById("user-table-body");
+const userForm = document.getElementById("user-form");
+const userSubmitBtn = document.getElementById("user-submit-btn");
+const userCancelBtn = document.getElementById("user-cancel-btn");
+
+// State: are we editing?
+let editingUserIndex = -1;
+
+// Render Table
+function renderUserTable() {
+  userTableBody.innerHTML = "";
+  systemUsers.forEach((u, i) => {
+    // แสดงผลในตาราง: ถ้าเป็น true ให้โชว์ ✅ ถ้าไม่ใช่ ให้โชว์ -
+    const assignDisplay = u.assignTo ? '<span style="color:green; font-size:1.2em;">✅</span>' : '-';
+    
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${u.id}</td>
+      <td>${u.name}</td>
+      <td>${u.email}</td>
+      <td>${u.role}</td>
+      <td style="text-align:center;">${assignDisplay}</td> <!-- จัดกึ่งกลาง -->
+      <td>${u.password}</td>
+      <td>
+        <button class="btn-small btn-secondary" onclick="editUser(${i})">Edit</button>
+        <button class="btn-small btn-danger" onclick="deleteUser(${i})">Delete</button>
+      </td>
+    `;
+    userTableBody.appendChild(tr);
+  });
+}
+
+// Add or Update User
+userForm.addEventListener("submit", e => {
+  e.preventDefault();
+  
+  const idInput = document.getElementById("user-id");
+  const nameInput = document.getElementById("user-name");
+  const emailInput = document.getElementById("user-email");
+  const roleInput = document.getElementById("user-role");
+  const assignInput = document.getElementById("user-assign-to"); // Checkbox Element
+  const passwordInput = document.getElementById("user-password");
+
+  const id = idInput.value.trim();
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const role = roleInput.value;
+  const assignTo = assignInput.checked; // รับค่า boolean (true/false)
+  const password = passwordInput.value.trim();
+
+  if (!id || !name || !email || !role || !password) {
+    alert("กรุณากรอกข้อมูลให้ครบ");
+    return;
+  }
+
+  // Update Logic
+  if (editingUserIndex > -1) {
+    // Update existing
+    systemUsers[editingUserIndex].name = name;
+    systemUsers[editingUserIndex].email = email;
+    systemUsers[editingUserIndex].role = role;
+    systemUsers[editingUserIndex].assignTo = assignTo; // Update boolean
+    systemUsers[editingUserIndex].password = password;
+    
+    alert("แก้ไขข้อมูลสำเร็จ!");
+    
+    // Reset Edit State
+    resetUserForm();
+  } else {
+    // Add New Logic
+    if (systemUsers.some(u => u.id === id)) {
+      alert("User ID นี้ถูกใช้แล้ว");
+      return;
+    }
+    
+    systemUsers.push({
+      id,
+      name,
+      email,
+      role,
+      assignTo, // Save boolean
+      password
+    });
+    
+    alert("เพิ่มผู้ใช้สำเร็จ!");
+    userForm.reset();
+  }
+
+  localStorage.setItem("itsm_users", JSON.stringify(systemUsers));
+  renderUserTable();
+  populateAssigneeDropdowns(); // Refresh dropdowns immediately
+});
+
+// Edit User: Populate form and set edit mode
+function editUser(index) {
+  const u = systemUsers[index];
+  editingUserIndex = index;
+
+  // Populate inputs
+  document.getElementById("user-id").value = u.id;
+  document.getElementById("user-name").value = u.name;
+  document.getElementById("user-email").value = u.email;
+  document.getElementById("user-role").value = u.role;
+  // ตั้งค่า Checkbox ตามข้อมูลที่บันทึกไว้
+  document.getElementById("user-assign-to").checked = u.assignTo === true; 
+  document.getElementById("user-password").value = u.password || "";
+
+  // Lock ID field
+  const idInput = document.getElementById("user-id");
+  idInput.readOnly = true;
+  idInput.style.backgroundColor = "#e5e7eb"; 
+
+  // Change buttons
+  userSubmitBtn.textContent = "Update User";
+  userSubmitBtn.classList.remove("btn");
+  userSubmitBtn.classList.add("btn-secondary"); // Or keep primary but change text
+  userCancelBtn.style.display = "inline-block";
+  
+  // Scroll to form
+  userForm.scrollIntoView({ behavior: "smooth" });
+}
+
+// Cancel Edit
+userCancelBtn.addEventListener("click", () => {
+  resetUserForm();
+});
+
+function resetUserForm() {
+  editingUserIndex = -1;
+  userForm.reset();
+  
+  // Unlock ID
+  const idInput = document.getElementById("user-id");
+  idInput.readOnly = false;
+  idInput.style.backgroundColor = "#ffffff";
+
+  // Reset buttons
+  userSubmitBtn.textContent = "Add User";
+  userSubmitBtn.classList.remove("btn-secondary");
+  userSubmitBtn.classList.add("btn");
+  userCancelBtn.style.display = "none";
+}
+
+// Delete User
+function deleteUser(index) {
+  if (!confirm("ต้องการลบผู้ใช้นี้ใช่หรือไม่?")) return;
+  
+  // If deleting the user currently being edited, reset form first
+  if (editingUserIndex === index) {
+    resetUserForm();
+  } else if (editingUserIndex > index) {
+    // If deleting a user before the one being edited, shift index down
+    editingUserIndex--;
+  }
+  
+  systemUsers.splice(index, 1);
+  localStorage.setItem("itsm_users", JSON.stringify(systemUsers));
+  renderUserTable();
+  populateAssigneeDropdowns(); // Refresh dropdowns immediately
+}
+
+renderUserTable();
+  </script>
+</body>
+</html>
