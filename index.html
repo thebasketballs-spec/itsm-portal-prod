@@ -1060,10 +1060,13 @@
                   <input type="text" id="request-remark" />
                 </div>
               </div>
+
               <div class="form-group">
-                <label>Request Description *</label>
-                <textarea id="request-description" required></textarea>
+                <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
+                <textarea id="request-description" required placeholder="พิมพ์รายละเอียดคำขอ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+                <ul class="attachments-list" id="request-staged-attachments" style="margin-top: 8px;"></ul>
               </div>
+
               <div class="form-row" style="align-items:flex-end;">
                 <div class="form-group"></div>
                 <button type="submit" class="btn">Submit Request</button>
@@ -1648,7 +1651,6 @@
       { q: "Request new TM1 user", a: "Use Service Request > Access Request and specify the role." }
     ];
 
-    // Added elements
     const exportIncBtn = document.getElementById("btn-export-inc");
     const exportReqBtn = document.getElementById("btn-export-req");
     const btnExportJson = document.getElementById("btn-export-json");
@@ -1986,6 +1988,70 @@
       renderIncidentStagedAttachments();
     };
 
+    // ================== PASTE IMAGE IN REQUEST FORM ==================
+    let requestStagedAttachments = [];
+    const requestDescInput = document.getElementById("request-description");
+    const requestStagedList = document.getElementById("request-staged-attachments");
+
+    requestDescInput.addEventListener("paste", (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      
+      const images = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          images.push(items[i].getAsFile());
+        }
+      }
+      
+      if (!images.length) return; 
+      
+      images.forEach(file => {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+          showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 500KB)`);
+          return;
+        }
+        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
+          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`);
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          requestStagedAttachments.push({
+            id: `${Date.now()}-${Math.random()}`,
+            name: `pasted-image-${Date.now()}.png`,
+            type: file.type,
+            size: file.size,
+            dataUrl: evt.target.result
+          });
+          renderRequestStagedAttachments();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    function renderRequestStagedAttachments() {
+      requestStagedList.innerHTML = "";
+      requestStagedAttachments.forEach((a, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${a.dataUrl}" class="attachment-preview" />
+          <div style="flex:1;">
+            <div><strong>${a.name}</strong></div>
+            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${index})">X</button>
+        `;
+        requestStagedList.appendChild(li);
+      });
+    }
+
+    window.removeRequestStaged = function(index) {
+      requestStagedAttachments.splice(index, 1);
+      renderRequestStagedAttachments();
+    };
+
     // ================== CREATING TICKETS (with email) ==================
     incidentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -2014,9 +2080,7 @@
         id: generateId("INC"), type: "Incident", requester, dept, phone, email, system, module, title,
         category, impact, priority, dueDate: due || null, approver, reference, description,
         status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
-        
         attachments: [...incidentStagedAttachments], 
-        
         sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
       };
 
@@ -2069,7 +2133,8 @@
       const req = {
         id: generateId("REQ"), type: "Request", requester, dept, phone, email, system, module, title,
         requestType: type, category, impact, dueDate: due, approver, reference, remark, description,
-        status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], attachments: [],
+        status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
+        attachments: [...requestStagedAttachments], 
         sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
       };
 
@@ -2077,6 +2142,9 @@
       requests.unshift(req);
 
       requestForm.reset();
+      requestStagedAttachments = [];
+      renderRequestStagedAttachments();
+
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
       renderRequests(); renderDashboard(); renderMyTickets(); renderAdminTable();
       showToast(`Created Request ${req.id}`);
