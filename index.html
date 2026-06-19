@@ -554,12 +554,12 @@
       list-style: none;
       padding-left: 0;
       margin: 0;
-      max-height: 160px;
+      max-height: 240px; /* เพิ่มความสูงให้เห็นรูปชัดขึ้น */
       overflow: auto;
     }
     .notes-list li {
-      margin-bottom: 6px;
-      padding-bottom: 4px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 1px dashed #e5e7eb;
       font-size: 12px;
     }
@@ -1069,7 +1069,7 @@
                 </div>
               </div>
 
-             <div class="form-group">
+              <div class="form-group">
                 <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
                 <textarea id="request-description" required placeholder="พิมพ์รายละเอียดคำขอ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
                 
@@ -1500,10 +1500,14 @@
           </div>
           <button class="btn btn-small" id="detail-save-btn" style="margin-top:6px;">Save Changes</button>
         </div>
+        
         <div class="detail-block">
           <h3>Notes (Internal / Public)</h3>
           <ul class="notes-list" id="detail-notes-list"></ul>
-          <textarea id="detail-note-input" placeholder="Add notes, e.g. status update, user feedback, etc."></textarea>
+          
+          <textarea id="detail-note-input" placeholder="พิมพ์อัปเดตสถานะ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+          <ul class="attachments-list" id="detail-note-staged-attachments" style="margin-top: 4px;"></ul>
+          
           <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
             <label style="font-size:11px;">
               <input type="radio" name="note-visibility" value="public" checked /> Public
@@ -1514,6 +1518,7 @@
            </div>
           <button class="btn btn-small" id="detail-add-note-btn" style="margin-top:4px;">Add Note</button>
         </div>
+
         <div class="detail-block">
           <h3>Attachments</h3>
           <div class="muted">
@@ -1528,7 +1533,7 @@
         </div>
       </div>
       <div class="muted" style="margin-top:6px;">
-
+        * Attachments are stored as Base64 in localStorage (for Demo / small team usage).
       </div>
     </div>
   </div>
@@ -1565,6 +1570,7 @@
     let currentUser = null;
     let currentDetail = null;
     let editingUserIndex = -1;
+    let detailNoteStagedAttachments = []; // Array เก็บรูปสำหรับโน้ตใหม่
 
     // Constants
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
@@ -1601,9 +1607,12 @@
     const detailApproverSpan = document.getElementById("detail-approver");
     const detailDescriptionInput = document.getElementById("detail-description-input");
     const detailSaveBtn = document.getElementById("detail-save-btn");
+    
     const detailNotesList = document.getElementById("detail-notes-list");
     const detailNoteInput = document.getElementById("detail-note-input");
+    const detailNoteStagedList = document.getElementById("detail-note-staged-attachments"); // Element โชว์รูปโน้ต
     const detailAddNoteBtn = document.getElementById("detail-add-note-btn");
+    
     const detailAttachmentsList = document.getElementById("detail-attachments-list");
     const detailFileInput = document.getElementById("detail-file-input");
     const detailDropzone = document.getElementById("detail-dropzone");
@@ -2003,7 +2012,8 @@
       incidentStagedAttachments.splice(index, 1);
       renderIncidentStagedAttachments();
     };
-// ================== ATTACH FILE IN INCIDENT FORM ==================
+
+    // ================== ATTACH FILE IN INCIDENT FORM ==================
     const incidentFileInput = document.getElementById("incident-file-input");
     
     incidentFileInput.addEventListener("change", (e) => {
@@ -2011,12 +2021,10 @@
       if (!files || files.length === 0) return;
 
       Array.from(files).forEach(file => {
-        // เช็คขนาดไฟล์ (จำกัด 500KB ตามที่คุณตั้งค่าไว้เพื่อไม่ให้ Database เต็ม)
         if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
           showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 500KB)`);
           return;
         }
-        // เช็คจำนวนไฟล์สูงสุด
         if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
           showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`);
           return;
@@ -2035,10 +2043,9 @@
         };
         reader.readAsDataURL(file);
       });
-      
-      // ล้างค่า input เพื่อให้สามารถกดเลือกไฟล์เดิมซ้ำได้ในกรณีที่เผลอลบทิ้งไป
       incidentFileInput.value = "";
     });
+
     // ================== PASTE IMAGE IN REQUEST FORM ==================
     let requestStagedAttachments = [];
     const requestDescInput = document.getElementById("request-description");
@@ -2102,7 +2109,8 @@
       requestStagedAttachments.splice(index, 1);
       renderRequestStagedAttachments();
     };
-// ================== ATTACH FILE IN REQUEST FORM ==================
+
+    // ================== ATTACH FILE IN REQUEST FORM ==================
     const requestFileInput = document.getElementById("request-file-input");
     
     requestFileInput.addEventListener("change", (e) => {
@@ -2110,12 +2118,10 @@
       if (!files || files.length === 0) return;
 
       Array.from(files).forEach(file => {
-        // เช็คขนาดไฟล์ (จำกัด 500KB)
         if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
           showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 500KB)`);
           return;
         }
-        // เช็คจำนวนไฟล์สูงสุด
         if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
           showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`);
           return;
@@ -2134,11 +2140,10 @@
         };
         reader.readAsDataURL(file);
       });
-      
-      // ล้างค่า input เพื่อให้กดเลือกไฟล์เดิมซ้ำได้ถ้าเผลอลบทิ้ง
       requestFileInput.value = "";
     });
-    // ================== CREATING TICKETS (with email) ==================
+
+    // ================== CREATING TICKETS ==================
     incidentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const requester = document.getElementById("incident-requester").value.trim();
@@ -2181,7 +2186,6 @@
       renderIncidents(); renderDashboard(); renderMyTickets(); renderAdminTable();
       showToast(`Created Incident ${incident.id}`);
 
-      // --- Notify Admin via Outlook (mailto) ---
       const admin = systemUsers.find(u => u.role === 'admin');
       if (admin && admin.email) {
         const subject = encodeURIComponent(`[ITSM] New Incident: ${incident.id} - ${incident.title}`);
@@ -2235,7 +2239,6 @@
       renderRequests(); renderDashboard(); renderMyTickets(); renderAdminTable();
       showToast(`Created Request ${req.id}`);
 
-      // --- Notify Admin via Outlook (mailto) ---
       const admin = systemUsers.find(u => u.role === 'admin');
       if (admin && admin.email) {
         const subject = encodeURIComponent(`[ITSM] New Service Request: ${req.id} - ${req.title}`);
@@ -2447,7 +2450,6 @@
     }
 
     // ================== DETAIL MODAL & UPDATING TICKETS ==================
-// ================== DETAIL MODAL & UPDATING TICKETS ==================
     function findTicket(kind, id) { 
       return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id);
     }
@@ -2464,12 +2466,10 @@
       }
     }
 
-    // --- 1. ฟังก์ชันนำ Notes มาวาดลงบนหน้าจอ Modal ---
     function renderDetailNotes(t) {
       detailNotesList.innerHTML = "";
       if (!t.notes || !t.notes.length) return;
       
-      // กรองไม่ให้ User ธรรมดาเห็น Internal Note
       const visibleNotes = t.notes.filter(n => {
         if (n.visibility === "internal") {
           return currentUser && ["admin", "manager", "support"].includes(currentUser.role);
@@ -2481,15 +2481,26 @@
         const li = document.createElement("li");
         const isInternal = n.visibility === "internal";
         const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
+        
+        // ประมวลผลรูปภาพที่ถูกแนบมาในโน้ตเพื่อแสดงผล
+        let attachHtml = "";
+        if (n.attachments && n.attachments.length > 0) {
+          attachHtml = `<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">`;
+          n.attachments.forEach(a => {
+            attachHtml += `<a href="${a.dataUrl}" target="_blank" title="คลิกเพื่อดูรูปขนาดเต็ม"><img src="${a.dataUrl}" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2;" /></a>`;
+          });
+          attachHtml += `</div>`;
+        }
+
         li.innerHTML = `
           <div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div>
-          <div style="line-height:1.4;">${n.text}</div>
+          <div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>
+          ${attachHtml}
         `;
         detailNotesList.appendChild(li);
       });
     }
 
-    // --- 2. ฟังก์ชันนำรูปภาพมาวาดลงบนหน้าจอ Modal ---
     function renderDetailAttachments(t) {
       detailAttachmentsList.innerHTML = "";
       if (!t.attachments || !t.attachments.length) return;
@@ -2524,7 +2535,10 @@
       detailApproverSpan.textContent = t.approver || "-";
       detailDescriptionInput.value = t.description || "";
       
-      // เรียกใช้ฟังก์ชันเพื่อให้วาด Notes และรูปภาพที่ซ่อนอยู่ ขึ้นมาโชว์ตอนเปิด Modal
+      // ล้างรูปภาพเก่าที่ค้างอยู่ตรงช่องแนบรูปภาพโน้ต ก่อนเปิด Modal ตัวใหม่
+      detailNoteStagedAttachments = [];
+      renderDetailNoteStagedAttachments();
+
       renderDetailNotes(t);
       renderDetailAttachments(t);
       
@@ -2563,16 +2577,88 @@
       renderAll(); showToast("Changes saved.");
     });
 
+    // ================== PASTE IMAGE IN DETAIL NOTE ==================
+    detailNoteInput.addEventListener("paste", (e) => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      
+      const images = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          images.push(items[i].getAsFile());
+        }
+      }
+      
+      if (!images.length) return; 
+      
+      images.forEach(file => {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+          showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 500KB)`);
+          return;
+        }
+        if (detailNoteStagedAttachments.length >= 3) {
+          showToast(`สามารถแนบรูปใน Note ได้สูงสุด 3 รูปต่อครั้ง`);
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          detailNoteStagedAttachments.push({
+            id: `${Date.now()}-${Math.random()}`,
+            name: `note-image-${Date.now()}.png`,
+            type: file.type,
+            size: file.size,
+            dataUrl: evt.target.result
+          });
+          renderDetailNoteStagedAttachments();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    function renderDetailNoteStagedAttachments() {
+      detailNoteStagedList.innerHTML = "";
+      detailNoteStagedAttachments.forEach((a, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${a.dataUrl}" class="attachment-preview" />
+          <div style="flex:1;">
+            <div><strong>${a.name}</strong></div>
+            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <button type="button" class="btn-danger btn-small" onclick="window.removeDetailNoteStaged(${index})">X</button>
+        `;
+        detailNoteStagedList.appendChild(li);
+      });
+    }
+
+    window.removeDetailNoteStaged = function(index) {
+      detailNoteStagedAttachments.splice(index, 1);
+      renderDetailNoteStagedAttachments();
+    };
+
+    // การบันทึก Note พ่วงรูปภาพ
     detailAddNoteBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
       const t = findTicket(currentDetail.kind, currentDetail.id);
       const text = detailNoteInput.value.trim();
-      if (!text || !t) return;
+      
+      // จะยอมให้ Submit ได้ถ้ามีข้อความ "หรือ" มีรูปภาพถูกแปะไว้อย่างใดอย่างหนึ่ง
+      if (!text && detailNoteStagedAttachments.length === 0) return;
+      if (!t) return;
+      
       let visibility = "public";
       document.querySelectorAll('input[name="note-visibility"]').forEach(r => { if (r.checked) visibility = r.value; });
       
       if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ text, createdAt: new Date().toISOString(), visibility, authorId: currentUser.id, authorName: currentUser.name });
+      t.notes.push({ 
+        text, 
+        createdAt: new Date().toISOString(), 
+        visibility, 
+        authorId: currentUser.id, 
+        authorName: currentUser.name,
+        attachments: [...detailNoteStagedAttachments] // นำรูปภาพที่ค้างไว้ ยัดใส่เข้าไปด้วย
+      });
       
       if (t.sla && !t.sla.firstResponseAt && ["support", "admin", "manager"].includes(currentUser.role)) {
         t.sla.firstResponseAt = new Date().toISOString();
@@ -2582,14 +2668,14 @@
       await updateTicket(currentDetail.kind, t);
       logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
       
+      // ล้างข้อมูลและรูปภาพในช่องกรอกข้อความ
       detailNoteInput.value = ""; 
+      detailNoteStagedAttachments = [];
+      renderDetailNoteStagedAttachments();
       
-      // สั่งให้วาด Notes โชว์บนหน้าจอทันทีที่เพิ่มเสร็จ
       renderDetailNotes(t); 
       renderAll(); 
     });
-
-    
 
     // ================== ADMIN DELETE & BULK ==================
     document.addEventListener("click", async (e) => {
