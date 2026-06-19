@@ -238,6 +238,7 @@
       border-radius: 10px 10px 0 0;
       flex-shrink: 0;
       background: transparent;
+      position: relative;
     }
     .nav-tab:hover {
       background: #f3f4ff;
@@ -370,6 +371,10 @@
       border-radius: 999px;
       font-size: 11px;
       font-weight: 500;
+    }
+    .status-pending-approval {
+      background: #e0e7ff;
+      color: #3730a3;
     }
     .status-open {
       background: #eef2ff;
@@ -727,6 +732,10 @@
 
       <div class="tabs" id="tabs">
         <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
+        <div class="nav-tab" data-target="approve-tasks-section">
+          My Tasks (Approve)
+          <span id="badge-pending-approve" class="badge badge-amber" style="display:none; margin-left:4px; margin-right:0;">0</span>
+        </div>
         <div class="nav-tab" data-target="incident-section">Incidents</div>
         <div class="nav-tab" data-target="request-section">Requests</div>
         <div class="nav-tab" data-target="mytickets-section">My Tickets</div>
@@ -781,6 +790,28 @@
             <div class="muted">
               * SLA breach / auto escalation is checked every 1 minute and on page refresh
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="approve-tasks-section" class="section">
+        <div class="card">
+          <h2>My Tasks (Pending Approval)</h2>
+          <small>รายการตั๋วที่รอการพิจารณาอนุมัติจากคุณ</small>
+          <div class="table-container" style="margin-top: 12px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Type</th>
+                  <th>Subject</th>
+                  <th>Requester</th>
+                  <th>Created At</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="approve-tasks-table-body"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -917,6 +948,7 @@
               <strong>Filter:</strong>
               <select id="incident-status-filter">
                 <option value="">All Status</option>
+                <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Pending User">Pending User</option>
@@ -1101,6 +1133,7 @@
               <strong>Filter:</strong>
              <select id="request-status-filter">
                 <option value="">All Status</option>
+                <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Pending User">Pending User</option>
@@ -1260,6 +1293,7 @@
               <strong>Filter:</strong>
               <select id="admin-status-filter">
                 <option value="">All Status</option>
+                <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Pending User">Pending User</option>
@@ -1409,7 +1443,8 @@
                   <th>Email</th>
                   <th>Role</th>
                   <th>Assign to</th> 
-                  <th>Is Approver</th> <th>Password</th>
+                  <th>Is Approver</th>
+                  <th>Password</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -1485,6 +1520,7 @@
           </div>
           <div class="detail-edit-field">
         <select id="detail-status-select">
+          <option value="Pending Approval">Pending Approval</option>
           <option value="Open">Open</option>
           <option value="In Progress">In Progress</option>
           <option value="Pending User">Pending User</option>
@@ -1650,6 +1686,7 @@
     const badgeTotal = document.getElementById("badge-total");
     const badgeSlaOk = document.getElementById("badge-sla-ok");
     const badgeSlaBreach = document.getElementById("badge-sla-breach");
+    const badgePendingApprove = document.getElementById("badge-pending-approve");
     let typeChart, statusChart;
     
     const incidentForm = document.getElementById("incident-form");
@@ -1676,6 +1713,7 @@
     const requestClearFilter = document.getElementById("request-clear-filter");
 
     const myTicketsBody = document.getElementById("mytickets-table-body");
+    const approveTasksBody = document.getElementById("approve-tasks-table-body");
     const agingRow = document.getElementById("aging-row");
     const resolutionRow = document.getElementById("resolution-row");
     const staffRow = document.getElementById("staff-row");
@@ -1847,6 +1885,7 @@
     }
     function statusClassName(status, escalated) {
       if (escalated) return "status-escalated";
+      if (status === "Pending Approval") return "status-pending-approval";
       if (status === "Open") return "status-open";
       if (status === "In Progress") return "status-in-progress";
       if (status === "Pending User") return "status-pending";
@@ -1855,6 +1894,7 @@
       return "";
     }
     function slaLabel(ticket) {
+      if (ticket.status === "Pending Approval") return "-"; // SLA ยังไม่เริ่มนับถ้ารออนุมัติ
       if (!ticket.sla) return "-";
       const s = ticket.sla;
       if (s.resolutionBreached || s.responseBreached) return "Breach";
@@ -1991,6 +2031,59 @@
         if (targetId === "approver-section") renderApproverTable();
       });
     });
+
+    // ================== APPROVE / REJECT ACTION ==================
+    window.approveTicket = async function(kind, id) {
+      if (!confirm(`ยืนยันการอนุมัติ (Approve) ตั๋ว ${id} ใช่หรือไม่?`)) return;
+      const t = findTicket(kind, id);
+      if (!t) return;
+      
+      t.status = "Open";
+      t.updatedAt = new Date().toISOString();
+      
+      if (!Array.isArray(t.notes)) t.notes = [];
+      t.notes.push({ 
+        text: "✅ อนุมัติคำขอแล้ว (Approved)", 
+        createdAt: new Date().toISOString(), 
+        visibility: "public", 
+        authorId: currentUser.id, 
+        authorName: currentUser.name 
+      });
+
+      await updateTicket(kind, t);
+      logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
+      renderAll();
+      showToast(`Approved ticket ${t.id}`);
+    };
+
+    window.rejectTicket = async function(kind, id) {
+      const reason = prompt(`กรุณาระบุเหตุผลที่ไม่อนุมัติ (Reject) ตั๋ว ${id}:`);
+      if (reason === null) return; 
+      
+      const t = findTicket(kind, id);
+      if (!t) return;
+
+      t.status = "Cancelled";
+      t.updatedAt = new Date().toISOString();
+      
+      if (!Array.isArray(t.notes)) t.notes = [];
+      t.notes.push({ 
+        text: `❌ ไม่อนุมัติคำขอ (Rejected)\nเหตุผล: ${reason}`, 
+        createdAt: new Date().toISOString(), 
+        visibility: "public", 
+        authorId: currentUser.id, 
+        authorName: currentUser.name 
+      });
+
+      if (t.sla && !t.sla.resolvedAt) {
+        t.sla.resolvedAt = new Date().toISOString();
+      }
+
+      await updateTicket(kind, t);
+      logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
+      renderAll();
+      showToast(`Rejected ticket ${t.id}`);
+    };
 
     // ================== ASSIGNMENT & EMAIL ==================
     async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
@@ -2227,7 +2320,7 @@
       const impact = document.getElementById("incident-impact").value;
       const priority = document.getElementById("incident-priority").value;
       const due = document.getElementById("incident-due").value;
-      const approver = document.getElementById("incident-approver").value; // ดึง ID จาก Dropdown
+      const approver = document.getElementById("incident-approver").value; 
       const description = document.getElementById("incident-description").value.trim();
       const reference = document.getElementById("incident-reference").value.trim();
       
@@ -2237,10 +2330,12 @@
       }
       
       const now = new Date().toISOString();
+      const initialStatus = approver ? "Pending Approval" : "Open";
+
       const incident = {
         id: generateId("INC"), type: "Incident", requester, dept, phone, email, system, module, title,
         category, impact, priority, dueDate: due || null, approver, reference, description,
-        status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
+        status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
         attachments: [...incidentStagedAttachments], 
         sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
       };
@@ -2253,7 +2348,7 @@
       renderIncidentStagedAttachments();
 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
-      renderIncidents(); renderDashboard(); renderMyTickets(); renderAdminTable();
+      renderIncidents(); renderDashboard(); renderMyTickets(); renderAdminTable(); renderApproveTasks();
       showToast(`Created Incident ${incident.id}`);
 
       const admin = systemUsers.find(u => u.role === 'admin');
@@ -2279,21 +2374,23 @@
       const category = document.getElementById("request-category").value;
       const impact = document.getElementById("request-impact").value;
       const due = document.getElementById("request-due").value;
-      const approver = document.getElementById("request-approver").value; // ดึง ID จาก Dropdown
+      const approver = document.getElementById("request-approver").value; 
       const reference = document.getElementById("request-ref").value.trim();
       const remark = document.getElementById("request-remark").value.trim();
       const description = document.getElementById("request-description").value.trim();
 
-      if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !approver || !description) {
+      if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !description) {
         alert("Please fill in all required (*) fields.");
         return;
       }
 
       const now = new Date().toISOString();
+      const initialStatus = approver ? "Pending Approval" : "Open";
+
       const req = {
         id: generateId("REQ"), type: "Request", requester, dept, phone, email, system, module, title,
         requestType: type, category, impact, dueDate: due, approver, reference, remark, description,
-        status: "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
+        status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
         attachments: [...requestStagedAttachments], 
         sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
       };
@@ -2306,7 +2403,7 @@
       renderRequestStagedAttachments();
 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
-      renderRequests(); renderDashboard(); renderMyTickets(); renderAdminTable();
+      renderRequests(); renderDashboard(); renderMyTickets(); renderAdminTable(); renderApproveTasks();
       showToast(`Created Request ${req.id}`);
 
       const admin = systemUsers.find(u => u.role === 'admin');
@@ -2380,6 +2477,38 @@
     });
 
     // ================== RENDER FUNCTIONS ==================
+    function renderApproveTasks() {
+      if (!currentUser) return;
+      approveTasksBody.innerHTML = "";
+      
+      const all = [...incidents, ...requests].filter(t => t.status === "Pending Approval" && t.approver === currentUser.id);
+      
+      if (all.length > 0) {
+        badgePendingApprove.textContent = all.length;
+        badgePendingApprove.style.display = "inline-flex";
+      } else {
+        badgePendingApprove.style.display = "none";
+      }
+
+      all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
+        const tr = document.createElement("tr");
+        const kind = t.type === "Incident" ? "incident" : "request";
+        tr.innerHTML = `
+          <td>${t.id}</td>
+          <td>${t.type}</td>
+          <td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td>
+          <td>${t.requester}</td>
+          <td>${formatDateTime(t.createdAt)}</td>
+          <td>
+            <button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button>
+            <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button>
+            <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button>
+          </td>
+        `;
+        approveTasksBody.appendChild(tr);
+      });
+    }
+
     function renderDashboard() {
       const incidentCount = incidents.length;
       const requestCount = requests.length;
@@ -2390,6 +2519,7 @@
       badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`;
       badgeSlaOk.textContent = `SLA Met: ${slaOk}`;
       badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
+      
       const statusOpen = all.filter(t => t.status === "Open").length;
       const statusInProgress = all.filter(t => t.status === "In Progress").length;
       const statusPending = all.filter(t => t.status === "Pending User").length;
@@ -2502,7 +2632,7 @@
           const tr = document.createElement("tr");
           const cls = statusClassName(t.status, t.sla && t.sla.escalated);
           const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-";
-          const slaHtml = t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-";
+          const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-");
           const kind = t.type === "Incident" ? "incident" : "request";
           tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${t.priority || "-"}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
@@ -2602,7 +2732,6 @@
       detailRequesterDeptSpan.textContent = `${t.requester || "-"}${t.dept ? " / " + t.dept : ""}`;
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
       
-      // ดึงชื่อ Approver มาโชว์ ถ้ามี ID ให้แปลงเป็นชื่อ ถ้าไม่มีให้โชว์ text เดิม
       const approverName = getUserName(t.approver);
       detailApproverSpan.textContent = approverName ? approverName : (t.approver || "-");
       
@@ -2639,7 +2768,7 @@
       }
       
       if (t.sla) {
-        if (t.status !== "Open" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
+        if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
         if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
       }
       t.updatedAt = new Date().toISOString();
@@ -2891,7 +3020,7 @@
       const now = new Date();
       let changed = false;
       all.forEach(t => {
-        if (!t.sla) return;
+        if (!t.sla || t.status === "Pending Approval") return; 
         const sla = t.sla;
         const resDue = new Date(sla.resolutionDueAt);
         const respDue = new Date(sla.responseDueAt);
@@ -2912,8 +3041,13 @@
     }
 
     function renderAll() { 
-      renderIncidents(); renderRequests(); renderMyTickets(); 
-      renderDashboard(); renderAdminTable(); renderKB();
+      renderIncidents(); 
+      renderRequests(); 
+      renderMyTickets(); 
+      renderDashboard(); 
+      renderAdminTable(); 
+      renderApproveTasks();
+      renderKB();
     }
 
     [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch].forEach(el => el.addEventListener("input", renderIncidents));
