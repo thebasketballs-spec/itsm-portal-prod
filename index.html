@@ -554,7 +554,7 @@
       list-style: none;
       padding-left: 0;
       margin: 0;
-      max-height: 240px; /* เพิ่มความสูงให้เห็นรูปชัดขึ้น */
+      max-height: 240px;
       overflow: auto;
     }
     .notes-list li {
@@ -735,6 +735,7 @@
         <div class="nav-tab" data-target="audit-section" data-roles="admin,manager">Audit Log</div>
         <div class="nav-tab" data-target="kb-section">Knowledge Base</div>
         <div class="nav-tab" data-target="user-section" data-roles="admin">User Management</div>
+        <div class="nav-tab" data-target="approver-section" data-roles="admin">Approvers</div>
       </div>
 
       <div id="dashboard-section" class="section active">
@@ -873,7 +874,9 @@
                 </div>
                 <div class="form-group">
                   <label>Approver (optional)</label>
-                  <input type="text" id="incident-approver" />
+                  <select id="incident-approver">
+                    <option value="">-- Select Approver --</option>
+                  </select>
                 </div>
               </div>
 
@@ -1054,8 +1057,10 @@
                   <input type="date" id="request-due" required />
                 </div>
                 <div class="form-group">
-                  <label>Approver *</label>
-                  <input type="text" id="request-approver" required />
+                  <label>Approver (optional)</label>
+                  <select id="request-approver">
+                    <option value="">-- Select Approver --</option>
+                  </select>
                 </div>
               </div>
               <div class="form-row">
@@ -1378,6 +1383,10 @@
                 <label>Assign to</label>
                 <input type="checkbox" id="user-assign-to" style="width: 20px; height: 20px; margin-top: 6px;" />
               </div>
+              <div class="form-group" style="align-items: flex-start;">
+                <label>Is Approver?</label>
+                <input type="checkbox" id="user-is-approver" style="width: 20px; height: 20px; margin-top: 6px;" />
+              </div>
               <div class="form-group">
                 <label>Password *</label>
                 <input type="text" id="user-password" required />
@@ -1400,11 +1409,31 @@
                   <th>Email</th>
                   <th>Role</th>
                   <th>Assign to</th> 
-                  <th>Password</th>
+                  <th>Is Approver</th> <th>Password</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody id="user-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="approver-section" class="section">
+        <div class="card">
+          <h2>Approver Management</h2>
+          <small>จัดการสิทธิ์ผู้อนุมัติ (ติ๊กถูกเพื่อให้รายชื่อไปแสดงใน Dropdown 'Approver' ตอนเปิดตั๋ว)</small>
+          <div class="table-container" style="margin-top: 12px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>User ID</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th style="text-align:center;">Is Approver?</th>
+                </tr>
+              </thead>
+              <tbody id="approver-table-body"></tbody>
             </table>
           </div>
         </div>
@@ -1570,7 +1599,7 @@
     let currentUser = null;
     let currentDetail = null;
     let editingUserIndex = -1;
-    let detailNoteStagedAttachments = []; // Array เก็บรูปสำหรับโน้ตใหม่
+    let detailNoteStagedAttachments = []; 
 
     // Constants
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
@@ -1610,7 +1639,7 @@
     
     const detailNotesList = document.getElementById("detail-notes-list");
     const detailNoteInput = document.getElementById("detail-note-input");
-    const detailNoteStagedList = document.getElementById("detail-note-staged-attachments"); // Element โชว์รูปโน้ต
+    const detailNoteStagedList = document.getElementById("detail-note-staged-attachments"); 
     const detailAddNoteBtn = document.getElementById("detail-add-note-btn");
     
     const detailAttachmentsList = document.getElementById("detail-attachments-list");
@@ -1668,6 +1697,8 @@
     const userSubmitBtn = document.getElementById("user-submit-btn");
     const userCancelBtn = document.getElementById("user-cancel-btn");
 
+    const approverTableBody = document.getElementById("approver-table-body");
+
     const kbSearch = document.getElementById("kb-search");
     const kbList = document.getElementById("kb-list");
     const KB_ENTRIES = [
@@ -1705,10 +1736,10 @@
         
         if (systemUsers.length === 0) {
           const defaultUsers = [
-            { id: "admin", name: "Admin", role: "admin", email: "admin@example.com", password: "12345", assignTo: false },
-            { id: "mgr1", name: "Manager A", role: "manager", email: "manager@example.com", password: "12345", assignTo: true },
-            { id: "sup1", name: "Support 1", role: "support", email: "support1@example.com", password: "12345", assignTo: true },
-            { id: "user1", name: "User 1", role: "user", email: "user1@example.com", password: "12345", assignTo: false }
+            { id: "admin", name: "Admin", role: "admin", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true },
+            { id: "mgr1", name: "Manager A", role: "manager", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true },
+            { id: "sup1", name: "Support 1", role: "support", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false },
+            { id: "user1", name: "User 1", role: "user", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false }
           ];
           for (let u of defaultUsers) {
             await dbAdd("users", u);
@@ -1849,6 +1880,43 @@
       });
     }
 
+    // ================== APPROVER DROPDOWN ==================
+    function populateApproverDropdowns() {
+      const incidentApp = document.getElementById("incident-approver");
+      const requestApp = document.getElementById("request-approver");
+      const approvers = systemUsers.filter(u => u.isApprover === true);
+      
+      let html = '<option value="">-- Select Approver --</option>';
+      approvers.forEach(u => {
+        html += `<option value="${u.id}">${u.name} (${u.role})</option>`;
+      });
+
+      if(incidentApp) incidentApp.innerHTML = html;
+      if(requestApp) requestApp.innerHTML = html;
+    }
+
+    function renderApproverTable() {
+      approverTableBody.innerHTML = "";
+      systemUsers.forEach((u, i) => {
+        const tr = document.createElement("tr");
+        const checked = u.isApprover ? "checked" : "";
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.role}</td>
+        <td style="text-align:center;">
+          <input type="checkbox" onchange="window.toggleApprover(${i}, this.checked)" ${checked} style="width:18px;height:18px; cursor:pointer;" />
+        </td>`;
+        approverTableBody.appendChild(tr);
+      });
+    }
+
+    window.toggleApprover = async function(index, isApproverChecked) {
+      const u = systemUsers[index];
+      u.isApprover = isApproverChecked;
+      await dbUpdate("users", u.firebaseId, u);
+      populateApproverDropdowns();
+      renderUserTable();
+      showToast(`อัปเดตสิทธิ์ Approver สำหรับ ${u.name} เรียบร้อย`);
+    };
+
     // ================== LOGIN ==================
     function initLogin() {
       loginUserSelect.innerHTML = "";
@@ -1886,6 +1954,7 @@
         }
       });
       populateAssigneeDropdowns();
+      populateApproverDropdowns();
       renderAll();
     }
     loginBtn.addEventListener("click", () => {
@@ -1919,6 +1988,7 @@
         if (targetId === "admin-section") renderAdminTable();
         if (targetId === "audit-section") renderAuditLog();
         if (targetId === "mytickets-section") renderMyTickets();
+        if (targetId === "approver-section") renderApproverTable();
       });
     });
 
@@ -2157,7 +2227,7 @@
       const impact = document.getElementById("incident-impact").value;
       const priority = document.getElementById("incident-priority").value;
       const due = document.getElementById("incident-due").value;
-      const approver = document.getElementById("incident-approver").value.trim();
+      const approver = document.getElementById("incident-approver").value; // ดึง ID จาก Dropdown
       const description = document.getElementById("incident-description").value.trim();
       const reference = document.getElementById("incident-reference").value.trim();
       
@@ -2209,7 +2279,7 @@
       const category = document.getElementById("request-category").value;
       const impact = document.getElementById("request-impact").value;
       const due = document.getElementById("request-due").value;
-      const approver = document.getElementById("request-approver").value.trim();
+      const approver = document.getElementById("request-approver").value; // ดึง ID จาก Dropdown
       const reference = document.getElementById("request-ref").value.trim();
       const remark = document.getElementById("request-remark").value.trim();
       const description = document.getElementById("request-description").value.trim();
@@ -2274,7 +2344,7 @@
       ];
       const rows = [header, ...incidents.map(i => [
         i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module, i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "",
-        i.approver, i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt),
+        getUserName(i.approver) || i.approver, i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt),
         i.sla ? formatDateTime(i.sla.responseDueAt) : "", i.sla ? formatDateTime(i.sla.resolutionDueAt) : "", i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "",
         i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "", i.sla ? i.sla.responseBreached : "", i.sla ? i.sla.resolutionBreached : ""
       ])];
@@ -2288,7 +2358,7 @@
       ];
       const rows = [header, ...requests.map(r => [
         r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "",
-        r.approver,r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt),
+        getUserName(r.approver) || r.approver,r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt),
         r.sla ? formatDateTime(r.sla.responseDueAt) : "", r.sla ? formatDateTime(r.sla.resolutionDueAt) : "", r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "",
         r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "", r.sla ? r.sla.responseBreached : "", r.sla ? r.sla.resolutionBreached : ""
       ])];
@@ -2482,7 +2552,6 @@
         const isInternal = n.visibility === "internal";
         const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
         
-        // ประมวลผลรูปภาพที่ถูกแนบมาในโน้ตเพื่อแสดงผล
         let attachHtml = "";
         if (n.attachments && n.attachments.length > 0) {
           attachHtml = `<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">`;
@@ -2532,10 +2601,13 @@
       detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
       detailRequesterDeptSpan.textContent = `${t.requester || "-"}${t.dept ? " / " + t.dept : ""}`;
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
-      detailApproverSpan.textContent = t.approver || "-";
+      
+      // ดึงชื่อ Approver มาโชว์ ถ้ามี ID ให้แปลงเป็นชื่อ ถ้าไม่มีให้โชว์ text เดิม
+      const approverName = getUserName(t.approver);
+      detailApproverSpan.textContent = approverName ? approverName : (t.approver || "-");
+      
       detailDescriptionInput.value = t.description || "";
       
-      // ล้างรูปภาพเก่าที่ค้างอยู่ตรงช่องแนบรูปภาพโน้ต ก่อนเปิด Modal ตัวใหม่
       detailNoteStagedAttachments = [];
       renderDetailNoteStagedAttachments();
 
@@ -2637,13 +2709,11 @@
       renderDetailNoteStagedAttachments();
     };
 
-    // การบันทึก Note พ่วงรูปภาพ
     detailAddNoteBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
       const t = findTicket(currentDetail.kind, currentDetail.id);
       const text = detailNoteInput.value.trim();
       
-      // จะยอมให้ Submit ได้ถ้ามีข้อความ "หรือ" มีรูปภาพถูกแปะไว้อย่างใดอย่างหนึ่ง
       if (!text && detailNoteStagedAttachments.length === 0) return;
       if (!t) return;
       
@@ -2657,7 +2727,7 @@
         visibility, 
         authorId: currentUser.id, 
         authorName: currentUser.name,
-        attachments: [...detailNoteStagedAttachments] // นำรูปภาพที่ค้างไว้ ยัดใส่เข้าไปด้วย
+        attachments: [...detailNoteStagedAttachments]
       });
       
       if (t.sla && !t.sla.firstResponseAt && ["support", "admin", "manager"].includes(currentUser.role)) {
@@ -2668,7 +2738,6 @@
       await updateTicket(currentDetail.kind, t);
       logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
       
-      // ล้างข้อมูลและรูปภาพในช่องกรอกข้อความ
       detailNoteInput.value = ""; 
       detailNoteStagedAttachments = [];
       renderDetailNoteStagedAttachments();
@@ -2731,8 +2800,9 @@
       userTableBody.innerHTML = "";
       systemUsers.forEach((u, i) => {
         const assignDisplay = u.assignTo ? '<span style="color:green; font-size:1.2em;">✅</span>' : '-';
+        const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td>${u.password}</td>
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td>${u.password}</td>
         <td><button class="btn-small btn-secondary" onclick="window.editUser(${i})">Edit</button> <button class="btn-small btn-danger" onclick="window.deleteUser(${i})">Delete</button></td>`;
         userTableBody.appendChild(tr);
       });
@@ -2745,25 +2815,28 @@
       const email = document.getElementById("user-email").value.trim();
       const role = document.getElementById("user-role").value;
       const assignTo = document.getElementById("user-assign-to").checked;
+      const isApprover = document.getElementById("user-is-approver").checked;
       const password = document.getElementById("user-password").value.trim();
 
       if (!id || !name || !email || !role || !password) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
 
       if (editingUserIndex > -1) {
         const u = systemUsers[editingUserIndex];
-        u.name = name; u.email = email; u.role = role; u.assignTo = assignTo; u.password = password;
+        u.name = name; u.email = email; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.password = password;
         await dbUpdate("users", u.firebaseId, u);
         alert("แก้ไขข้อมูลสำเร็จ!");
         resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("User ID นี้ถูกใช้แล้ว"); return; }
-        const newUser = { id, name, email, role, assignTo, password };
+        const newUser = { id, name, email, role, assignTo, isApprover, password };
         await dbAdd("users", newUser);
         systemUsers.push(newUser);
         alert("เพิ่มผู้ใช้สำเร็จ!");
         userForm.reset();
       }
-      renderUserTable(); populateAssigneeDropdowns();
+      populateApproverDropdowns();
+      renderUserTable(); 
+      renderApproverTable();
     });
 
     window.editUser = function(index) {
@@ -2774,6 +2847,7 @@
       document.getElementById("user-email").value = u.email;
       document.getElementById("user-role").value = u.role;
       document.getElementById("user-assign-to").checked = u.assignTo === true; 
+      document.getElementById("user-is-approver").checked = u.isApprover === true;
       document.getElementById("user-password").value = u.password || "";
       document.getElementById("user-id").readOnly = true;
       userSubmitBtn.textContent = "Update User";
@@ -2789,7 +2863,9 @@
       else if (editingUserIndex > index) editingUserIndex--;
       
       systemUsers.splice(index, 1);
-      renderUserTable(); populateAssigneeDropdowns();
+      populateApproverDropdowns();
+      renderUserTable(); 
+      renderApproverTable();
     };
 
     function resetUserForm() {
