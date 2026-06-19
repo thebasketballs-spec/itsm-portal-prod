@@ -880,6 +880,14 @@
               <div class="form-group">
                 <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
                 <textarea id="incident-description" required placeholder="พิมพ์รายละเอียดปัญหา และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+                
+                <div style="margin-top: 8px;">
+                  <label for="incident-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
+                    📎 แนบไฟล์ (Attach Files)
+                  </label>
+                  <input type="file" id="incident-file-input" multiple style="display: none;" />
+                </div>
+
                 <ul class="attachments-list" id="incident-staged-attachments" style="margin-top: 8px;"></ul>
               </div>
 
@@ -1987,7 +1995,42 @@
       incidentStagedAttachments.splice(index, 1);
       renderIncidentStagedAttachments();
     };
+// ================== ATTACH FILE IN INCIDENT FORM ==================
+    const incidentFileInput = document.getElementById("incident-file-input");
+    
+    incidentFileInput.addEventListener("change", (e) => {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
 
+      Array.from(files).forEach(file => {
+        // เช็คขนาดไฟล์ (จำกัด 500KB ตามที่คุณตั้งค่าไว้เพื่อไม่ให้ Database เต็ม)
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+          showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 500KB)`);
+          return;
+        }
+        // เช็คจำนวนไฟล์สูงสุด
+        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
+          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          incidentStagedAttachments.push({
+            id: `${Date.now()}-${Math.random()}`,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            dataUrl: evt.target.result
+          });
+          renderIncidentStagedAttachments();
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      // ล้างค่า input เพื่อให้สามารถกดเลือกไฟล์เดิมซ้ำได้ในกรณีที่เผลอลบทิ้งไป
+      incidentFileInput.value = "";
+    });
     // ================== PASTE IMAGE IN REQUEST FORM ==================
     let requestStagedAttachments = [];
     const requestDescInput = document.getElementById("request-description");
