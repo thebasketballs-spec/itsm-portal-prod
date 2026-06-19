@@ -2361,6 +2361,7 @@
     }
 
     // ================== DETAIL MODAL & UPDATING TICKETS ==================
+// ================== DETAIL MODAL & UPDATING TICKETS ==================
     function findTicket(kind, id) { 
       return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id);
     }
@@ -2375,6 +2376,50 @@
         const idx = requests.findIndex(r => r.id === ticket.id);
         if (idx >= 0) requests[idx] = ticket;
       }
+    }
+
+    // --- 1. ฟังก์ชันนำ Notes มาวาดลงบนหน้าจอ Modal ---
+    function renderDetailNotes(t) {
+      detailNotesList.innerHTML = "";
+      if (!t.notes || !t.notes.length) return;
+      
+      // กรองไม่ให้ User ธรรมดาเห็น Internal Note
+      const visibleNotes = t.notes.filter(n => {
+        if (n.visibility === "internal") {
+          return currentUser && ["admin", "manager", "support"].includes(currentUser.role);
+        }
+        return true;
+      });
+
+      visibleNotes.forEach(n => {
+        const li = document.createElement("li");
+        const isInternal = n.visibility === "internal";
+        const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
+        li.innerHTML = `
+          <div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div>
+          <div style="line-height:1.4;">${n.text}</div>
+        `;
+        detailNotesList.appendChild(li);
+      });
+    }
+
+    // --- 2. ฟังก์ชันนำรูปภาพมาวาดลงบนหน้าจอ Modal ---
+    function renderDetailAttachments(t) {
+      detailAttachmentsList.innerHTML = "";
+      if (!t.attachments || !t.attachments.length) return;
+      
+      t.attachments.forEach(a => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${a.dataUrl}" class="attachment-preview" />
+          <div style="flex:1;">
+            <div><strong>${a.name}</strong></div>
+            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <a href="${a.dataUrl}" download="${a.name}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>
+        `;
+        detailAttachmentsList.appendChild(li);
+      });
     }
 
     function openDetail(kind, id) {
@@ -2392,8 +2437,11 @@
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
       detailApproverSpan.textContent = t.approver || "-";
       detailDescriptionInput.value = t.description || "";
-      detailNotesList.innerHTML = "";
-      detailAttachmentsList.innerHTML = "";
+      
+      // เรียกใช้ฟังก์ชันเพื่อให้วาด Notes และรูปภาพที่ซ่อนอยู่ ขึ้นมาโชว์ตอนเปิด Modal
+      renderDetailNotes(t);
+      renderDetailAttachments(t);
+      
       detailBackdrop.classList.add("active");
     }
 
@@ -2447,8 +2495,15 @@
       
       await updateTicket(currentDetail.kind, t);
       logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
-      detailNoteInput.value = ""; renderAll(); 
+      
+      detailNoteInput.value = ""; 
+      
+      // สั่งให้วาด Notes โชว์บนหน้าจอทันทีที่เพิ่มเสร็จ
+      renderDetailNotes(t); 
+      renderAll(); 
     });
+
+    
 
     // ================== ADMIN DELETE & BULK ==================
     document.addEventListener("click", async (e) => {
