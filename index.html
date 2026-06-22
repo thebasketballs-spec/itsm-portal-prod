@@ -2574,7 +2574,7 @@
       const approver = document.getElementById("request-approver").value; 
       const ccEmails = document.getElementById("request-cc").value.trim();
       const reference = document.getElementById("request-ref").value.trim();
-      const remark = document.getElementById("request-remark").value.trim();
+      const remark = document.getElementById("request-remark")?.value.trim() || "";
       const description = document.getElementById("request-description").value.trim();
 
       if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !description) {
