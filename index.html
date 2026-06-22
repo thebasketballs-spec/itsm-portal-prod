@@ -143,7 +143,7 @@
       color: var(--banpu-muted);
     }
 
-    /* STICKY HEADER & TABS (อัปเกรด UX) */
+    /* STICKY HEADER & TABS */
     .sticky-header-container {
       position: sticky;
       top: 0;
@@ -842,11 +842,13 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Requester *</label>
-                  <input type="text" id="incident-requester" required placeholder="ชื่อผู้แจ้ง..." />
+                  <select id="incident-requester" required>
+                    <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label>Department *</label>
-                  <input type="text" id="incident-dept" required placeholder="แผนก..." />
+                  <input type="text" id="incident-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
@@ -856,7 +858,7 @@
                 </div>
                 <div class="form-group">
                   <label>Email *</label>
-                  <input type="email" id="incident-email" required placeholder="อีเมล..." />
+                  <input type="email" id="incident-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
@@ -1039,11 +1041,13 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Requester *</label>
-                  <input type="text" id="request-requester" required placeholder="ชื่อผู้แจ้ง..." />
+                  <select id="request-requester" required>
+                    <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
+                  </select>
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                   <label>Department *</label>
-                  <input type="text" id="request-dept" required placeholder="แผนก..." />
+                  <input type="text" id="request-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
@@ -1053,7 +1057,7 @@
                 </div>
                 <div class="form-group">
                   <label>Email *</label>
-                  <input type="email" id="request-email" required placeholder="อีเมล..." />
+                  <input type="email" id="request-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
@@ -1411,7 +1415,7 @@
       <div id="user-section" class="section">
         <div class="card">
           <h2>User Management</h2>
-          <small>สร้าง / ลบ / แก้ไข User</small>
+          <small>สร้าง / ลบ / แก้ไข User พร้อมกำหนดสิทธิ์รายบุคคล</small>
           <form id="user-form" style="margin-top: 10px;">
             <div class="form-row">
               <div class="form-group">
@@ -1429,6 +1433,10 @@
             </div>
             <div class="form-row">
               <div class="form-group">
+                <label>Department *</label>
+                <input type="text" id="user-dept" required placeholder="เช่น Finance, IT, Accounting..." />
+              </div>
+              <div class="form-group">
                 <label>Role *</label>
                 <select id="user-role" required>
                   <option value="">-- Select --</option>
@@ -1438,21 +1446,26 @@
                   <option value="user">User</option>
                 </select>
               </div>
-              <div class="form-group" style="align-items: flex-start;">
-                <label>Assign to</label>
-                <input type="checkbox" id="user-assign-to" style="width: 20px; height: 20px; margin-top: 6px;" />
-              </div>
-              <div class="form-group" style="align-items: flex-start;">
-                <label>Is Approver?</label>
-                <input type="checkbox" id="user-is-approver" style="width: 20px; height: 20px; margin-top: 6px;" />
-              </div>
               <div class="form-group">
                 <label>Password *</label>
                 <input type="text" id="user-password" required />
               </div>
             </div>
             
-            <div class="form-row">
+            <div class="form-row" style="background:#f9fafb; padding:10px 14px; border-radius:8px; border:1px solid #e5e7eb; gap:18px; align-items:center;">
+              <span style="font-weight:600; font-size:12px; color:#374151;">กำหนดสิทธิ์:</span>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="user-assign-to" style="width:16px; height:16px;" /> เป็น IT Support (รับตั๋วได้)
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="user-is-approver" style="width:16px; height:16px;" /> เป็น Approver (อนุมัติตั๋วได้)
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> เป็น Requester (เปิดตั๋วได้)
+              </label>
+            </div>
+            
+            <div class="form-row" style="margin-top:10px;">
               <div style="display:flex; gap:6px;">
                 <button class="btn btn-small" type="submit" id="user-submit-btn">Add User</button>
                 <button class="btn btn-small btn-secondary" type="button" id="user-cancel-btn" style="display:none;">Cancel</button>
@@ -1465,10 +1478,12 @@
                 <tr>
                   <th>User ID</th>
                   <th>Name</th>
+                  <th>Department</th>
                   <th>Email</th>
                   <th>Role</th>
-                  <th>Assign to</th> 
-                  <th>Is Approver</th>
+                  <th style="text-align:center;">Support?</th> 
+                  <th style="text-align:center;">Approver?</th>
+                  <th style="text-align:center;">Requester?</th>
                   <th>Password</th>
                   <th>Action</th>
                 </tr>
@@ -1855,10 +1870,10 @@
         
         if (systemUsers.length === 0) {
           const defaultUsers = [
-            { id: "admin", name: "Admin", role: "admin", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true },
-            { id: "mgr1", name: "Manager A", role: "manager", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true },
-            { id: "sup1", name: "Support 1", role: "support", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false },
-            { id: "user1", name: "User 1", role: "user", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false }
+            { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
+            { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true },
+            { id: "sup1", name: "Support 1", role: "support", department: "IT Helpdesk", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false, isRequester: true },
+            { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true }
           ];
           for (let u of defaultUsers) {
             await dbAdd("users", u);
@@ -2047,6 +2062,61 @@
       showToast(`อัปเดตสิทธิ์ Approver สำหรับ ${u.name} เรียบร้อย`);
     };
 
+    // ================== REQUESTER DROPDOWNS & AUTO-FILL ==================
+    function populateRequesterDropdowns() {
+      const incReqSelect = document.getElementById("incident-requester");
+      const reqReqSelect = document.getElementById("request-requester");
+      
+      // ดึงคนที่มีสิทธิ์เป็น Requester (รวมถึงคนเก่าที่ค่าเป็น undefined)
+      const requesters = systemUsers.filter(u => u.isRequester !== false);
+      
+      let html = '<option value="">-- เลือกผู้แจ้ง (Requester) --</option>';
+      requesters.forEach(u => {
+        html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'ไม่ระบุแผนก'})</option>`;
+      });
+
+      if (incReqSelect) incReqSelect.innerHTML = html;
+      if (reqReqSelect) reqReqSelect.innerHTML = html;
+    }
+
+    function setupRequesterAutoFill(selectId, deptInputId, emailInputId) {
+      const selectEl = document.getElementById(selectId);
+      const deptEl = document.getElementById(deptInputId);
+      const emailEl = document.getElementById(emailInputId);
+      if (!selectEl || !deptEl || !emailEl) return;
+
+      selectEl.addEventListener("change", (e) => {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        if (!selectedOption || !selectedOption.value) {
+          deptEl.value = ""; emailEl.value = "";
+          return;
+        }
+        deptEl.value = selectedOption.getAttribute("data-dept") || "";
+        emailEl.value = selectedOption.getAttribute("data-email") || "";
+      });
+    }
+    setupRequesterAutoFill("incident-requester", "incident-dept", "incident-email");
+    setupRequesterAutoFill("request-requester", "request-dept", "request-email");
+
+    function applyRequesterUserLock() {
+      if (!currentUser) return;
+      const incReqEl = document.getElementById("incident-requester");
+      const incDeptEl = document.getElementById("incident-dept");
+      const incEmailEl = document.getElementById("incident-email");
+
+      const reqReqEl = document.getElementById("request-requester");
+      const reqDeptEl = document.getElementById("request-dept");
+      const reqEmailEl = document.getElementById("request-email");
+
+      if (currentUser.role === "user") {
+        if (incReqEl) { incReqEl.value = currentUser.name; incReqEl.disabled = true; if(incDeptEl) incDeptEl.value = currentUser.department || ""; if(incEmailEl) incEmailEl.value = currentUser.email || ""; }
+        if (reqReqEl) { reqReqEl.value = currentUser.name; reqReqEl.disabled = true; if(reqDeptEl) reqDeptEl.value = currentUser.department || ""; if(reqEmailEl) reqEmailEl.value = currentUser.email || ""; }
+      } else {
+        if (incReqEl) { incReqEl.disabled = false; incReqEl.value = ""; if(incDeptEl) incDeptEl.value = ""; if(incEmailEl) incEmailEl.value = ""; }
+        if (reqReqEl) { reqReqEl.disabled = false; reqReqEl.value = ""; if(reqDeptEl) reqDeptEl.value = ""; if(reqEmailEl) reqEmailEl.value = ""; }
+      }
+    }
+
     // ================== LOGIN ==================
     function initLogin() {
       loginUserSelect.innerHTML = "";
@@ -2084,26 +2154,11 @@
         }
       });
       
-      // Auto-fill Requester info based on Role
-      const incReqEl = document.getElementById("incident-requester");
-      const incEmailEl = document.getElementById("incident-email");
-      const reqReqEl = document.getElementById("request-requester");
-      const reqEmailEl = document.getElementById("request-email");
-
-      if (user && user.role === "user") {
-        if(incReqEl) { incReqEl.value = user.name; incReqEl.readOnly = true; incReqEl.style.background = "#f3f4f6"; }
-        if(incEmailEl) { incEmailEl.value = user.email; incEmailEl.readOnly = true; incEmailEl.style.background = "#f3f4f6"; }
-        if(reqReqEl) { reqReqEl.value = user.name; reqReqEl.readOnly = true; reqReqEl.style.background = "#f3f4f6"; }
-        if(reqEmailEl) { reqEmailEl.value = user.email; reqEmailEl.readOnly = true; reqEmailEl.style.background = "#f3f4f6"; }
-      } else {
-        if(incReqEl) { incReqEl.readOnly = false; incReqEl.style.background = "#ffffff"; }
-        if(incEmailEl) { incEmailEl.readOnly = false; incEmailEl.style.background = "#ffffff"; }
-        if(reqReqEl) { reqReqEl.readOnly = false; reqReqEl.style.background = "#ffffff"; }
-        if(reqEmailEl) { reqEmailEl.readOnly = false; reqEmailEl.style.background = "#ffffff"; }
-      }
-
       populateAssigneeDropdowns();
       populateApproverDropdowns();
+      populateRequesterDropdowns(); // เติม Dropdown Requester
+      applyRequesterUserLock();     // ทำการล็อกหรือ Auto-fill ตาม Role
+
       renderAll();
     }
     loginBtn.addEventListener("click", () => {
@@ -2422,7 +2477,7 @@
     // ================== CREATING TICKETS ==================
     incidentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const requester = document.getElementById("incident-requester").value.trim();
+      const requester = document.getElementById("incident-requester").value;
       const dept = document.getElementById("incident-dept").value.trim();
       const phone = document.getElementById("incident-phone").value.trim();
       const email = document.getElementById("incident-email").value.trim();
@@ -2460,6 +2515,7 @@
       incidentForm.reset();
       incidentStagedAttachments = [];
       renderIncidentStagedAttachments();
+      applyRequesterUserLock(); // คืนค่าล็อกหรือข้อมูลผู้แจ้งหลังล้างฟอร์ม
 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
       renderAll();
@@ -2478,7 +2534,7 @@
 
     requestForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const requester = document.getElementById("request-requester").value.trim();
+      const requester = document.getElementById("request-requester").value;
       const dept = document.getElementById("request-dept").value.trim();
       const phone = document.getElementById("request-phone").value.trim();
       const email = document.getElementById("request-email").value.trim();
@@ -2517,6 +2573,7 @@
       requestForm.reset();
       requestStagedAttachments = [];
       renderRequestStagedAttachments();
+      applyRequesterUserLock(); // คืนค่าล็อกหรือข้อมูลผู้แจ้งหลังล้างฟอร์ม
 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
       renderAll();
@@ -2846,7 +2903,7 @@
       
       detailDescriptionInput.value = t.description || "";
       
-      // จัดการแบนเนอร์ยืนยันปิดตั๋ว (2-Step Closing)
+      // 2-Step Closing banner trigger
       const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
       const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
       
@@ -2915,7 +2972,6 @@
         await assignTicket(t, newAssignee, true); 
       }
       
-      // 2-step closing note tracking
       if (t.status === "Resolved" && oldStatus !== "Resolved") {
         if(!Array.isArray(t.notes)) t.notes = [];
         t.notes.push({
@@ -3098,8 +3154,9 @@
       systemUsers.forEach((u, i) => {
         const assignDisplay = u.assignTo ? '<span style="color:green; font-size:1.2em;">✅</span>' : '-';
         const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
+        const requesterDisplay = u.isRequester !== false ? '<span style="color:purple; font-size:1.2em;">✅</span>' : '-';
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td>${u.password}</td>
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.password}</td>
         <td><button class="btn-small btn-secondary" onclick="window.editUser(${i})">Edit</button> <button class="btn-small btn-danger" onclick="window.deleteUser(${i})">Delete</button></td>`;
         userTableBody.appendChild(tr);
       });
@@ -3110,28 +3167,31 @@
       const id = document.getElementById("user-id").value.trim();
       const name = document.getElementById("user-name").value.trim();
       const email = document.getElementById("user-email").value.trim();
+      const department = document.getElementById("user-dept").value.trim();
       const role = document.getElementById("user-role").value;
       const assignTo = document.getElementById("user-assign-to").checked;
       const isApprover = document.getElementById("user-is-approver").checked;
+      const isRequester = document.getElementById("user-is-requester").checked;
       const password = document.getElementById("user-password").value.trim();
 
-      if (!id || !name || !email || !role || !password) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
+      if (!id || !name || !email || !role || !password || !department) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
 
       if (editingUserIndex > -1) {
         const u = systemUsers[editingUserIndex];
-        u.name = name; u.email = email; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.password = password;
+        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;
         await dbUpdate("users", u.firebaseId, u);
         alert("แก้ไขข้อมูลสำเร็จ!");
         resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("User ID นี้ถูกใช้แล้ว"); return; }
-        const newUser = { id, name, email, role, assignTo, isApprover, password };
+        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password };
         await dbAdd("users", newUser);
         systemUsers.push(newUser);
         alert("เพิ่มผู้ใช้สำเร็จ!");
         userForm.reset();
       }
       populateApproverDropdowns();
+      populateRequesterDropdowns();
       renderAll(); 
     });
 
@@ -3141,9 +3201,11 @@
       document.getElementById("user-id").value = u.id;
       document.getElementById("user-name").value = u.name;
       document.getElementById("user-email").value = u.email;
+      document.getElementById("user-dept").value = u.department || "";
       document.getElementById("user-role").value = u.role;
       document.getElementById("user-assign-to").checked = u.assignTo === true; 
       document.getElementById("user-is-approver").checked = u.isApprover === true;
+      document.getElementById("user-is-requester").checked = u.isRequester !== false;
       document.getElementById("user-password").value = u.password || "";
       document.getElementById("user-id").readOnly = true;
       userSubmitBtn.textContent = "Update User";
@@ -3160,6 +3222,7 @@
       
       systemUsers.splice(index, 1);
       populateApproverDropdowns();
+      populateRequesterDropdowns();
       renderAll(); 
     };
 
@@ -3168,6 +3231,7 @@
       document.getElementById("user-id").readOnly = false;
       userSubmitBtn.textContent = "Add User";
       userCancelBtn.style.display = "none";
+      document.getElementById("user-is-requester").checked = true;
     }
 
     // ================== OTHER UTILS ==================
