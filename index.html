@@ -1269,7 +1269,7 @@
       </div>
 
       <div id="admin-section" class="section">
-        <div class="grid">
+        <div>
           <div class="card">
             <div class="flex-between">
               <div>
@@ -1329,7 +1329,6 @@
               * Auto Escalation: when SLA breach is detected, ticket is marked as Escalated and an Audit Log entry is created.
             </div>
           </div>
-         
         </div>
       </div>
   
@@ -1733,7 +1732,6 @@
 
     const exportIncBtn = document.getElementById("btn-export-inc");
     const exportReqBtn = document.getElementById("btn-export-req");
-    
 
     // ================== FIREBASE HELPERS ==================
     async function dbAdd(colName, data) {
@@ -1880,7 +1878,7 @@
       return "";
     }
     function slaLabel(ticket) {
-      if (ticket.status === "Pending Approval") return "-"; // SLA ยังไม่เริ่มนับถ้ารออนุมัติ
+      if (ticket.status === "Pending Approval") return "-"; 
       if (!ticket.sla) return "-";
       const s = ticket.sla;
       if (s.resolutionBreached || s.responseBreached) return "Breach";
@@ -2447,7 +2445,6 @@
       ])];
       downloadCSV("requests.csv", rows);
     });
-
 
     // ================== RENDER FUNCTIONS ==================
     function renderApproveTasks() {
