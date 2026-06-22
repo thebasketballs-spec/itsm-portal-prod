@@ -698,7 +698,6 @@
         <br/>- <code>Manager</code>: View all tickets + Assign/Re-assign
         <br/>- <code>Support</code>: View all tickets, update status, Internal notes
         <br/>- <code>User</code>: Create Incident/Request + view own My Tickets
-        <br/>- <code>Approver</code>: View all tickets + Approve the request
       </div>
     </div>
   </div>
@@ -1330,7 +1329,21 @@
               * Auto Escalation: when SLA breach is detected, ticket is marked as Escalated and an Audit Log entry is created.
             </div>
           </div>
- 
+          <div class="card">
+            <h2>Data Management (SharePoint / Firebase)</h2>
+            <small>Backup data to JSON file</small>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+              <div class="muted" style="line-height:1.4;">
+                ระบบดึงข้อมูลจาก Firebase เป็นหลัก การ Export คือการเซฟข้อมูลทั้งหมดเป็นไฟล์เพื่อนำไปสำรองใน SharePoint
+              </div>
+              <a href="https://banpugroup.sharepoint.com/:f:/r/sites/BANPUFinance/Shared%20Documents/test?csf=1&web=1&e=kfm7Me" target="_blank" class="btn btn-secondary" style="text-decoration:none; text-align:center;">
+                📂 Open SharePoint Folder
+              </a>
+              <div style="display:flex; gap:6px;">
+                <button class="btn" id="btn-export-json">⬇️ Export Data (JSON)</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
   
