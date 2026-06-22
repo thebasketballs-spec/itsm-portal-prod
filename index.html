@@ -406,7 +406,7 @@
     }
     .status-closed {
       background: #dcfce7;
-      color: #15803d;
+          color: #15803d;
     }
     .status-cancelled {
       background: #e5e7eb;
@@ -1656,7 +1656,6 @@
     </div>
   </div>
   <div id="toast-container"></div>
-  
   <script type="module">
     // --- Import Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -1693,7 +1692,9 @@
     // Constants
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
     const MAX_ATTACHMENTS_PER_TICKET = 5;
-    const MAX_ATTACHMENT_SIZE_BYTES = 500 * 1024;
+    
+    // [จุดแก้ที่ 5] ลดขนาดไฟล์ลงเหลือ 150KB ป้องกัน Firestore Document Quota Exceeded (1MB limit)
+    const MAX_ATTACHMENT_SIZE_BYTES = 150 * 1024; 
 
     // ================== DOM ELEMENTS ==================
     const loginRoot = document.getElementById("login-root");
@@ -1893,6 +1894,10 @@
 
         initLogin();
         checkSLA();
+        
+        // [จุดแก้ที่ 2] สั่งรันเช็ค SLA อัตโนมัติทุกๆ 60 วินาทีจริงๆ
+        setInterval(checkSLA, 60000); 
+
         renderAll();
         renderUserTable();
 
@@ -1902,21 +1907,15 @@
       }
     }
 
-    // ================== HELPER FUNCTIONS (Running Number Generator) ==================
-    
-    // ➔ ฟังก์ชันสุ่มเลขตัวใหม่: ระบบ Running Number (เช่น INC-2606-0001)
+    // ================== HELPER FUNCTIONS ==================
     function generateId(prefix, existingTickets) {
       const now = new Date();
       const yy = String(now.getFullYear()).slice(-2);
       const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const ymPrefix = `${prefix}-${yy}${mm}-`; // ผลลัพธ์: "INC-2606-"
-
-      // กรองหาตั๋วเฉพาะเดือนนี้
+      const ymPrefix = `${prefix}-${yy}${mm}-`; 
       const monthTickets = existingTickets.filter(t => t.id && t.id.startsWith(ymPrefix));
       let nextNum = 1;
-      
       if (monthTickets.length > 0) {
-        // ดึงเลข 4 หลักท้ายออกมาหาค่าสูงสุด
         const nums = monthTickets.map(t => {
           const parts = t.id.split("-");
           const val = parseInt(parts[parts.length - 1], 10);
@@ -2051,17 +2050,12 @@
       });
     }
 
-    // ================== APPROVER DROPDOWN ==================
     function populateApproverDropdowns() {
       const incidentApp = document.getElementById("incident-approver");
       const requestApp = document.getElementById("request-approver");
       const approvers = systemUsers.filter(u => u.isApprover === true);
-      
       let html = '<option value="">-- Select Approver --</option>';
-      approvers.forEach(u => {
-        html += `<option value="${u.id}">${u.name} (${u.role})</option>`;
-      });
-
+      approvers.forEach(u => { html += `<option value="${u.id}">${u.name} (${u.role})</option>`; });
       if(incidentApp) incidentApp.innerHTML = html;
       if(requestApp) requestApp.innerHTML = html;
     }
@@ -2088,18 +2082,14 @@
       showToast(`อัปเดตสิทธิ์ Approver สำหรับ ${u.name} เรียบร้อย`);
     };
 
-    // ================== REQUESTER DROPDOWNS & AUTO-FILL ==================
     function populateRequesterDropdowns() {
       const incReqSelect = document.getElementById("incident-requester");
       const reqReqSelect = document.getElementById("request-requester");
-      
       const requesters = systemUsers.filter(u => u.isRequester !== false);
-      
       let html = '<option value="">-- เลือกผู้แจ้ง (Requester) --</option>';
       requesters.forEach(u => {
         html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'ไม่ระบุแผนก'})</option>`;
       });
-
       if (incReqSelect) incReqSelect.innerHTML = html;
       if (reqReqSelect) reqReqSelect.innerHTML = html;
     }
@@ -2116,7 +2106,8 @@
           deptEl.value = ""; emailEl.value = "";
           return;
         }
-        deptEl.value = selectedOption.getAttribute("data-dept") || "";
+        // [จุดแก้ที่ 4] ใส่ fallback "N/A" ป้องกันฟอร์มค้างกรณี User ไม่มีสังกัดแผนก
+        deptEl.value = selectedOption.getAttribute("data-dept") || "N/A";
         emailEl.value = selectedOption.getAttribute("data-email") || "";
       });
     }
@@ -2128,14 +2119,13 @@
       const incReqEl = document.getElementById("incident-requester");
       const incDeptEl = document.getElementById("incident-dept");
       const incEmailEl = document.getElementById("incident-email");
-
       const reqReqEl = document.getElementById("request-requester");
       const reqDeptEl = document.getElementById("request-dept");
       const reqEmailEl = document.getElementById("request-email");
 
       if (currentUser.role === "user") {
-        if (incReqEl) { incReqEl.value = currentUser.name; incReqEl.disabled = true; if(incDeptEl) incDeptEl.value = currentUser.department || ""; if(incEmailEl) incEmailEl.value = currentUser.email || ""; }
-        if (reqReqEl) { reqReqEl.value = currentUser.name; reqReqEl.disabled = true; if(reqDeptEl) reqDeptEl.value = currentUser.department || ""; if(reqEmailEl) reqEmailEl.value = currentUser.email || ""; }
+        if (incReqEl) { incReqEl.value = currentUser.name; incReqEl.disabled = true; if(incDeptEl) incDeptEl.value = currentUser.department || "N/A"; if(incEmailEl) incEmailEl.value = currentUser.email || ""; }
+        if (reqReqEl) { reqReqEl.value = currentUser.name; reqReqEl.disabled = true; if(reqDeptEl) reqDeptEl.value = currentUser.department || "N/A"; if(reqEmailEl) reqEmailEl.value = currentUser.email || ""; }
       } else {
         if (incReqEl) { incReqEl.disabled = false; incReqEl.value = ""; if(incDeptEl) incDeptEl.value = ""; if(incEmailEl) incEmailEl.value = ""; }
         if (reqReqEl) { reqReqEl.disabled = false; reqReqEl.value = ""; if(reqDeptEl) reqDeptEl.value = ""; if(reqEmailEl) reqEmailEl.value = ""; }
@@ -2154,37 +2144,25 @@
       const savedId = localStorage.getItem("itsm_current_user");
       if (savedId) {
         const user = getUserById(savedId);
-        if (user) {
-          setCurrentUser(user);
-          return;
-        }
+        if (user) { setCurrentUser(user); return; }
       }
-      loginRoot.style.display = "flex";
-      appRoot.style.display = "none";
+      loginRoot.style.display = "flex"; appRoot.style.display = "none";
     }
     function setCurrentUser(user) {
       currentUser = user;
       localStorage.setItem("itsm_current_user", user.id);
       currentUserLabel.textContent = `User: ${user.name}`;
       currentRoleLabel.textContent = user.role.toUpperCase();
-      loginRoot.style.display = "none";
-      appRoot.style.display = "block";
+      loginRoot.style.display = "none"; appRoot.style.display = "block";
       tabs.forEach(tab => {
         const roles = tab.getAttribute("data-roles");
-        if (!roles) {
-          tab.style.display = "inline-flex";
-        } else {
+        if (!roles) { tab.style.display = "inline-flex"; } 
+        else {
           const allowed = roles.split(",").map(s => s.trim());
           tab.style.display = allowed.includes(user.role) ? "inline-flex" : "none";
         }
       });
-      
-      populateAssigneeDropdowns();
-      populateApproverDropdowns();
-      populateRequesterDropdowns(); 
-      applyRequesterUserLock();     
-
-      renderAll();
+      populateAssigneeDropdowns(); populateApproverDropdowns(); populateRequesterDropdowns(); applyRequesterUserLock(); renderAll();
     }
     loginBtn.addEventListener("click", () => {
       const id = loginUserSelect.value;
@@ -2194,14 +2172,12 @@
       if (!user) { alert("Please select a user."); return; }
       if (user.password && user.password !== password) { alert("Incorrect password."); return; }
       passwordInput.value = "";
-      setCurrentUser(user);
-      showToast(`Welcome, ${user.name}`);
+      setCurrentUser(user); showToast(`Welcome, ${user.name}`);
     });
     logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("itsm_current_user");
       currentUser = null;
-      appRoot.style.display = "none";
-      loginRoot.style.display = "flex";
+      appRoot.style.display = "none"; loginRoot.style.display = "flex";
     });
 
     // ================== TABS ==================
@@ -2224,60 +2200,27 @@
     // ================== APPROVE / REJECT ACTION ==================
     window.approveTicket = async function(kind, id) {
       if (!confirm(`ยืนยันการอนุมัติ (Approve) ตั๋ว ${id} ใช่หรือไม่?`)) return;
-      const t = findTicket(kind, id);
-      if (!t) return;
-      
-      t.status = "Open";
-      t.updatedAt = new Date().toISOString();
-      
+      const t = findTicket(kind, id); if (!t) return;
+      t.status = "Open"; t.updatedAt = new Date().toISOString();
       if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ 
-        text: "✅ อนุมัติคำขอแล้ว (Approved)", 
-        createdAt: new Date().toISOString(), 
-        visibility: "public", 
-        authorId: currentUser.id, 
-        authorName: currentUser.name 
-      });
-
-      await updateTicket(kind, t);
-      logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
-      renderAll();
-      showToast(`Approved ticket ${t.id}`);
+      t.notes.push({ text: "✅ อนุมัติคำขอแล้ว (Approved)", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+      await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
+      renderAll(); showToast(`Approved ticket ${t.id}`);
     };
 
     window.rejectTicket = async function(kind, id) {
       const reason = prompt(`กรุณาระบุเหตุผลที่ไม่อนุมัติ (Reject) ตั๋ว ${id}:`);
-      if (!reason || reason.trim() === "") {
-        alert("⚠️ บังคับกรอก: คุณต้องระบุเหตุผลที่ไม่อนุมัติตั๋วทุกครั้ง");
-        return; 
-      }
-      
-      const t = findTicket(kind, id);
-      if (!t) return;
-
-      t.status = "Cancelled";
-      t.updatedAt = new Date().toISOString();
-      
+      if (!reason || reason.trim() === "") { alert("⚠️ บังคับกรอก: คุณต้องระบุเหตุผลที่ไม่อนุมัติตั๋วทุกครั้ง"); return; }
+      const t = findTicket(kind, id); if (!t) return;
+      t.status = "Cancelled"; t.updatedAt = new Date().toISOString();
       if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ 
-        text: `❌ ไม่อนุมัติคำขอ (Rejected)\nเหตุผล: ${reason}`, 
-        createdAt: new Date().toISOString(), 
-        visibility: "public", 
-        authorId: currentUser.id, 
-        authorName: currentUser.name 
-      });
-
-      if (t.sla && !t.sla.resolvedAt) {
-        t.sla.resolvedAt = new Date().toISOString();
-      }
-
-      await updateTicket(kind, t);
-      logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
-      renderAll();
-      showToast(`Rejected ticket ${t.id}`);
+      t.notes.push({ text: `❌ ไม่อนุมัติคำขอ (Rejected)\nเหตุผล: ${reason}`, createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+      if (t.sla && !t.sla.resolvedAt) { t.sla.resolvedAt = new Date().toISOString(); }
+      await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
+      renderAll(); showToast(`Rejected ticket ${t.id}`);
     };
 
-    // ================== ASSIGNMENT & EMAIL ==================
+    // ================== ASSIGNMENT ==================
     async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const prev = ticket.assignedTo || null;
       if (prev === newAssigneeId) return;
@@ -2285,63 +2228,25 @@
       ticket.updatedAt = new Date().toISOString();
       const newName = getUserName(newAssigneeId) || "(Unassigned)";
       logAudit("ASSIGN", ticket.id, `Assigned to ${newName}`);
-      
-      if (currentUser && currentUser.id === newAssigneeId) {
-        showToast(`Ticket ${ticket.id} assigned to you.`);
-      }
-
-      if (newAssigneeId) {
-        const assignee = getUserById(newAssigneeId);
-        if (assignee && assignee.email) {
-          if (fromDetail) {
-            const ccParam = ticket.ccEmails ? `&cc=${encodeURIComponent(ticket.ccEmails)}` : "";
-            const subject = encodeURIComponent(`[ITSM] You have been assigned ticket ${ticket.id}`);
-            const body = encodeURIComponent(`Dear ${assignee.name},\n\nYou have been assigned to ticket ${ticket.id}: "${ticket.title}".\nPlease log in to the portal to review the request.\n\nBest Regards,\nIT Service Management`);
-            window.location.href = `mailto:${assignee.email}?subject=${subject}&body=${body}${ccParam}`;
-          } else {
-            console.log(`📧 Email prepared for ${assignee.email} regarding ticket ${ticket.id}`);
-          }
-        }
-      }
+      if (currentUser && currentUser.id === newAssigneeId) { showToast(`Ticket ${ticket.id} assigned to you.`); }
     }
 
-    // ================== PASTE IMAGE IN INCIDENT FORM ==================
+    // ================== ATTACHMENTS (INCIDENT) ==================
     let incidentStagedAttachments = [];
     const incidentDescInput = document.getElementById("incident-description");
     const incidentStagedList = document.getElementById("incident-staged-attachments");
 
     incidentDescInput.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items;
-      if (!items) return;
-      
+      const items = e.clipboardData && e.clipboardData.items; if (!items) return;
       const images = [];
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.startsWith("image/")) {
-          images.push(items[i].getAsFile());
-        }
-      }
-      
+      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
-      
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-          showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 500KB)`);
-          return;
-        }
-        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
-          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`);
-          return;
-        }
-        
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
+        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
-          incidentStagedAttachments.push({
-            id: `${Date.now()}-${Math.random()}`,
-            name: `pasted-image-${Date.now()}.png`,
-            type: file.type,
-            size: file.size,
-            dataUrl: evt.target.result
-          });
+          incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
           renderIncidentStagedAttachments();
         };
         reader.readAsDataURL(file);
@@ -2352,49 +2257,22 @@
       incidentStagedList.innerHTML = "";
       incidentStagedAttachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${a.dataUrl}" class="attachment-preview" />
-          <div style="flex:1;">
-            <div><strong>${a.name}</strong></div>
-            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
-          </div>
-          <button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${index})">X</button>
-        `;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${index})">X</button>`;
         incidentStagedList.appendChild(li);
       });
     }
 
-    window.removeIncidentStaged = function(index) {
-      incidentStagedAttachments.splice(index, 1);
-      renderIncidentStagedAttachments();
-    };
+    window.removeIncidentStaged = function(index) { incidentStagedAttachments.splice(index, 1); renderIncidentStagedAttachments(); };
 
-    // ================== ATTACH FILE IN INCIDENT FORM ==================
     const incidentFileInput = document.getElementById("incident-file-input");
-    
     incidentFileInput.addEventListener("change", (e) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
-
+      const files = e.target.files; if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-          showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 500KB)`);
-          return;
-        }
-        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
-          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`);
-          return;
-        }
-
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 150KB)`); return; }
+        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
-          incidentStagedAttachments.push({
-            id: `${Date.now()}-${Math.random()}`,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            dataUrl: evt.target.result
-          });
+          incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
           renderIncidentStagedAttachments();
         };
         reader.readAsDataURL(file);
@@ -2402,43 +2280,22 @@
       incidentFileInput.value = "";
     });
 
-    // ================== PASTE IMAGE IN REQUEST FORM ==================
+    // ================== ATTACHMENTS (REQUEST) ==================
     let requestStagedAttachments = [];
     const requestDescInput = document.getElementById("request-description");
     const requestStagedList = document.getElementById("request-staged-attachments");
 
     requestDescInput.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items;
-      if (!items) return;
-      
+      const items = e.clipboardData && e.clipboardData.items; if (!items) return;
       const images = [];
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.startsWith("image/")) {
-          images.push(items[i].getAsFile());
-        }
-      }
-      
+      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
-      
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-          showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 500KB)`);
-          return;
-        }
-        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
-          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`);
-          return;
-        }
-        
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
+        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
-          requestStagedAttachments.push({
-            id: `${Date.now()}-${Math.random()}`,
-            name: `pasted-image-${Date.now()}.png`,
-            type: file.type,
-            size: file.size,
-            dataUrl: evt.target.result
-          });
+          requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
           renderRequestStagedAttachments();
         };
         reader.readAsDataURL(file);
@@ -2449,49 +2306,22 @@
       requestStagedList.innerHTML = "";
       requestStagedAttachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${a.dataUrl}" class="attachment-preview" />
-          <div style="flex:1;">
-            <div><strong>${a.name}</strong></div>
-            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
-          </div>
-          <button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${index})">X</button>
-        `;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${index})">X</button>`;
         requestStagedList.appendChild(li);
       });
     }
 
-    window.removeRequestStaged = function(index) {
-      requestStagedAttachments.splice(index, 1);
-      renderRequestStagedAttachments();
-    };
+    window.removeRequestStaged = function(index) { requestStagedAttachments.splice(index, 1); renderRequestStagedAttachments(); };
 
-    // ================== ATTACH FILE IN REQUEST FORM ==================
     const requestFileInput = document.getElementById("request-file-input");
-    
     requestFileInput.addEventListener("change", (e) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
-
+      const files = e.target.files; if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-          showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 500KB)`);
-          return;
-        }
-        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) {
-          showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`);
-          return;
-        }
-
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 150KB)`); return; }
+        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
-          requestStagedAttachments.push({
-            id: `${Date.now()}-${Math.random()}`,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            dataUrl: evt.target.result
-          });
+          requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
           renderRequestStagedAttachments();
         };
         reader.readAsDataURL(file);
@@ -2499,7 +2329,7 @@
       requestFileInput.value = "";
     });
 
-    // ================== CREATING TICKETS (ใช้ Running Number ID) ==================
+    // ================== CREATING TICKETS ==================
     incidentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const requester = document.getElementById("incident-requester").value;
@@ -2519,15 +2349,14 @@
       const reference = document.getElementById("incident-reference").value.trim();
       
       if (!requester || !dept || !email || !system || !title || !category || !impact || !priority || !description) {
-        alert("Please fill in all required (*) fields.");
-        return;
+        alert("Please fill in all required (*) fields."); return;
       }
       
       const now = new Date().toISOString();
       const initialStatus = approver ? "Pending Approval" : "Open";
 
       const incident = {
-        id: generateId("INC", incidents), // ➔ เรียกใช้ Running Number
+        id: generateId("INC", incidents),
         type: "Incident", requester, dept, phone, email, system, module, title,
         category, impact, priority, dueDate: due || null, approver, ccEmails, reference, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
@@ -2535,27 +2364,9 @@
         sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
       };
 
-      await dbAdd("incidents", incident);
-      incidents.unshift(incident);
-      
-      incidentForm.reset();
-      incidentStagedAttachments = [];
-      renderIncidentStagedAttachments();
-      applyRequesterUserLock(); 
-
-      logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
-      renderAll();
-      showToast(`Created Incident ${incident.id}`);
-
-      const admin = systemUsers.find(u => u.role === 'admin');
-      if (admin && admin.email) {
-        const ccParam = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : "";
-        const subject = encodeURIComponent(`[ITSM] New Incident: ${incident.id} - ${incident.title}`);
-        const body = encodeURIComponent(
-`Dear Admin,\n\nA new incident has been submitted.\n\nID: ${incident.id}\nRequester: ${requester}\nSystem: ${system}\nPriority: ${priority}\nDescription: ${description}\n\nPlease check the dashboard.`
-        );
-        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}${ccParam}`;
-      }
+      await dbAdd("incidents", incident); incidents.unshift(incident);
+      incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); 
+      logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
     });
 
     requestForm.addEventListener("submit", async (e) => {
@@ -2578,15 +2389,14 @@
       const description = document.getElementById("request-description").value.trim();
 
       if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !description) {
-        alert("Please fill in all required (*) fields.");
-        return;
+        alert("Please fill in all required (*) fields."); return;
       }
 
       const now = new Date().toISOString();
       const initialStatus = approver ? "Pending Approval" : "Open";
 
       const req = {
-        id: generateId("REQ", requests), // ➔ เรียกใช้ Running Number
+        id: generateId("REQ", requests),
         type: "Request", requester, dept, phone, email, system, module, title,
         requestType: type, category, impact, dueDate: due, approver, ccEmails, reference, remark, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
@@ -2594,75 +2404,33 @@
         sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
       };
 
-      await dbAdd("requests", req);
-      requests.unshift(req);
-
-      requestForm.reset();
-      requestStagedAttachments = [];
-      renderRequestStagedAttachments();
-      applyRequesterUserLock(); 
-
-      logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
-      renderAll();
-      showToast(`Created Request ${req.id}`);
-
-      const admin = systemUsers.find(u => u.role === 'admin');
-      if (admin && admin.email) {
-        const ccParam = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : "";
-        const subject = encodeURIComponent(`[ITSM] New Service Request: ${req.id} - ${req.title}`);
-        const body = encodeURIComponent(
-`Dear Admin,\n\nA new request has been submitted.\n\nID: ${req.id}\nRequester: ${requester}\nType: ${type}\nSystem: ${system}\nDescription: ${description}\n\nPlease check the dashboard.`
-        );
-        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}${ccParam}`;
-      }
+      await dbAdd("requests", req); requests.unshift(req);
+      requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); 
+      logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
     });
 
     // ================== EXPORT CSV ==================
     function downloadCSV(filename, rows) {
       if (!rows || !rows.length) { alert("No data for export."); return; }
-      const processValue = (v) => {
-        if (v === null || v === undefined) return "";
-        const s = String(v).replace(/"/g, '""');
-        return `"${s}"`;
-      };
+      const processValue = (v) => { if (v === null || v === undefined) return ""; return `"${String(v).replace(/"/g, '""')}"`; };
       const csv = rows.map(row => row.map(processValue).join(",")).join("\n");
       const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
+      const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
     }
 
     if(exportIncBtn) {
       exportIncBtn.addEventListener("click", () => {
-        const header = [
-          "ID","Type","Requester","Dept","Phone","Email","System","Module","Title","Category","Impact","Priority","DueDate","Approver","CC_Emails","Reference",
-          "Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"
-        ];
-        const rows = [header, ...incidents.map(i => [
-          i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module, i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "",
-          getUserName(i.approver) || i.approver, i.ccEmails || "", i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt),
-          i.sla ? formatDateTime(i.sla.responseDueAt) : "", i.sla ? formatDateTime(i.sla.resolutionDueAt) : "", i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "",
-          i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "", i.sla ? i.sla.responseBreached : "", i.sla ? i.sla.resolutionBreached : ""
-        ])];
+        const header = ["ID","Type","Requester","Dept","Phone","Email","System","Module","Title","Category","Impact","Priority","DueDate","Approver","CC_Emails","Reference","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"];
+        const rows = [header, ...incidents.map(i => [i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module, i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "", getUserName(i.approver) || i.approver, i.ccEmails || "", i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt), i.sla ? formatDateTime(i.sla.responseDueAt) : "", i.sla ? formatDateTime(i.sla.resolutionDueAt) : "", i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "", i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "", i.sla ? i.sla.responseBreached : "", i.sla ? i.sla.resolutionBreached : ""])];
         downloadCSV("incidents.csv", rows);
       });
     }
 
     if(exportReqBtn) {
       exportReqBtn.addEventListener("click", () => {
-        const header = [
-          "ID","Type","Requester","Dept","Phone","Email","System","Module","Title","RequestType","Category","Impact","DueDate","Approver","CC_Emails","Reference",
-          "Remark","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"
-        ];
-        const rows = [header, ...requests.map(r => [
-          r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "",
-          getUserName(r.approver) || r.approver, r.ccEmails || "", r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt),
-          r.sla ? formatDateTime(r.sla.responseDueAt) : "", r.sla ? formatDateTime(r.sla.resolutionDueAt) : "", r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "",
-          r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "", r.sla ? r.sla.responseBreached : "", r.sla ? r.sla.resolutionBreached : ""
-        ])];
+        const header = ["ID","Type","Requester","Dept","Phone","Email","System","Module","Title","RequestType","Category","Impact","DueDate","Approver","CC_Emails","Reference","Remark","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"];
+        const rows = [header, ...requests.map(r => [r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "", getUserName(r.approver) || r.approver, r.ccEmails || "", r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt), r.sla ? formatDateTime(r.sla.responseDueAt) : "", r.sla ? formatDateTime(r.sla.resolutionDueAt) : "", r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "", r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "", r.sla ? r.sla.responseBreached : "", r.sla ? r.sla.resolutionBreached : ""])];
         downloadCSV("requests.csv", rows);
       });
     }
@@ -2671,137 +2439,66 @@
     function renderApproveTasks() {
       if (!currentUser) return;
       approveTasksBody.innerHTML = "";
-      
       const all = [...incidents, ...requests].filter(t => t.status === "Pending Approval" && t.approver === currentUser.id);
-      
-      if (all.length > 0) {
-        badgePendingApprove.textContent = all.length;
-        badgePendingApprove.style.display = "inline-flex";
-      } else {
-        badgePendingApprove.style.display = "none";
-      }
-
+      if (all.length > 0) { badgePendingApprove.textContent = all.length; badgePendingApprove.style.display = "inline-flex"; } 
+      else { badgePendingApprove.style.display = "none"; }
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
-        const tr = document.createElement("tr");
-        const kind = t.type === "Incident" ? "incident" : "request";
-        tr.innerHTML = `
-          <td>${t.id}</td>
-          <td>${t.type}</td>
-          <td>${formatPriority(t.priority)}</td>
-          <td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td>
-          <td>${formatRequesterObo(t.requester, t.createdBy)}</td>
-          <td>${formatDateTime(t.createdAt)}</td>
-          <td>
-            <button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button>
-            <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button>
-            <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button>
-          </td>
-        `;
+        const tr = document.createElement("tr"); const kind = t.type === "Incident" ? "incident" : "request";
+        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
         approveTasksBody.appendChild(tr);
       });
     }
 
     function renderDashboard() {
-      const incidentCount = incidents.length;
-      const requestCount = requests.length;
-      const total = incidentCount + requestCount;
-      const all = [...incidents, ...requests];
-      const slaOk = all.filter(t => t.sla && t.sla.resolvedAt && !t.sla.resolutionBreached).length;
-      const slaBreach = all.filter(t => t.sla && (t.sla.resolutionBreached || t.sla.responseBreached)).length;
-      badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`;
-      badgeSlaOk.textContent = `SLA Met: ${slaOk}`;
-      badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
-      
-      const statusOpen = all.filter(t => t.status === "Open").length;
-      const statusInProgress = all.filter(t => t.status === "In Progress").length;
-      const statusPending = all.filter(t => t.status === "Pending User").length;
-      const statusClosed = all.filter(t => t.status === "Closed").length;
-      const statusCancelled = all.filter(t => t.status === "Cancelled").length;
-
+      const incidentCount = incidents.length; const requestCount = requests.length; const total = incidentCount + requestCount; const all = [...incidents, ...requests];
+      const slaOk = all.filter(t => t.sla && t.sla.resolvedAt && !t.sla.resolutionBreached).length; const slaBreach = all.filter(t => t.sla && (t.sla.resolutionBreached || t.sla.responseBreached)).length;
+      badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`; badgeSlaOk.textContent = `SLA Met: ${slaOk}`; badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
+      const statusOpen = all.filter(t => t.status === "Open").length; const statusInProgress = all.filter(t => t.status === "In Progress").length; const statusPending = all.filter(t => t.status === "Pending User").length; const statusClosed = all.filter(t => t.status === "Closed").length; const statusCancelled = all.filter(t => t.status === "Cancelled").length;
       const typeCtx = document.getElementById("typeChart").getContext("2d");
       if (typeChart) typeChart.destroy();
-      typeChart = new Chart(typeCtx, {
-        type: "doughnut", data: { labels: ["Incident", "Request"], datasets: [{ data: [incidentCount, requestCount] }] },
-        options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" }
-      });
-
+      typeChart = new Chart(typeCtx, { type: "doughnut", data: { labels: ["Incident", "Request"], datasets: [{ data: [incidentCount, requestCount] }] }, options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" } });
       const statusCtx = document.getElementById("statusChart").getContext("2d");
       if (statusChart) statusChart.destroy();
-      statusChart = new Chart(statusCtx, {
-        type: "bar", data: { labels: ["Open", "In Progress", "Pending User", "Closed", "Cancelled"], datasets: [{ label: "Count", data: [statusOpen, statusInProgress, statusPending, statusClosed, statusCancelled] }] },
-        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, precision: 0 } } }
-      });
-
+      statusChart = new Chart(statusCtx, { type: "bar", data: { labels: ["Open", "In Progress", "Pending User", "Closed", "Cancelled"], datasets: [{ label: "Count", data: [statusOpen, statusInProgress, statusPending, statusClosed, statusCancelled] }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, precision: 0 } } } });
       latestTableBody.innerHTML = "";
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5).forEach(t => {
-          const tr = document.createElement("tr");
-          const cls = statusClassName(t.status, t.sla && t.sla.escalated);
+          const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
           tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
           latestTableBody.appendChild(tr);
         });
     }
 
     function filterByDateRange(createdISO, fromVal, toVal) {
-      const dt = new Date(createdISO);
-      if (isNaN(dt.getTime())) return false;
+      const dt = new Date(createdISO); if (isNaN(dt.getTime())) return false;
       if (fromVal && dt < new Date(fromVal + "T00:00:00")) return false;
-      if (toVal && dt > new Date(toVal + "T23:59:59")) return false;
-      return true;
+      if (toVal && dt > new Date(toVal + "T23:59:59")) return false; return true;
     }
 
     function renderIncidents() {
-      const statusFilter = incidentStatusFilter.value;
-      const categoryFilter = incidentCategoryFilter.value;
-      const systemFilter = incidentSystemFilter.value;
-      const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase();
-      const fromVal = incidentDateFrom.value; const toVal = incidentDateTo.value;
-      const search = incidentSearch.value.trim().toLowerCase();
+      const statusFilter = incidentStatusFilter.value; const categoryFilter = incidentCategoryFilter.value; const systemFilter = incidentSystemFilter.value; const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase(); const fromVal = incidentDateFrom.value; const toVal = incidentDateTo.value; const search = incidentSearch.value.trim().toLowerCase();
       incidentTableBody.innerHTML = "";
-      incidents.filter(i => !statusFilter || i.status === statusFilter)
-        .filter(i => !categoryFilter || i.category === categoryFilter)
-        .filter(i => !systemFilter || i.system === systemFilter)
-        .filter(i => filterByDateRange(i.createdAt, fromVal, toVal))
-        .filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch))
-        .filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search))
-        .forEach(i => {
-          const tr = document.createElement("tr");
-          const cls = statusClassName(i.status, i.sla && i.sla.escalated);
+      incidents.filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
+          const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
           tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${formatRequesterObo(i.requester, i.createdBy)}</td>`;
           incidentTableBody.appendChild(tr);
         });
     }
 
     function renderRequests() {
-      const statusFilter = requestStatusFilter.value;
-      const categoryFilter = requestCategoryFilter.value;
-      const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value;
-      const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase();
-      const fromVal = requestDateFrom.value;
-      const toVal = requestDateTo.value;
-      const search = requestSearch.value.trim().toLowerCase();
+      const statusFilter = requestStatusFilter.value; const categoryFilter = requestCategoryFilter.value; const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value; const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase(); const fromVal = requestDateFrom.value; const toVal = requestDateTo.value; const search = requestSearch.value.trim().toLowerCase();
       requestTableBody.innerHTML = "";
-      requests.filter(r => !statusFilter || r.status === statusFilter)
-        .filter(r => !categoryFilter || r.category === categoryFilter)
-        .filter(r => !systemFilter || r.system === systemFilter)
-        .filter(r => !typeFilter || r.requestType === typeFilter)
-        .filter(r => filterByDateRange(r.createdAt, fromVal, toVal))
-        .filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch))
-        .filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search))
-        .forEach(r => {
-          const tr = document.createElement("tr");
-          const cls = statusClassName(r.status, r.sla && r.sla.escalated);
+      requests.filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
+          const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
           tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}"><strong style="color:var(--banpu-primary);">${r.title}</strong> <span class="muted" style="font-size:11px;">(${formatRequesterObo(r.requester, r.createdBy)})</span></td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
           requestTableBody.appendChild(tr);
         });
     }
 
     function renderMyTickets() {
-      if (!currentUser) return;
-      myTicketsBody.innerHTML = "";
+      if (!currentUser) return; myTicketsBody.innerHTML = "";
       const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
-          const tr = document.createElement("tr");
-          const cls = statusClassName(t.status, t.sla && t.sla.escalated);
+          const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
           tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
           myTicketsBody.appendChild(tr);
         });
@@ -2809,28 +2506,14 @@
 
     function renderAdminTable() {
       if (!currentUser || !["admin", "manager"].includes(currentUser.role)) return;
-      const statusFilter = adminStatusFilter.value;
-      const assigneeSearch = adminAssigneeSearch.value.trim().toLowerCase();
-      const fromVal = adminDateFrom.value; const toVal = adminDateTo.value;
-      const search = adminSearch.value.trim().toLowerCase();
-      const all = [...incidents, ...requests];
+      const statusFilter = adminStatusFilter.value; const assigneeSearch = adminAssigneeSearch.value.trim().toLowerCase(); const fromVal = adminDateFrom.value; const toVal = adminDateTo.value; const search = adminSearch.value.trim().toLowerCase(); const all = [...incidents, ...requests];
       adminTableBody.innerHTML = "";
-      all.filter(t => !statusFilter || t.status === statusFilter)
-        .filter(t => filterByDateRange(t.createdAt, fromVal, toVal))
-        .filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch))
-        .filter(t => !search || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(search))
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .forEach(t => {
-          const tr = document.createElement("tr");
-          const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-";
-          const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-");
-          const kind = t.type === "Incident" ? "incident" : "request";
+      all.filter(t => !statusFilter || t.status === statusFilter).filter(t => filterByDateRange(t.createdAt, fromVal, toVal)).filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(t => !search || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(search)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
+          const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated); const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-"; const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-"); const kind = t.type === "Incident" ? "incident" : "request";
           tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
         });
-      const adminSelectAllCb = document.getElementById("admin-select-all");
-      if (adminSelectAllCb) adminSelectAllCb.checked = false;
+      const adminSelectAllCb = document.getElementById("admin-select-all"); if (adminSelectAllCb) adminSelectAllCb.checked = false;
     }
 
     function renderAuditLog() {
@@ -2843,146 +2526,69 @@
     }
 
     // ================== DETAIL MODAL & UPDATING TICKETS ==================
-    function findTicket(kind, id) { 
-      return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id);
-    }
+    function findTicket(kind, id) { return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id); }
     
     async function updateTicket(kind, ticket) {
-      const colName = kind === "incident" ? "incidents" : "requests";
-      await dbUpdate(colName, ticket.firebaseId, ticket);
-      if (kind === "incident") {
-        const idx = incidents.findIndex(i => i.id === ticket.id);
-        if (idx >= 0) incidents[idx] = ticket;
-      } else {
-        const idx = requests.findIndex(r => r.id === ticket.id);
-        if (idx >= 0) requests[idx] = ticket;
-      }
+      const colName = kind === "incident" ? "incidents" : "requests"; await dbUpdate(colName, ticket.firebaseId, ticket);
+      if (kind === "incident") { const idx = incidents.findIndex(i => i.id === ticket.id); if (idx >= 0) incidents[idx] = ticket; } 
+      else { const idx = requests.findIndex(r => r.id === ticket.id); if (idx >= 0) requests[idx] = ticket; }
     }
 
     function renderDetailNotes(t) {
-      detailNotesList.innerHTML = "";
-      if (!t.notes || !t.notes.length) return;
-      
-      const visibleNotes = t.notes.filter(n => {
-        if (n.visibility === "internal") {
-          return currentUser && ["admin", "manager", "support"].includes(currentUser.role);
-        }
-        return true;
-      });
-
+      detailNotesList.innerHTML = ""; if (!t.notes || !t.notes.length) return;
+      const visibleNotes = t.notes.filter(n => { if (n.visibility === "internal") { return currentUser && ["admin", "manager", "support"].includes(currentUser.role); } return true; });
       visibleNotes.forEach(n => {
-        const li = document.createElement("li");
-        const isInternal = n.visibility === "internal";
-        const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
-        
+        const li = document.createElement("li"); const isInternal = n.visibility === "internal"; const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
         let attachHtml = "";
         if (n.attachments && n.attachments.length > 0) {
           attachHtml = `<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">`;
-          n.attachments.forEach(a => {
-            attachHtml += `<a href="${a.dataUrl}" target="_blank" title="คลิกเพื่อดูรูปขนาดเต็ม"><img src="${a.dataUrl}" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2;" /></a>`;
-          });
+          n.attachments.forEach(a => { attachHtml += `<a href="${a.dataUrl}" target="_blank" title="คลิกเพื่อดูรูปขนาดเต็ม"><img src="${a.dataUrl}" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2;" /></a>`; });
           attachHtml += `</div>`;
         }
-
-        li.innerHTML = `
-          <div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div>
-          <div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>
-          ${attachHtml}
-        `;
+        li.innerHTML = `<div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>${attachHtml}`;
         detailNotesList.appendChild(li);
       });
     }
 
     function renderDetailAttachments(t) {
-      detailAttachmentsList.innerHTML = "";
-      if (!t.attachments || !t.attachments.length) return;
-      
+      detailAttachmentsList.innerHTML = ""; if (!t.attachments || !t.attachments.length) return;
       t.attachments.forEach(a => {
         const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${a.dataUrl}" class="attachment-preview" />
-          <div style="flex:1;">
-            <div><strong>${a.name}</strong></div>
-            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
-          </div>
-          <a href="${a.dataUrl}" download="${a.name}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>
-        `;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><a href="${a.dataUrl}" download="${a.name}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>`;
         detailAttachmentsList.appendChild(li);
       });
     }
 
     function openDetail(kind, id) {
-      const t = findTicket(kind, id);
-      if (!t) return;
+      const t = findTicket(kind, id); if (!t) return;
       currentDetail = { kind, id };
       detailTitle.textContent = `${t.type} Detail`; detailSubtitle.textContent = `${t.id} • ${t.title}`;
-      detailIdSpan.textContent = t.id; detailTypeSpan.textContent = t.type;
-      detailSubjectInput.value = t.title; detailSystemInput.value = t.system || "";
-      detailModuleInput.value = t.module || "";
-      detailAssigneeSelect.value = t.assignedTo || "";
-      detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)";
-      detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
-      
-      const reqName = t.requester || "-";
-      const deptName = t.dept ? ` / ${t.dept}` : "";
-      const creatorName = getUserName(t.createdBy);
-      let oboText = "";
-      if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) {
-        oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${creatorName}</strong></div>`;
-      }
+      detailIdSpan.textContent = t.id; detailTypeSpan.textContent = t.type; detailSubjectInput.value = t.title; detailSystemInput.value = t.system || ""; detailModuleInput.value = t.module || ""; detailAssigneeSelect.value = t.assignedTo || ""; detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)"; detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
+      const reqName = t.requester || "-"; const deptName = t.dept ? ` / ${t.dept}` : ""; const creatorName = getUserName(t.createdBy); let oboText = "";
+      if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) { oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${creatorName}</strong></div>`; }
       document.getElementById("detail-requester-dept").innerHTML = `<strong>${reqName}</strong>${deptName}<br/>${oboText}`;
-
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
-      
-      const approverName = getUserName(t.approver);
-      detailApproverSpan.textContent = approverName ? approverName : (t.approver || "-");
-      
-      detailDescriptionInput.value = t.description || "";
-      
+      const approverName = getUserName(t.approver); detailApproverSpan.textContent = approverName ? approverName : (t.approver || "-"); detailDescriptionInput.value = t.description || "";
       const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
       const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
       
       if (t.status === "Resolved" && isOwner && resConfirmBanner) {
         resConfirmBanner.style.display = "flex";
-        
         document.getElementById("btn-requester-confirm-close").onclick = async () => {
           if(!confirm("ยืนยันปิดตั๋วใบนี้เสร็จสมบูรณ์?")) return;
-          t.status = "Closed";
-          if(t.sla) t.sla.resolvedAt = new Date().toISOString();
-          t.updatedAt = new Date().toISOString();
+          t.status = "Closed"; if(t.sla) t.sla.resolvedAt = new Date().toISOString(); t.updatedAt = new Date().toISOString();
           if(!Array.isArray(t.notes)) t.notes = [];
           t.notes.push({ text: "✅ ผู้แจ้งยืนยันปิดตั๋วเรียบร้อยแล้ว (Confirmed Closed)", createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
-          await updateTicket(kind, t);
-          logAudit("CONFIRM_CLOSE", t.id, "Requester confirmed resolved ticket closed");
-          renderAll();
-          closeDetail();
-          showToast("ปิดตั๋วสำเร็จ ขอบคุณครับ");
+          await updateTicket(kind, t); logAudit("CONFIRM_CLOSE", t.id, "Requester confirmed resolved ticket closed"); renderAll(); closeDetail(); showToast("ปิดตั๋วสำเร็จ ขอบคุณครับ");
         };
-
         document.getElementById("btn-requester-confirm-reopen").onclick = async () => {
-          const rsn = prompt("ระบุปัญหาที่ยังพบอยู่เพื่อส่งกลับให้ IT ตรวจสอบอีกครั้ง:");
-          if(!rsn) return;
-          t.status = "In Progress";
-          t.updatedAt = new Date().toISOString();
-          if(!Array.isArray(t.notes)) t.notes = [];
+          const rsn = prompt("ระบุปัญหาที่ยังพบอยู่เพื่อส่งกลับให้ IT ตรวจสอบอีกครั้ง:"); if(!rsn) return;
+          t.status = "In Progress"; t.updatedAt = new Date().toISOString(); if(!Array.isArray(t.notes)) t.notes = [];
           t.notes.push({ text: `❌ ผู้แจ้งปฏิเสธการปิดตั๋ว (Re-opened)\nสาเหตุ: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
-          await updateTicket(kind, t);
-          logAudit("REOPEN", t.id, "Requester re-opened resolved ticket");
-          renderAll();
-          closeDetail();
-          showToast("ส่งตั๋วกลับให้ IT ตรวจสอบแล้ว");
+          await updateTicket(kind, t); logAudit("REOPEN", t.id, "Requester re-opened resolved ticket"); renderAll(); closeDetail(); showToast("ส่งตั๋วกลับให้ IT ตรวจสอบแล้ว");
         };
-      } else if(resConfirmBanner) {
-        resConfirmBanner.style.display = "none";
-      }
-
-      detailNoteStagedAttachments = [];
-      renderDetailNoteStagedAttachments();
-
-      renderDetailNotes(t);
-      renderDetailAttachments(t);
-      
-      detailBackdrop.classList.add("active");
+      } else if(resConfirmBanner) { resConfirmBanner.style.display = "none"; }
+      detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderDetailAttachments(t); detailBackdrop.classList.add("active");
     }
 
     function closeDetail() { detailBackdrop.classList.remove("active"); currentDetail = null; }
@@ -2990,78 +2596,43 @@
     
     detailSaveBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
-      const t = findTicket(currentDetail.kind, currentDetail.id);
-      if (!t) return;
+      const t = findTicket(currentDetail.kind, currentDetail.id); if (!t) return;
       
       const oldStatus = t.status;
-      t.title = detailSubjectInput.value.trim() || t.title;
-      t.system = detailSystemInput.value.trim();
-      t.module = detailModuleInput.value.trim();
-      t.status = detailStatusSelect.value;
-      t.priority = detailPrioritySelect.value;
-      t.dueDate = detailDueInput.value || null;
-      t.description = detailDescriptionInput.value.trim();
+      const oldPriority = t.priority || "P3 - Medium (24h)"; 
+
+      t.title = detailSubjectInput.value.trim() || t.title; t.system = detailSystemInput.value.trim(); t.module = detailModuleInput.value.trim(); t.status = detailStatusSelect.value; t.priority = detailPrioritySelect.value; t.dueDate = detailDueInput.value || null; t.description = detailDescriptionInput.value.trim();
+      
+      // [จุดแก้ที่ 3] หากเปลี่ยน Priority ใน Modal ให้คำนวณ Due Date SLA ใหม่ทันที
+      if (t.priority !== oldPriority) {
+        t.sla = computeSlaForTicket(t.priority, t.createdAt);
+      }
       
       const newAssignee = detailAssigneeSelect.value || null;
-      if (t.assignedTo !== newAssignee) {
-        await assignTicket(t, newAssignee, true); 
-      }
-      
+      if (t.assignedTo !== newAssignee) { await assignTicket(t, newAssignee, true); }
       if (t.status === "Resolved" && oldStatus !== "Resolved") {
         if(!Array.isArray(t.notes)) t.notes = [];
-        t.notes.push({
-          text: "✅ IT Support ได้แก้ไขปัญหาเบื้องต้นแล้ว (Resolved)\nรอผู้แจ้งตรวจสอบและกดยืนยันปิดตั๋ว",
-          createdAt: new Date().toISOString(),
-          visibility: "public",
-          authorId: currentUser.id,
-          authorName: currentUser.name
-        });
+        t.notes.push({ text: "✅ IT Support ได้แก้ไขปัญหาเบื้องต้นแล้ว (Resolved)\nรอผู้แจ้งตรวจสอบและกดยืนยันปิดตั๋ว", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
       }
-
       if (t.sla) {
         if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
         if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
       }
       t.updatedAt = new Date().toISOString();
-      
-      await updateTicket(currentDetail.kind, t);
-      logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal");
-      renderAll(); showToast("Changes saved.");
+      await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
     });
 
-    // ================== PASTE IMAGE IN DETAIL NOTE ==================
+    // ================== NOTES IN DETAIL ==================
     detailNoteInput.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items;
-      if (!items) return;
-      
-      const images = [];
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.startsWith("image/")) {
-          images.push(items[i].getAsFile());
-        }
-      }
-      
+      const items = e.clipboardData && e.clipboardData.items; if (!items) return;
+      const images = []; for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
-      
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-          showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 500KB)`);
-          return;
-        }
-        if (detailNoteStagedAttachments.length >= 3) {
-          showToast(`สามารถแนบรูปใน Note ได้สูงสุด 3 รูปต่อครั้ง`);
-          return;
-        }
-        
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
+        if (detailNoteStagedAttachments.length >= 3) { showToast(`สามารถแนบรูปใน Note ได้สูงสุด 3 รูปต่อครั้ง`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
-          detailNoteStagedAttachments.push({
-            id: `${Date.now()}-${Math.random()}`,
-            name: `note-image-${Date.now()}.png`,
-            type: file.type,
-            size: file.size,
-            dataUrl: evt.target.result
-          });
+          detailNoteStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `note-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
           renderDetailNoteStagedAttachments();
         };
         reader.readAsDataURL(file);
@@ -3072,127 +2643,74 @@
       detailNoteStagedList.innerHTML = "";
       detailNoteStagedAttachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${a.dataUrl}" class="attachment-preview" />
-          <div style="flex:1;">
-            <div><strong>${a.name}</strong></div>
-            <div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div>
-          </div>
-          <button type="button" class="btn-danger btn-small" onclick="window.removeDetailNoteStaged(${index})">X</button>
-        `;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeDetailNoteStaged(${index})">X</button>`;
         detailNoteStagedList.appendChild(li);
       });
     }
 
-    window.removeDetailNoteStaged = function(index) {
-      detailNoteStagedAttachments.splice(index, 1);
-      renderDetailNoteStagedAttachments();
-    };
+    window.removeDetailNoteStaged = function(index) { detailNoteStagedAttachments.splice(index, 1); renderDetailNoteStagedAttachments(); };
 
     detailAddNoteBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
-      const t = findTicket(currentDetail.kind, currentDetail.id);
-      const text = detailNoteInput.value.trim();
-      
-      if (!text && detailNoteStagedAttachments.length === 0) return;
-      if (!t) return;
-      
-      let visibility = "public";
-      document.querySelectorAll('input[name="note-visibility"]').forEach(r => { if (r.checked) visibility = r.value; });
-      
+      const t = findTicket(currentDetail.kind, currentDetail.id); const text = detailNoteInput.value.trim();
+      if (!text && detailNoteStagedAttachments.length === 0) return; if (!t) return;
+      let visibility = "public"; document.querySelectorAll('input[name="note-visibility"]').forEach(r => { if (r.checked) visibility = r.value; });
       if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ 
-        text, 
-        createdAt: new Date().toISOString(), 
-        visibility, 
-        authorId: currentUser ? currentUser.id : "unknown", 
-        authorName: currentUser ? currentUser.name : "Unknown User",
-        attachments: [...detailNoteStagedAttachments]
-      });
-      
-      if (t.sla && !t.sla.firstResponseAt && currentUser && ["support", "admin", "manager"].includes(currentUser.role)) {
-        t.sla.firstResponseAt = new Date().toISOString();
-      }
+      t.notes.push({ text, createdAt: new Date().toISOString(), visibility, authorId: currentUser ? currentUser.id : "unknown", authorName: currentUser ? currentUser.name : "Unknown User", attachments: [...detailNoteStagedAttachments] });
+      if (t.sla && !t.sla.firstResponseAt && currentUser && ["support", "admin", "manager"].includes(currentUser.role)) { t.sla.firstResponseAt = new Date().toISOString(); }
       t.updatedAt = new Date().toISOString();
-      
-      await updateTicket(currentDetail.kind, t);
-      logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
-      
-      detailNoteInput.value = ""; 
-      detailNoteStagedAttachments = [];
-      renderDetailNoteStagedAttachments();
-      
-      renderDetailNotes(t); 
-      renderAll(); 
+      await updateTicket(currentDetail.kind, t); logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
+      detailNoteInput.value = ""; detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderAll(); 
     });
 
-    // ================== ADMIN SELECT ALL CHECKBOX ==================
     const adminSelectAllInput = document.getElementById("admin-select-all");
-    if (adminSelectAllInput) {
-      adminSelectAllInput.addEventListener("change", (e) => {
-        document.querySelectorAll(".admin-select").forEach(cb => cb.checked = e.target.checked);
-      });
-    }
+    if (adminSelectAllInput) { adminSelectAllInput.addEventListener("change", (e) => { document.querySelectorAll(".admin-select").forEach(cb => cb.checked = e.target.checked); }); }
 
-    // ================== ADMIN DELETE & BULK ==================
     document.addEventListener("click", async (e) => {
-      const btnDetail = e.target.closest("[data-detail-kind]");
-      if (btnDetail) { openDetail(btnDetail.getAttribute("data-detail-kind"), btnDetail.getAttribute("data-id")); return; }
-      
+      const btnDetail = e.target.closest("[data-detail-kind]"); if (btnDetail) { openDetail(btnDetail.getAttribute("data-detail-kind"), btnDetail.getAttribute("data-id")); return; }
       const btnDel = e.target.closest("[data-admin-delete-kind]");
       if (btnDel) {
-        const kind = btnDel.getAttribute("data-admin-delete-kind");
-        const id = btnDel.getAttribute("data-id");
+        const kind = btnDel.getAttribute("data-admin-delete-kind"); const id = btnDel.getAttribute("data-id");
         if (!confirm(`Delete ticket ${id}?`)) return;
-        
-        const t = findTicket(kind, id);
-        if (t) await dbDelete(kind === "incident" ? "incidents" : "requests", t.firebaseId);
-
-        if (kind === "incident") incidents = incidents.filter(i => i.id !== id);
-        else requests = requests.filter(r => r.id !== id);
-        
-        logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard");
-        renderAll();
+        const t = findTicket(kind, id); if (t) await dbDelete(kind === "incident" ? "incidents" : "requests", t.firebaseId);
+        if (kind === "incident") incidents = incidents.filter(i => i.id !== id); else requests = requests.filter(r => r.id !== id);
+        logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard"); renderAll();
       }
     });
 
     adminBulkApply.addEventListener("click", async () => {
-      const action = adminBulkAction.value;
-      const assignId = adminBulkAssignee.value || null;
-      const selected = Array.from(document.querySelectorAll(".admin-select")).filter(cb => cb.checked).map(cb => ({ kind: cb.getAttribute("data-kind"), id: cb.getAttribute("data-id") }));
-      
+      const action = adminBulkAction.value; const assignId = adminBulkAssignee.value || null; const selected = Array.from(document.querySelectorAll(".admin-select")).filter(cb => cb.checked).map(cb => ({ kind: cb.getAttribute("data-kind"), id: cb.getAttribute("data-id") }));
       if (!selected.length) { alert("Please select at least one ticket."); return; }
       if (!action && !assignId) { alert("Select a Bulk Action or Assign To value first."); return; }
-      
       for (let sel of selected) {
-        const t = findTicket(sel.kind, sel.id);
-        if (!t) continue;
+        const t = findTicket(sel.kind, sel.id); if (!t) continue;
         if (assignId) await assignTicket(t, assignId);
         if (action === "close") { t.status = "Closed"; if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString(); }
         if (action === "reopen") t.status = "Open";
-        if (action === "delete") {
-            await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId);
-            if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id);
-            else requests = requests.filter(r => r.id !== sel.id);
-            continue;
-        }
-        t.updatedAt = new Date().toISOString();
-        await updateTicket(sel.kind, t);
+        if (action === "delete") { await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId); if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id); else requests = requests.filter(r => r.id !== sel.id); continue; }
+        t.updatedAt = new Date().toISOString(); await updateTicket(sel.kind, t);
       }
-      logAudit("BULK_ACTION", "N/A", "Executed bulk action");
-      renderAll(); showToast("Bulk action completed.");
+      logAudit("BULK_ACTION", "N/A", "Executed bulk action"); renderAll(); showToast("Bulk action completed.");
     });
 
-    // ================== USER MANAGEMENT ==================
+    // ================== USER MANAGEMENT (REFACTORED) ==================
+    
+    // [จุดแก้ที่ 1] ผูก Event ให้ปุ่ม Cancel ทำงาน
+    userCancelBtn.addEventListener("click", resetUserForm);
+
     function renderUserTable() {
       userTableBody.innerHTML = "";
-      systemUsers.forEach((u, i) => {
+      // [จุดแก้ที่ 6 - Part A] ถอด Array index (i) ออก ใช้อ้างอิงด้วย u.id เท่านั้น
+      systemUsers.forEach((u) => { 
         const assignDisplay = u.assignTo ? '<span style="color:green; font-size:1.2em;">✅</span>' : '-';
         const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
         const requesterDisplay = u.isRequester !== false ? '<span style="color:purple; font-size:1.2em;">✅</span>' : '-';
         const tr = document.createElement("tr");
         tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.password}</td>
-        <td><button class="btn-small btn-secondary" onclick="window.editUser(${i})">Edit</button> <button class="btn-small btn-danger" onclick="window.deleteUser(${i})">Delete</button></td>`;
+        <td>
+          <button class="btn-small btn-secondary" onclick="window.editUser('${u.id}')">Edit</button> 
+          <button class="btn-small btn-danger" onclick="window.deleteUser('${u.id}')">Delete</button>
+        </td>`;
         userTableBody.appendChild(tr);
       });
     }
@@ -3215,24 +2733,23 @@
         const u = systemUsers[editingUserIndex];
         u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;
         await dbUpdate("users", u.firebaseId, u);
-        alert("แก้ไขข้อมูลสำเร็จ!");
-        resetUserForm();
+        alert("แก้ไขข้อมูลสำเร็จ!"); resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("User ID นี้ถูกใช้แล้ว"); return; }
         const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password };
-        await dbAdd("users", newUser);
-        systemUsers.push(newUser);
-        alert("เพิ่มผู้ใช้สำเร็จ!");
-        userForm.reset();
+        await dbAdd("users", newUser); systemUsers.push(newUser); alert("เพิ่มผู้ใช้สำเร็จ!"); userForm.reset();
       }
-      populateApproverDropdowns();
-      populateRequesterDropdowns();
-      renderAll(); 
+      populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     });
 
-    window.editUser = function(index) {
-      const u = systemUsers[index];
-      editingUserIndex = index;
+    // [จุดแก้ที่ 6 - Part B] ค้นหา User จาก ID แทนการรับ index ตรงๆ
+    window.editUser = function(userId) {
+      const targetIndex = systemUsers.findIndex(item => item.id === userId);
+      if (targetIndex === -1) return;
+      
+      editingUserIndex = targetIndex;
+      const u = systemUsers[targetIndex];
+
       document.getElementById("user-id").value = u.id;
       document.getElementById("user-name").value = u.name;
       document.getElementById("user-email").value = u.email;
@@ -3243,52 +2760,44 @@
       document.getElementById("user-is-requester").checked = u.isRequester !== false;
       document.getElementById("user-password").value = u.password || "";
       document.getElementById("user-id").readOnly = true;
-      userSubmitBtn.textContent = "Update User";
-      userCancelBtn.style.display = "inline-block";
+      userSubmitBtn.textContent = "Update User"; userCancelBtn.style.display = "inline-block";
       userForm.scrollIntoView({ behavior: "smooth" });
     };
 
-    window.deleteUser = async function(index) {
+    // [จุดแก้ที่ 6 - Part C] ลบ User โดยเช็คพิกัด Array ใหม่วินาทีต่อวินาที
+    window.deleteUser = async function(userId) {
       if (!confirm("ต้องการลบผู้ใช้นี้ใช่หรือไม่?")) return;
-      const u = systemUsers[index];
+      const actualIndex = systemUsers.findIndex(item => item.id === userId);
+      if (actualIndex === -1) return;
+
+      const u = systemUsers[actualIndex];
       await dbDelete("users", u.firebaseId);
-      if (editingUserIndex === index) resetUserForm();
-      else if (editingUserIndex > index) editingUserIndex--;
+
+      if (editingUserIndex === actualIndex) resetUserForm();
+      else if (editingUserIndex > actualIndex) editingUserIndex--;
       
-      systemUsers.splice(index, 1);
-      populateApproverDropdowns();
-      populateRequesterDropdowns();
-      renderAll(); 
+      systemUsers.splice(actualIndex, 1);
+      populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     };
 
     function resetUserForm() {
       editingUserIndex = -1; userForm.reset();
       document.getElementById("user-id").readOnly = false;
-      userSubmitBtn.textContent = "Add User";
-      userCancelBtn.style.display = "none";
-      document.getElementById("user-is-requester").checked = true;
+      userSubmitBtn.textContent = "Add User"; userCancelBtn.style.display = "none"; document.getElementById("user-is-requester").checked = true;
     }
 
     // ================== OTHER UTILS ==================
     function renderReports() { 
-      const all = [...incidents, ...requests];
-      const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
-      all.forEach(t => {
-        const days = calcAgeDays(t.createdAt);
-        if (days <= 1) buckets["0-1"]++; else if (days <= 3) buckets["1-3"]++; else if (days <= 7) buckets["3-7"]++; else buckets[">7"]++;
-      });
+      const all = [...incidents, ...requests]; const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
+      all.forEach(t => { const days = calcAgeDays(t.createdAt); if (days <= 1) buckets["0-1"]++; else if (days <= 3) buckets["1-3"]++; else if (days <= 7) buckets["3-7"]++; else buckets[">7"]++; });
       agingRow.innerHTML = `<tr><td>Count</td><td>${buckets["0-1"]}</td><td>${buckets["1-3"]}</td><td>${buckets["3-7"]}</td><td>${buckets[">7"]}</td></tr>`;
     }
     
     function checkSLA() { 
-      const all = [...incidents, ...requests];
-      const now = new Date();
-      let changed = false;
+      const all = [...incidents, ...requests]; const now = new Date(); let changed = false;
       all.forEach(t => {
         if (!t.sla || t.status === "Pending Approval") return; 
-        const sla = t.sla;
-        const resDue = new Date(sla.resolutionDueAt);
-        const respDue = new Date(sla.responseDueAt);
+        const sla = t.sla; const resDue = new Date(sla.resolutionDueAt); const respDue = new Date(sla.responseDueAt);
         if (!sla.firstResponseAt && now > respDue && !sla.responseBreached) { sla.responseBreached = true; changed = true; }
         if (!sla.resolvedAt && now > resDue && !sla.resolutionBreached) { sla.resolutionBreached = true; changed = true; }
       });
@@ -3296,32 +2805,18 @@
     }
     
     function renderKB() {
-      const search = kbSearch.value.trim().toLowerCase();
-      kbList.innerHTML = "";
+      const search = kbSearch.value.trim().toLowerCase(); kbList.innerHTML = "";
       KB_ENTRIES.filter(e => !search || e.q.toLowerCase().includes(search) || e.a.toLowerCase().includes(search)).forEach(e => {
-          const li = document.createElement("li");
-          li.innerHTML = `<strong>${e.q}</strong><span>${e.a}</span>`;
-          kbList.appendChild(li);
+          const li = document.createElement("li"); li.innerHTML = `<strong>${e.q}</strong><span>${e.a}</span>`; kbList.appendChild(li);
         });
     }
 
-    function renderAll() { 
-      renderIncidents(); 
-      renderRequests(); 
-      renderMyTickets(); 
-      renderDashboard(); 
-      renderAdminTable(); 
-      renderApproveTasks();
-      renderUserTable();
-      renderApproverTable();
-      renderKB();
-    }
+    function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable(); renderKB(); }
 
     [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch].forEach(el => el.addEventListener("input", renderIncidents));
     [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch].forEach(el => el.addEventListener("input", renderRequests));
     [adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch].forEach(el => el.addEventListener("input", renderAdminTable));
 
-    // ================== INITIALIZATION ==================
     loadDataFromFirebase();
   </script>
 </body>
