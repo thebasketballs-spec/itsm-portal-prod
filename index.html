@@ -142,6 +142,19 @@
       font-size: 13px;
       color: var(--banpu-muted);
     }
+
+    /* STICKY HEADER & TABS (อัปเกรด UX) */
+    .sticky-header-container {
+      position: sticky;
+      top: 0;
+      z-index: 120;
+      background: var(--banpu-card-bg);
+      padding-top: 10px;
+      padding-bottom: 2px;
+      margin-top: -10px;
+      border-bottom: 1px solid var(--banpu-border);
+    }
+
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -223,8 +236,7 @@
     .tabs {
       display: flex;
       gap: 8px;
-      border-bottom: 1px solid var(--banpu-border);
-      margin-bottom: 10px;
+      margin-top: 6px;
       overflow-x: auto;
     }
     .nav-tab {
@@ -251,7 +263,7 @@
     }
     .section {
       display: none;
-      margin-top: 12px;
+      margin-top: 16px;
     }
     .section.active {
       display: block;
@@ -383,6 +395,10 @@
     .status-in-progress {
       background: #fef3c7;
       color: #b45309;
+    }
+    .status-resolved {
+      background: #dbeafe;
+      color: #1e40af;
     }
     .status-pending {
       background: #fffbeb;
@@ -661,19 +677,16 @@
       display: block;
       margin-bottom: 2px;
     }
-    .pill-sla-ok {
-      background: #dcfce7;
-      color: #15803d;
-      padding: 2px 6px;
-      border-radius: 999px;
+    .kb-suggestion-banner {
+      display: none;
+      margin-top: 4px;
+      padding: 6px 10px;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
       font-size: 11px;
-    }
-    .pill-sla-breach {
-      background: #fee2e2;
-      color: #b91c1c;
-      padding: 2px 6px;
-      border-radius: 999px;
-      font-size: 11px;
+      color: #92400e;
+      line-height: 1.4;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -704,47 +717,50 @@
 
   <div id="app-root">
     <div class="app-container">
-      <div class="top-bar">
-        <div>
-          <h1>Finance System Service Portal – Incident & Request</h1>
-         <div class="subtitle">
-            Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Firebase Integration).
-         </div>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <div class="user-pill">
-            <span id="current-user-label">User: -</span>
-            <span class="role-badge" id="current-role-label">-</span>
+      
+      <div class="sticky-header-container">
+        <div class="top-bar">
+          <div>
+            <h1>Finance System Service Portal – Incident & Request</h1>
+           <div class="subtitle">
+              Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Firebase Integration).
+           </div>
           </div>
-          <button class="btn-secondary btn-small" id="logout-btn">Log out</button>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <div class="user-pill">
+              <span id="current-user-label">User: -</span>
+              <span class="role-badge" id="current-role-label">-</span>
+            </div>
+            <button class="btn-secondary btn-small" id="logout-btn">Log out</button>
+          </div>
         </div>
-      </div>
-   
-      <div class="top-bar" style="margin-bottom:4px;">
-        <div class="muted">
-          SLA Template: P1 = 4h, P2 = 8h, P3 = 24h, P4 = 48h (Response/Resolution use the same simple template)
+     
+        <div class="top-bar" style="margin-bottom:0;">
+          <div class="muted">
+            SLA Template: P1 = 4h, P2 = 8h, P3 = 24h, P4 = 48h (Response/Resolution use the same simple template)
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-secondary btn-small" id="btn-export-inc">Export Incidents CSV</button>
+            <button class="btn-secondary btn-small" id="btn-export-req">Export Requests CSV</button>
+          </div>
         </div>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-secondary btn-small" id="btn-export-inc">Export Incidents CSV</button>
-          <button class="btn-secondary btn-small" id="btn-export-req">Export Requests CSV</button>
-        </div>
-      </div>
 
-      <div class="tabs" id="tabs">
-        <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
-        <div class="nav-tab" data-target="approve-tasks-section">
-          My Tasks (Approve)
-          <span id="badge-pending-approve" class="badge badge-amber" style="display:none; margin-left:4px; margin-right:0;">0</span>
+        <div class="tabs" id="tabs">
+          <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
+          <div class="nav-tab" data-target="approve-tasks-section">
+            My Tasks (Approve)
+            <span id="badge-pending-approve" class="badge badge-amber" style="display:none; margin-left:4px; margin-right:0;">0</span>
+          </div>
+          <div class="nav-tab" data-target="incident-section">Incidents</div>
+          <div class="nav-tab" data-target="request-section">Requests</div>
+          <div class="nav-tab" data-target="mytickets-section">My Tickets</div>
+          <div class="nav-tab" data-target="reports-section" data-roles="admin,manager">Reports</div>
+          <div class="nav-tab" data-target="admin-section" data-roles="admin,manager">Admin Dashboard</div>
+          <div class="nav-tab" data-target="audit-section" data-roles="admin,manager">Audit Log</div>
+          <div class="nav-tab" data-target="kb-section">Knowledge Base</div>
+          <div class="nav-tab" data-target="user-section" data-roles="admin">User Management</div>
+          <div class="nav-tab" data-target="approver-section" data-roles="admin">Approvers</div>
         </div>
-        <div class="nav-tab" data-target="incident-section">Incidents</div>
-        <div class="nav-tab" data-target="request-section">Requests</div>
-        <div class="nav-tab" data-target="mytickets-section">My Tickets</div>
-        <div class="nav-tab" data-target="reports-section" data-roles="admin,manager">Reports</div>
-        <div class="nav-tab" data-target="admin-section" data-roles="admin,manager">Admin Dashboard</div>
-        <div class="nav-tab" data-target="audit-section" data-roles="admin,manager">Audit Log</div>
-        <div class="nav-tab" data-target="kb-section">Knowledge Base</div>
-        <div class="nav-tab" data-target="user-section" data-roles="admin">User Management</div>
-        <div class="nav-tab" data-target="approver-section" data-roles="admin">Approvers</div>
       </div>
 
       <div id="dashboard-section" class="section active">
@@ -804,6 +820,7 @@
                 <tr>
                   <th>ID</th>
                   <th>Type</th>
+                  <th>Priority</th>
                   <th>Subject</th>
                   <th>Requester</th>
                   <th>Created At</th>
@@ -825,45 +842,49 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Requester *</label>
-                  <input type="text" id="incident-requester" required />
+                  <input type="text" id="incident-requester" required placeholder="ชื่อผู้แจ้ง..." />
                 </div>
                 <div class="form-group">
                   <label>Department *</label>
-                  <input type="text" id="incident-dept" required />
+                  <input type="text" id="incident-dept" required placeholder="แผนก..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone</label>
-                  <input type="tel" id="incident-phone" />
+                  <input type="tel" id="incident-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
                 <div class="form-group">
                   <label>Email *</label>
-                  <input type="email" id="incident-email" required />
+                  <input type="email" id="incident-email" required placeholder="อีเมล..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label>System *</label>
                   <select id="incident-system" required>
-                    <option value="">-- Select --</option>
-                    <option value="TM1">TM1</option>
-                    <option value="BPC">BPC</option>
+                    <option value="">-- Select System --</option>
                     <option value="Oracle">Oracle</option>
                     <option value="SAP">SAP</option>
+                    <option value="TM1">TM1</option>
+                    <option value="BPC">BPC</option>
+                    <option value="Power BI">Power BI</option>
                     <option value="Network">Network</option>
                     <option value="Others">Others</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label>Module</label>
-                  <input type="text" id="incident-module" />
+                  <input type="text" id="incident-module" list="inc-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
+                  <datalist id="inc-module-suggestions"></datalist>
                 </div>
               </div>
+              
               <div class="form-row">
                 <div class="form-group">
                   <label>Subject *</label>
-                  <input type="text" id="incident-title" required />
+                  <input type="text" id="incident-title" required placeholder="ระบุหัวข้อปัญหา เช่น TM1 ล็อกอินไม่ได้..." />
+                  <div id="inc-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                 <div class="form-group">
                   <label>Category *</label>
@@ -877,6 +898,7 @@
                   </select>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                    <label>Impact *</label>
@@ -891,13 +913,14 @@
                   <label>Priority / SLA *</label>
                   <select id="incident-priority" required>
                     <option value="">-- Select --</option>
-                    <option value="P1 - Critical (4h)">P1 - Critical (4h)</option>
-                    <option value="P2 - High (8h)">P2 - High (8h)</option>
-                    <option value="P3 - Medium (24h)">P3 - Medium (24h)</option>
-                    <option value="P4 - Low (48h)">P4 - Low (48h)</option>
+                    <option value="P1 - Critical (4h)">🔴 P1 - Critical (4h)</option>
+                    <option value="P2 - High (8h)">🟠 P2 - High (8h)</option>
+                    <option value="P3 - Medium (24h)">🔵 P3 - Medium (24h)</option>
+                    <option value="P4 - Low (48h)">🟢 P4 - Low (48h)</option>
                   </select>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Required by (optional)</label>
@@ -909,6 +932,11 @@
                     <option value="">-- Select Approver --</option>
                   </select>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
+                <input type="text" id="incident-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
               </div>
 
               <div class="form-group">
@@ -951,6 +979,7 @@
                 <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
                 <option value="Pending User">Pending User</option>
                 <option value="Closed">Closed</option>
                 <option value="Cancelled">Cancelled</option>
@@ -965,10 +994,11 @@
               </select>
               <select id="incident-system-filter">
                 <option value="">All Systems</option>
-                <option value="TM1">TM1</option>
-                <option value="BPC">BPC</option>
                 <option value="Oracle">Oracle</option>
                 <option value="SAP">SAP</option>
+                <option value="TM1">TM1</option>
+                <option value="BPC">BPC</option>
+                <option value="Power BI">Power BI</option>
                 <option value="Network">Network</option>
                 <option value="Others">Others</option>
               </select>
@@ -1009,45 +1039,48 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Requester *</label>
-                  <input type="text" id="request-requester" required />
+                  <input type="text" id="request-requester" required placeholder="ชื่อผู้แจ้ง..." />
                 </div>
                  <div class="form-group">
                   <label>Department *</label>
-                  <input type="text" id="request-dept" required />
+                  <input type="text" id="request-dept" required placeholder="แผนก..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone</label>
-                  <input type="tel" id="request-phone" />
+                  <input type="tel" id="request-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
                 <div class="form-group">
                   <label>Email *</label>
-                  <input type="email" id="request-email" required />
+                  <input type="email" id="request-email" required placeholder="อีเมล..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                     <label>System *</label>
                   <select id="request-system" required>
-                    <option value="">-- Select --</option>
-                    <option value="TM1">TM1</option>
-                    <option value="BPC">BPC</option>
+                    <option value="">-- Select System --</option>
                     <option value="Oracle">Oracle</option>
                     <option value="SAP">SAP</option>
+                    <option value="TM1">TM1</option>
+                    <option value="BPC">BPC</option>
                     <option value="Power BI">Power BI</option>
                     <option value="Others">Others</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label>Module</label>
-                  <input type="text" id="request-module" />
+                  <input type="text" id="request-module" list="req-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
+                  <datalist id="req-module-suggestions"></datalist>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Subject *</label>
-                  <input type="text" id="request-title" required />
+                  <input type="text" id="request-title" required placeholder="ระบุหัวข้อคำขอ..." />
+                  <div id="req-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                  <div class="form-group">
                   <label>Request Type *</label>
@@ -1061,6 +1094,7 @@
                   </select>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Category *</label>
@@ -1083,6 +1117,7 @@
                   </select>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                    <label>Requested Due Date *</label>
@@ -1095,14 +1130,15 @@
                   </select>
                 </div>
               </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label>Reference</label>
                   <input type="text" id="request-ref" />
                 </div>
                 <div class="form-group">
-                  <label>Remark</label>
-                  <input type="text" id="request-remark" />
+                  <label>CC Emails</label>
+                  <input type="text" id="request-cc" placeholder="เช่น user2@banpu.com,..." />
                 </div>
               </div>
 
@@ -1136,6 +1172,7 @@
                 <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
                 <option value="Pending User">Pending User</option>
                 <option value="Closed">Closed</option>
                 <option value="Cancelled">Cancelled</option>
@@ -1150,10 +1187,10 @@
               </select>
               <select id="request-system-filter">
                 <option value="">All Systems</option>
+                <option value="Oracle">Oracle</option>
+                <option value="SAP">SAP</option>
                 <option value="TM1">TM1</option>
                 <option value="BPC">BPC</option>
-                 <option value="Oracle">Oracle</option>
-                <option value="SAP">SAP</option>
                 <option value="Power BI">Power BI</option>
                 <option value="Others">Others</option>
               </select>
@@ -1178,6 +1215,7 @@
                     <th>ID</th>
                     <th>Subject</th>
                     <th>System</th>
+                    <th>Priority</th>
                     <th>Request Type</th>
                     <th>Assigned</th>
                     <th>Status</th>
@@ -1203,6 +1241,7 @@
                 <tr>
                   <th>ID</th>
                   <th>Type</th>
+                  <th>Priority</th>
                   <th>Subject</th>
                   <th>Status</th>
                   <th>SLA</th>
@@ -1296,6 +1335,7 @@
                 <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
                 <option value="Pending User">Pending User</option>
                 <option value="Closed">Closed</option>
                 <option value="Cancelled">Cancelled</option>
@@ -1471,6 +1511,18 @@
         <button class="close-btn" id="detail-close-btn">&times;</button>
       </div>
       <div class="modal-body">
+        
+        <div id="detail-resolved-confirm-banner" style="display:none; grid-column: 1 / -1; background:#eff6ff; border:1px solid #bfdbfe; padding:12px 16px; border-radius:12px; margin-bottom:8px; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <strong style="color:#1e40af; font-size:14px;">ตั๋วนี้ได้รับการแก้ไขเบื้องต้นแล้ว (Resolved)</strong><br/>
+            <span style="font-size:12px; color:#3b82f6;">กรุณาทดสอบระบบ หากใช้งานได้ปกติโปรดกดยืนยันปิดตั๋ว หากยังพบปัญหาอยู่กดแจ้งเปิดซ้ำ</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn badge-green" id="btn-requester-confirm-close" style="padding:6px 14px; font-size:12px;">✅ ยืนยันปิดตั๋ว (Confirm Close)</button>
+            <button class="btn-danger" id="btn-requester-confirm-reopen" style="padding:6px 14px; font-size:12px;">❌ แจ้งเปิดซ้ำ (Re-open)</button>
+          </div>
+        </div>
+
         <div class="detail-block">
           <h3>Main Info & Edit</h3>
           <div class="detail-row">
@@ -1508,6 +1560,7 @@
           <option value="Pending Approval">Pending Approval</option>
           <option value="Open">Open</option>
           <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
           <option value="Pending User">Pending User</option>
           <option value="Closed">Closed</option>
           <option value="Cancelled">Cancelled</option>
@@ -1518,10 +1571,10 @@
            </div>
           <div class="detail-edit-field">
             <select id="detail-priority-select">
-              <option value="P1 - Critical (4h)">P1 - Critical (4h)</option>
-              <option value="P2 - High (8h)">P2 - High (8h)</option>
-              <option value="P3 - Medium (24h)">P3 - Medium (24h)</option>
-               <option value="P4 - Low (48h)">P4 - Low (48h)</option>
+              <option value="P1 - Critical (4h)">🔴 P1 - Critical (4h)</option>
+              <option value="P2 - High (8h)">🟠 P2 - High (8h)</option>
+              <option value="P3 - Medium (24h)">🔵 P3 - Medium (24h)</option>
+               <option value="P4 - Low (48h)">🟢 P4 - Low (48h)</option>
             </select>
           </div>
           <div class="detail-row" style="margin-top:4px;">
@@ -1706,7 +1759,6 @@
     const adminBulkAction = document.getElementById("admin-bulk-action");
     const adminBulkAssignee = document.getElementById("admin-bulk-assignee");
     const adminBulkApply = document.getElementById("admin-bulk-apply");
-    const adminSelectAll = document.getElementById("admin-select-all");
     const adminStatusFilter = document.getElementById("admin-status-filter");
     const adminAssigneeSearch = document.getElementById("admin-assignee-search");
     const adminDateFrom = document.getElementById("admin-date-from");
@@ -1725,13 +1777,58 @@
     const kbSearch = document.getElementById("kb-search");
     const kbList = document.getElementById("kb-list");
     const KB_ENTRIES = [
-      { q: "TM1 login error invalid credential", a: "Check that the AD account is not locked and the password is correct." },
-      { q: "BPC report is slow", a: "Try clearing cache / logging out and logging in again." },
-      { q: "Request new TM1 user", a: "Use Service Request > Access Request and specify the role." }
+      { q: "TM1 login error invalid credential", a: "ตรวจสอบว่าบัญชี AD ไม่ได้ถูกล็อก และกรอกรหัสผ่านถูกต้อง" },
+      { q: "BPC report is slow", a: "ลองทำการ Clear Cache หรือกด Log out แล้วล็อกอินเข้าใหม่" },
+      { q: "Request new TM1 user", a: "ใช้เมนู Service Request > Access Request พร้อมระบุ Role ที่ต้องการ" },
+      { q: "SAP BPC ล็อกอินไม่ได้", a: "ตรวจสอบการเชื่อมต่อ VPN / FortiClient ว่าทำงานอยู่หรือไม่" }
     ];
 
     const exportIncBtn = document.getElementById("btn-export-inc");
     const exportReqBtn = document.getElementById("btn-export-req");
+
+    // ================== CASCADING MODULES MAP ==================
+    const MODULES_BY_SYSTEM = {
+      "Oracle": ["AP - Accounts Payable", "AR - Accounts Receivable", "GL - General Ledger", "FA - Fixed Assets", "CM - Cash Management"],
+      "SAP": ["FI - Financial Accounting", "CO - Controlling", "MM - Materials Management", "SD - Sales & Distribution"],
+      "TM1": ["Budgeting Model", "Forecasting", "Executive Report", "WebSheet"],
+      "BPC": ["Consolidation", "Planning", "Data Manager", "Logic Script"],
+      "Power BI": ["Executive Dashboard", "Finance Dataset", "Data Gateway", "Scheduled Refresh"],
+      "Network": ["VPN / FortiClient", "Wi-Fi", "LAN", "Firewall"],
+      "Others": ["General UI", "Login / SSO", "Performance", "Data Export"]
+    };
+
+    function setupCascadingModule(sysSelectId, datalistId) {
+      const sysEl = document.getElementById(sysSelectId);
+      const listEl = document.getElementById(datalistId);
+      if(!sysEl || !listEl) return;
+      sysEl.addEventListener("change", e => {
+        listEl.innerHTML = "";
+        const mods = MODULES_BY_SYSTEM[e.target.value] || [];
+        mods.forEach(m => { const opt = document.createElement("option"); opt.value = m; listEl.appendChild(opt); });
+      });
+    }
+    setupCascadingModule("incident-system", "inc-module-suggestions");
+    setupCascadingModule("request-system", "req-module-suggestions");
+
+    // ================== AI DEFLECTION BANNER ==================
+    function setupKbDeflection(inputId, bannerId) {
+      const input = document.getElementById(inputId);
+      const banner = document.getElementById(bannerId);
+      if(!input || !banner) return;
+      input.addEventListener("input", e => {
+        const text = e.target.value.trim().toLowerCase();
+        if(text.length < 3) { banner.style.display = "none"; return; }
+        const matched = KB_ENTRIES.find(k => k.q.toLowerCase().includes(text) || text.includes(k.q.toLowerCase().split(" ")[0]));
+        if(matched) {
+          banner.innerHTML = `💡 <strong>พบบทความที่อาจช่วยแก้ปัญหาให้คุณได้:</strong> "${matched.q}"<br/><span style="color:#b45309;">👉 คำแนะนำ: ${matched.a}</span>`;
+          banner.style.display = "block";
+        } else {
+          banner.style.display = "none";
+        }
+      });
+    }
+    setupKbDeflection("incident-title", "inc-kb-banner");
+    setupKbDeflection("request-title", "req-kb-banner");
 
     // ================== FIREBASE HELPERS ==================
     async function dbAdd(colName, data) {
@@ -1793,6 +1890,14 @@
     // ================== HELPER FUNCTIONS ==================
     function getUserById(id) { return systemUsers.find(u => u.id === id) || null; }
     function getUserName(id) { const u = getUserById(id); return u ? u.name : ""; }
+    function formatPriority(p) {
+      if (!p) return "-";
+      if (p.includes("P1")) return "🔴 " + p;
+      if (p.includes("P2")) return "🟠 " + p;
+      if (p.includes("P3")) return "🔵 " + p;
+      if (p.includes("P4")) return "🟢 " + p;
+      return p;
+    }
     function formatDateTime(d) {
       const date = new Date(d);
       if (isNaN(date.getTime())) return "-";
@@ -1872,6 +1977,7 @@
       if (status === "Pending Approval") return "status-pending-approval";
       if (status === "Open") return "status-open";
       if (status === "In Progress") return "status-in-progress";
+      if (status === "Resolved") return "status-resolved";
       if (status === "Pending User") return "status-pending";
       if (status === "Closed") return "status-closed";
       if (status === "Cancelled") return "status-cancelled";
@@ -1977,6 +2083,25 @@
           tab.style.display = allowed.includes(user.role) ? "inline-flex" : "none";
         }
       });
+      
+      // Auto-fill Requester info based on Role
+      const incReqEl = document.getElementById("incident-requester");
+      const incEmailEl = document.getElementById("incident-email");
+      const reqReqEl = document.getElementById("request-requester");
+      const reqEmailEl = document.getElementById("request-email");
+
+      if (user && user.role === "user") {
+        if(incReqEl) { incReqEl.value = user.name; incReqEl.readOnly = true; incReqEl.style.background = "#f3f4f6"; }
+        if(incEmailEl) { incEmailEl.value = user.email; incEmailEl.readOnly = true; incEmailEl.style.background = "#f3f4f6"; }
+        if(reqReqEl) { reqReqEl.value = user.name; reqReqEl.readOnly = true; reqReqEl.style.background = "#f3f4f6"; }
+        if(reqEmailEl) { reqEmailEl.value = user.email; reqEmailEl.readOnly = true; reqEmailEl.style.background = "#f3f4f6"; }
+      } else {
+        if(incReqEl) { incReqEl.readOnly = false; incReqEl.style.background = "#ffffff"; }
+        if(incEmailEl) { incEmailEl.readOnly = false; incEmailEl.style.background = "#ffffff"; }
+        if(reqReqEl) { reqReqEl.readOnly = false; reqReqEl.style.background = "#ffffff"; }
+        if(reqEmailEl) { reqEmailEl.readOnly = false; reqEmailEl.style.background = "#ffffff"; }
+      }
+
       populateAssigneeDropdowns();
       populateApproverDropdowns();
       renderAll();
@@ -2042,7 +2167,10 @@
 
     window.rejectTicket = async function(kind, id) {
       const reason = prompt(`กรุณาระบุเหตุผลที่ไม่อนุมัติ (Reject) ตั๋ว ${id}:`);
-      if (reason === null) return; 
+      if (!reason || reason.trim() === "") {
+        alert("⚠️ บังคับกรอก: คุณต้องระบุเหตุผลที่ไม่อนุมัติตั๋วทุกครั้ง");
+        return; 
+      }
       
       const t = findTicket(kind, id);
       if (!t) return;
@@ -2086,9 +2214,10 @@
         const assignee = getUserById(newAssigneeId);
         if (assignee && assignee.email) {
           if (fromDetail) {
+            const ccParam = ticket.ccEmails ? `&cc=${encodeURIComponent(ticket.ccEmails)}` : "";
             const subject = encodeURIComponent(`[ITSM] You have been assigned ticket ${ticket.id}`);
             const body = encodeURIComponent(`Dear ${assignee.name},\n\nYou have been assigned to ticket ${ticket.id}: "${ticket.title}".\nPlease log in to the portal to review the request.\n\nBest Regards,\nIT Service Management`);
-            window.location.href = `mailto:${assignee.email}?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:${assignee.email}?subject=${subject}&body=${body}${ccParam}`;
           } else {
             console.log(`📧 Email prepared for ${assignee.email} regarding ticket ${ticket.id}`);
           }
@@ -2305,6 +2434,7 @@
       const priority = document.getElementById("incident-priority").value;
       const due = document.getElementById("incident-due").value;
       const approver = document.getElementById("incident-approver").value; 
+      const ccEmails = document.getElementById("incident-cc").value.trim();
       const description = document.getElementById("incident-description").value.trim();
       const reference = document.getElementById("incident-reference").value.trim();
       
@@ -2318,7 +2448,7 @@
 
       const incident = {
         id: generateId("INC"), type: "Incident", requester, dept, phone, email, system, module, title,
-        category, impact, priority, dueDate: due || null, approver, reference, description,
+        category, impact, priority, dueDate: due || null, approver, ccEmails, reference, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
         attachments: [...incidentStagedAttachments], 
         sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
@@ -2337,11 +2467,12 @@
 
       const admin = systemUsers.find(u => u.role === 'admin');
       if (admin && admin.email) {
+        const ccParam = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : "";
         const subject = encodeURIComponent(`[ITSM] New Incident: ${incident.id} - ${incident.title}`);
         const body = encodeURIComponent(
 `Dear Admin,\n\nA new incident has been submitted.\n\nID: ${incident.id}\nRequester: ${requester}\nSystem: ${system}\nPriority: ${priority}\nDescription: ${description}\n\nPlease check the dashboard.`
         );
-        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}${ccParam}`;
       }
     });
 
@@ -2359,6 +2490,7 @@
       const impact = document.getElementById("request-impact").value;
       const due = document.getElementById("request-due").value;
       const approver = document.getElementById("request-approver").value; 
+      const ccEmails = document.getElementById("request-cc").value.trim();
       const reference = document.getElementById("request-ref").value.trim();
       const remark = document.getElementById("request-remark").value.trim();
       const description = document.getElementById("request-description").value.trim();
@@ -2373,7 +2505,7 @@
 
       const req = {
         id: generateId("REQ"), type: "Request", requester, dept, phone, email, system, module, title,
-        requestType: type, category, impact, dueDate: due, approver, reference, remark, description,
+        requestType: type, category, impact, dueDate: due, approver, ccEmails, reference, remark, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
         attachments: [...requestStagedAttachments], 
         sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
@@ -2392,11 +2524,12 @@
 
       const admin = systemUsers.find(u => u.role === 'admin');
       if (admin && admin.email) {
+        const ccParam = ccEmails ? `&cc=${encodeURIComponent(ccEmails)}` : "";
         const subject = encodeURIComponent(`[ITSM] New Service Request: ${req.id} - ${req.title}`);
         const body = encodeURIComponent(
 `Dear Admin,\n\nA new request has been submitted.\n\nID: ${req.id}\nRequester: ${requester}\nType: ${type}\nSystem: ${system}\nDescription: ${description}\n\nPlease check the dashboard.`
         );
-        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:${admin.email}?subject=${subject}&body=${body}${ccParam}`;
       }
     });
 
@@ -2418,33 +2551,37 @@
       URL.revokeObjectURL(url);
     }
 
-    exportIncBtn.addEventListener("click", () => {
-      const header = [
-        "ID","Type","Requester","Dept","Phone","Email","System","Module","Title","Category","Impact","Priority","DueDate","Approver","Reference",
-        "Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"
-      ];
-      const rows = [header, ...incidents.map(i => [
-        i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module, i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "",
-        getUserName(i.approver) || i.approver, i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt),
-        i.sla ? formatDateTime(i.sla.responseDueAt) : "", i.sla ? formatDateTime(i.sla.resolutionDueAt) : "", i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "",
-        i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "", i.sla ? i.sla.responseBreached : "", i.sla ? i.sla.resolutionBreached : ""
-      ])];
-      downloadCSV("incidents.csv", rows);
-    });
+    if(exportIncBtn) {
+      exportIncBtn.addEventListener("click", () => {
+        const header = [
+          "ID","Type","Requester","Dept","Phone","Email","System","Module","Title","Category","Impact","Priority","DueDate","Approver","CC_Emails","Reference",
+          "Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"
+        ];
+        const rows = [header, ...incidents.map(i => [
+          i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module, i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "",
+          getUserName(i.approver) || i.approver, i.ccEmails || "", i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt),
+          i.sla ? formatDateTime(i.sla.responseDueAt) : "", i.sla ? formatDateTime(i.sla.resolutionDueAt) : "", i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "",
+          i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "", i.sla ? i.sla.responseBreached : "", i.sla ? i.sla.resolutionBreached : ""
+        ])];
+        downloadCSV("incidents.csv", rows);
+      });
+    }
 
-    exportReqBtn.addEventListener("click", () => {
-      const header = [
-        "ID","Type","Requester","Dept","Phone","Email","System","Module","Title","RequestType","Category","Impact","DueDate","Approver","Reference",
-        "Remark","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"
-      ];
-      const rows = [header, ...requests.map(r => [
-        r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "",
-        getUserName(r.approver) || r.approver,r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt),
-        r.sla ? formatDateTime(r.sla.responseDueAt) : "", r.sla ? formatDateTime(r.sla.resolutionDueAt) : "", r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "",
-        r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "", r.sla ? r.sla.responseBreached : "", r.sla ? r.sla.resolutionBreached : ""
-      ])];
-      downloadCSV("requests.csv", rows);
-    });
+    if(exportReqBtn) {
+      exportReqBtn.addEventListener("click", () => {
+        const header = [
+          "ID","Type","Requester","Dept","Phone","Email","System","Module","Title","RequestType","Category","Impact","DueDate","Approver","CC_Emails","Reference",
+          "Remark","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"
+        ];
+        const rows = [header, ...requests.map(r => [
+          r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "",
+          getUserName(r.approver) || r.approver, r.ccEmails || "", r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt),
+          r.sla ? formatDateTime(r.sla.responseDueAt) : "", r.sla ? formatDateTime(r.sla.resolutionDueAt) : "", r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "",
+          r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "", r.sla ? r.sla.responseBreached : "", r.sla ? r.sla.resolutionBreached : ""
+        ])];
+        downloadCSV("requests.csv", rows);
+      });
+    }
 
     // ================== RENDER FUNCTIONS ==================
     function renderApproveTasks() {
@@ -2466,6 +2603,7 @@
         tr.innerHTML = `
           <td>${t.id}</td>
           <td>${t.type}</td>
+          <td>${formatPriority(t.priority)}</td>
           <td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td>
           <td>${t.requester}</td>
           <td>${formatDateTime(t.createdAt)}</td>
@@ -2544,7 +2682,7 @@
         .forEach(i => {
           const tr = document.createElement("tr");
           const cls = statusClassName(i.status, i.sla && i.sla.escalated);
-          tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${i.priority}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${i.requester}</td>`;
+          tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${i.requester}</td>`;
           incidentTableBody.appendChild(tr);
         });
     }
@@ -2568,7 +2706,7 @@
         .forEach(r => {
           const tr = document.createElement("tr");
           const cls = statusClassName(r.status, r.sla && r.sla.escalated);
-          tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}">${r.title}</td><td>${r.system}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
+          tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}">${r.title}</td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
           requestTableBody.appendChild(tr);
         });
     }
@@ -2576,11 +2714,11 @@
     function renderMyTickets() {
       if (!currentUser) return;
       myTicketsBody.innerHTML = "";
-      const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id);
+      const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr");
           const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${t.title}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
+          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
           myTicketsBody.appendChild(tr);
         });
     }
@@ -2604,7 +2742,7 @@
           const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-";
           const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-");
           const kind = t.type === "Incident" ? "incident" : "request";
-          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${t.priority || "-"}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
+          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
         });
       const adminSelectAllCb = document.getElementById("admin-select-all");
@@ -2708,6 +2846,44 @@
       
       detailDescriptionInput.value = t.description || "";
       
+      // จัดการแบนเนอร์ยืนยันปิดตั๋ว (2-Step Closing)
+      const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
+      const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
+      
+      if (t.status === "Resolved" && isOwner && resConfirmBanner) {
+        resConfirmBanner.style.display = "flex";
+        
+        document.getElementById("btn-requester-confirm-close").onclick = async () => {
+          if(!confirm("ยืนยันปิดตั๋วใบนี้เสร็จสมบูรณ์?")) return;
+          t.status = "Closed";
+          if(t.sla) t.sla.resolvedAt = new Date().toISOString();
+          t.updatedAt = new Date().toISOString();
+          if(!Array.isArray(t.notes)) t.notes = [];
+          t.notes.push({ text: "✅ ผู้แจ้งยืนยันปิดตั๋วเรียบร้อยแล้ว (Confirmed Closed)", createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
+          await updateTicket(kind, t);
+          logAudit("CONFIRM_CLOSE", t.id, "Requester confirmed resolved ticket closed");
+          renderAll();
+          closeDetail();
+          showToast("ปิดตั๋วสำเร็จ ขอบคุณครับ");
+        };
+
+        document.getElementById("btn-requester-confirm-reopen").onclick = async () => {
+          const rsn = prompt("ระบุปัญหาที่ยังพบอยู่เพื่อส่งกลับให้ IT ตรวจสอบอีกครั้ง:");
+          if(!rsn) return;
+          t.status = "In Progress";
+          t.updatedAt = new Date().toISOString();
+          if(!Array.isArray(t.notes)) t.notes = [];
+          t.notes.push({ text: `❌ ผู้แจ้งปฏิเสธการปิดตั๋ว (Re-opened)\nสาเหตุ: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
+          await updateTicket(kind, t);
+          logAudit("REOPEN", t.id, "Requester re-opened resolved ticket");
+          renderAll();
+          closeDetail();
+          showToast("ส่งตั๋วกลับให้ IT ตรวจสอบแล้ว");
+        };
+      } else if(resConfirmBanner) {
+        resConfirmBanner.style.display = "none";
+      }
+
       detailNoteStagedAttachments = [];
       renderDetailNoteStagedAttachments();
 
@@ -2725,6 +2901,7 @@
       const t = findTicket(currentDetail.kind, currentDetail.id);
       if (!t) return;
       
+      const oldStatus = t.status;
       t.title = detailSubjectInput.value.trim() || t.title;
       t.system = detailSystemInput.value.trim();
       t.module = detailModuleInput.value.trim();
@@ -2738,6 +2915,18 @@
         await assignTicket(t, newAssignee, true); 
       }
       
+      // 2-step closing note tracking
+      if (t.status === "Resolved" && oldStatus !== "Resolved") {
+        if(!Array.isArray(t.notes)) t.notes = [];
+        t.notes.push({
+          text: "✅ IT Support ได้แก้ไขปัญหาเบื้องต้นแล้ว (Resolved)\nรอผู้แจ้งตรวจสอบและกดยืนยันปิดตั๋ว",
+          createdAt: new Date().toISOString(),
+          visibility: "public",
+          authorId: currentUser.id,
+          authorName: currentUser.name
+        });
+      }
+
       if (t.sla) {
         if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
         if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
