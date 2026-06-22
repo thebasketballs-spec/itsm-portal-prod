@@ -2856,7 +2856,7 @@
         });
     }
 
-    function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable(); renderKB(); }
+    function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable(); renderKB();renderReports(); }
 
     [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch].forEach(el => el.addEventListener("input", renderIncidents));
     [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch].forEach(el => el.addEventListener("input", renderRequests));
