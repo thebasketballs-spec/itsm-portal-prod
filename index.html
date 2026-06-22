@@ -692,6 +692,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- ================== LOGIN ================== -->
   <div id="login-root">
     <div class="login-card">
       <h1>ITSM Service Portal</h1>
@@ -715,9 +716,11 @@
     </div>
   </div>
 
+  <!-- ================== APP ================== -->
   <div id="app-root">
     <div class="app-container">
       
+      <!-- STICKY HEADER CONTAINER -->
       <div class="sticky-header-container">
         <div class="top-bar">
           <div>
@@ -745,6 +748,7 @@
           </div>
         </div>
 
+        <!-- TABS NAVIGATION -->
         <div class="tabs" id="tabs">
           <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
           <div class="nav-tab" data-target="approve-tasks-section">
@@ -763,6 +767,7 @@
         </div>
       </div>
 
+      <!-- DASHBOARD -->
       <div id="dashboard-section" class="section active">
         <div class="grid">
           <div class="card">
@@ -810,6 +815,7 @@
         </div>
       </div>
 
+      <!-- MY TASKS (APPROVE) SECTION -->
       <div id="approve-tasks-section" class="section">
         <div class="card">
           <h2>My Tasks (Pending Approval)</h2>
@@ -833,6 +839,7 @@
         </div>
       </div>
 
+      <!-- INCIDENT -->
       <div id="incident-section" class="section">
         <div class="grid">
           <div class="card">
@@ -840,12 +847,14 @@
             <small>Use for system down, slow performance, errors, or issues impacting operations.</small>
             <form id="incident-form">
               <div class="form-row">
+                <!-- เปลี่ยน Requester เป็น Dropdown -->
                 <div class="form-group">
-                  <label>Requester *</label>
+                  <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
                   <select id="incident-requester" required>
                     <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
                   </select>
                 </div>
+                <!-- Department ดึงอัตโนมัติ -->
                 <div class="form-group">
                   <label>Department *</label>
                   <input type="text" id="incident-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -856,6 +865,7 @@
                   <label>Phone</label>
                   <input type="tel" id="incident-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
+                <!-- Email ดึงอัตโนมัติ -->
                 <div class="form-group">
                   <label>Email *</label>
                   <input type="email" id="incident-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -875,6 +885,7 @@
                     <option value="Others">Others</option>
                   </select>
                 </div>
+                <!-- Cascading Datalist Module -->
                 <div class="form-group">
                   <label>Module</label>
                   <input type="text" id="incident-module" list="inc-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
@@ -886,6 +897,7 @@
                 <div class="form-group">
                   <label>Subject *</label>
                   <input type="text" id="incident-title" required placeholder="ระบุหัวข้อปัญหา เช่น TM1 ล็อกอินไม่ได้..." />
+                  <!-- สกัดกั้นตั๋วอัจฉริยะ (AI Deflection) -->
                   <div id="inc-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                 <div class="form-group">
@@ -936,11 +948,13 @@
                 </div>
               </div>
 
+              <!-- CC Email Field -->
               <div class="form-group">
                 <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
                 <input type="text" id="incident-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
               </div>
 
+              <!-- INCIDENT DESCRIPTION WITH PASTE & ATTACH FILE -->
               <div class="form-group">
                 <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
                 <textarea id="incident-description" required placeholder="พิมพ์รายละเอียดปัญหา และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
@@ -1032,6 +1046,7 @@
         </div>
       </div>
 
+      <!-- REQUEST -->
       <div id="request-section" class="section">
         <div class="grid">
           <div class="card">
@@ -1039,13 +1054,15 @@
             <small>Request: Access / Change / Service / Report / Dashboard</small>
             <form id="request-form">
               <div class="form-row">
+                <!-- เปลี่ยน Requester เป็น Dropdown -->
                 <div class="form-group">
-                  <label>Requester *</label>
+                  <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
                   <select id="request-requester" required>
                     <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
                   </select>
                 </div>
-                <div class="form-group">
+                <!-- Department ดึงอัตโนมัติ -->
+                 <div class="form-group">
                   <label>Department *</label>
                   <input type="text" id="request-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
@@ -1055,6 +1072,7 @@
                   <label>Phone</label>
                   <input type="tel" id="request-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
+                <!-- Email ดึงอัตโนมัติ -->
                 <div class="form-group">
                   <label>Email *</label>
                   <input type="email" id="request-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -1073,6 +1091,7 @@
                     <option value="Others">Others</option>
                   </select>
                 </div>
+                <!-- Cascading Datalist Module -->
                 <div class="form-group">
                   <label>Module</label>
                   <input type="text" id="request-module" list="req-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
@@ -1084,6 +1103,7 @@
                 <div class="form-group">
                   <label>Subject *</label>
                   <input type="text" id="request-title" required placeholder="ระบุหัวข้อคำขอ..." />
+                  <!-- สกัดกั้นตั๋วอัจฉริยะ (AI Deflection) -->
                   <div id="req-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                  <div class="form-group">
@@ -1146,6 +1166,7 @@
                 </div>
               </div>
 
+              <!-- REQUEST DESCRIPTION WITH PASTE & ATTACH FILE -->
               <div class="form-group">
                 <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
                 <textarea id="request-description" required placeholder="พิมพ์รายละเอียดคำขอ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
@@ -1235,6 +1256,7 @@
         </div>
       </div>
 
+      <!-- MY TICKETS -->
       <div id="mytickets-section" class="section">
         <div class="card">
           <h2>My Tickets</h2>
@@ -1259,6 +1281,7 @@
         </div>
       </div>
 
+      <!-- REPORTS -->
       <div id="reports-section" class="section">
         <div class="grid">
           <div class="card">
@@ -1311,6 +1334,7 @@
         </div>
       </div>
 
+      <!-- ADMIN DASHBOARD -->
       <div id="admin-section" class="section">
         <div>
           <div class="card">
@@ -1376,6 +1400,7 @@
         </div>
       </div>
   
+      <!-- AUDIT LOG -->
       <div id="audit-section" class="section">
         <div class="card">
           <h2>Audit Log</h2>
@@ -1398,6 +1423,7 @@
         </div>
        </div>
 
+      <!-- KB -->
       <div id="kb-section" class="section">
         <div class="card">
           <h2>Knowledge Base / FAQ</h2>
@@ -1412,6 +1438,7 @@
         </div>
       </div>
             
+      <!-- USER MANAGEMENT -->
       <div id="user-section" class="section">
         <div class="card">
           <h2>User Management</h2>
@@ -1494,6 +1521,7 @@
         </div>
       </div>
 
+      <!-- APPROVER SECTION -->
       <div id="approver-section" class="section">
         <div class="card">
           <h2>Approver Management</h2>
@@ -1516,6 +1544,7 @@
     </div>
   </div>
 
+  <!-- Detail Modal -->
   <div class="modal-backdrop" id="detail-backdrop">
     <div class="modal detail-modal">
       <div class="modal-header">
@@ -1600,10 +1629,11 @@
            </div>
           <div class="detail-row" style="margin-top:6px;">
             <div class="detail-label">Requester / Dept</div>
-            <div class="detail-value" id="detail-requester-dept"></div>
+            <!-- OBO Visual indicator point inside modal -->
+            <div class="detail-value" id="detail-requester-dept" style="text-align:right;"></div>
           </div>
-          <div class="detail-row">
-            <div class="detail-label">Created</div>
+          <div class="detail-row" style="margin-top:4px;">
+            <div class="detail-label">Created At</div>
             <div class="detail-value" id="detail-created"></div>
            </div>
           <div class="detail-row">
@@ -1905,6 +1935,17 @@
     // ================== HELPER FUNCTIONS ==================
     function getUserById(id) { return systemUsers.find(u => u.id === id) || null; }
     function getUserName(id) { const u = getUserById(id); return u ? u.name : ""; }
+    
+    // ฟังก์ชันติดสัญลักษณ์ OBO ท้ายชื่อผู้แจ้งในตารางส่วนกลาง
+    function formatRequesterObo(requesterName, createdById) {
+      if (!requesterName) return "-";
+      const creatorName = getUserName(createdById);
+      if (creatorName && creatorName.toLowerCase() !== requesterName.toLowerCase() && createdById !== "unknown" && createdById !== null) {
+        return `${requesterName} <span title="คีย์เปิดตั๋วแทนโดย: ${creatorName}" style="font-size:10px; background:#f3e8ff; color:#4338ca; padding:1px 6px; border-radius:4px; border:1px solid #c7d2fe; margin-left:4px; display:inline-block; line-height:1;">🏷️ OBO</span>`;
+      }
+      return requesterName;
+    }
+
     function formatPriority(p) {
       if (!p) return "-";
       if (p.includes("P1")) return "🔴 " + p;
@@ -2067,7 +2108,6 @@
       const incReqSelect = document.getElementById("incident-requester");
       const reqReqSelect = document.getElementById("request-requester");
       
-      // ดึงคนที่มีสิทธิ์เป็น Requester (รวมถึงคนเก่าที่ค่าเป็น undefined)
       const requesters = systemUsers.filter(u => u.isRequester !== false);
       
       let html = '<option value="">-- เลือกผู้แจ้ง (Requester) --</option>';
@@ -2156,8 +2196,8 @@
       
       populateAssigneeDropdowns();
       populateApproverDropdowns();
-      populateRequesterDropdowns(); // เติม Dropdown Requester
-      applyRequesterUserLock();     // ทำการล็อกหรือ Auto-fill ตาม Role
+      populateRequesterDropdowns(); 
+      applyRequesterUserLock();     
 
       renderAll();
     }
@@ -2515,7 +2555,7 @@
       incidentForm.reset();
       incidentStagedAttachments = [];
       renderIncidentStagedAttachments();
-      applyRequesterUserLock(); // คืนค่าล็อกหรือข้อมูลผู้แจ้งหลังล้างฟอร์ม
+      applyRequesterUserLock(); 
 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
       renderAll();
@@ -2573,7 +2613,7 @@
       requestForm.reset();
       requestStagedAttachments = [];
       renderRequestStagedAttachments();
-      applyRequesterUserLock(); // คืนค่าล็อกหรือข้อมูลผู้แจ้งหลังล้างฟอร์ม
+      applyRequesterUserLock(); 
 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
       renderAll();
@@ -2662,7 +2702,7 @@
           <td>${t.type}</td>
           <td>${formatPriority(t.priority)}</td>
           <td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td>
-          <td>${t.requester}</td>
+          <td>${formatRequesterObo(t.requester, t.createdBy)}</td>
           <td>${formatDateTime(t.createdAt)}</td>
           <td>
             <button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button>
@@ -2739,7 +2779,7 @@
         .forEach(i => {
           const tr = document.createElement("tr");
           const cls = statusClassName(i.status, i.sla && i.sla.escalated);
-          tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${i.requester}</td>`;
+          tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${formatRequesterObo(i.requester, i.createdBy)}</td>`;
           incidentTableBody.appendChild(tr);
         });
     }
@@ -2763,7 +2803,7 @@
         .forEach(r => {
           const tr = document.createElement("tr");
           const cls = statusClassName(r.status, r.sla && r.sla.escalated);
-          tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}">${r.title}</td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
+          tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}"><strong style="color:var(--banpu-primary);">${r.title}</strong> <span class="muted" style="font-size:11px;">(${formatRequesterObo(r.requester, r.createdBy)})</span></td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
           requestTableBody.appendChild(tr);
         });
     }
@@ -2775,7 +2815,7 @@
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr");
           const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
+          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
           myTicketsBody.appendChild(tr);
         });
     }
@@ -2799,7 +2839,7 @@
           const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-";
           const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-");
           const kind = t.type === "Incident" ? "incident" : "request";
-          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
+          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
         });
       const adminSelectAllCb = document.getElementById("admin-select-all");
@@ -2895,7 +2935,17 @@
       detailAssigneeSelect.value = t.assignedTo || "";
       detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)";
       detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
-      detailRequesterDeptSpan.textContent = `${t.requester || "-"}${t.dept ? " / " + t.dept : ""}`;
+      
+      // OBO Visual indicator point inside modal[cite: 2]
+      const reqName = t.requester || "-";
+      const deptName = t.dept ? ` / ${t.dept}` : "";
+      const creatorName = getUserName(t.createdBy);
+      let oboText = "";
+      if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) {
+        oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${creatorName}</strong></div>`;
+      }
+      document.getElementById("detail-requester-dept").innerHTML = `<strong>${reqName}</strong>${deptName}<br/>${oboText}`;
+
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
       
       const approverName = getUserName(t.approver);
@@ -2903,7 +2953,6 @@
       
       detailDescriptionInput.value = t.description || "";
       
-      // 2-Step Closing banner trigger
       const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
       const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
       
