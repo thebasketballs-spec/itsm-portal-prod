@@ -1937,7 +1937,7 @@
       u.isApprover = isApproverChecked;
       await dbUpdate("users", u.firebaseId, u);
       populateApproverDropdowns();
-      renderUserTable();
+      renderAll();
       showToast(`อัปเดตสิทธิ์ Approver สำหรับ ${u.name} เรียบร้อย`);
     };
 
@@ -2332,7 +2332,7 @@
       renderIncidentStagedAttachments();
 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`);
-      renderIncidents(); renderDashboard(); renderMyTickets(); renderAdminTable(); renderApproveTasks();
+      renderAll();
       showToast(`Created Incident ${incident.id}`);
 
       const admin = systemUsers.find(u => u.role === 'admin');
@@ -2387,7 +2387,7 @@
       renderRequestStagedAttachments();
 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`);
-      renderRequests(); renderDashboard(); renderMyTickets(); renderAdminTable(); renderApproveTasks();
+      renderAll();
       showToast(`Created Request ${req.id}`);
 
       const admin = systemUsers.find(u => u.role === 'admin');
@@ -2607,7 +2607,8 @@
           tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${t.priority || "-"}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
         });
-      adminSelectAll.checked = false;
+      const adminSelectAllCb = document.getElementById("admin-select-all");
+      if (adminSelectAllCb) adminSelectAllCb.checked = false;
     }
 
     function renderAuditLog() {
@@ -2824,12 +2825,12 @@
         text, 
         createdAt: new Date().toISOString(), 
         visibility, 
-        authorId: currentUser.id, 
-        authorName: currentUser.name,
+        authorId: currentUser ? currentUser.id : "unknown", 
+        authorName: currentUser ? currentUser.name : "Unknown User",
         attachments: [...detailNoteStagedAttachments]
       });
       
-      if (t.sla && !t.sla.firstResponseAt && ["support", "admin", "manager"].includes(currentUser.role)) {
+      if (t.sla && !t.sla.firstResponseAt && currentUser && ["support", "admin", "manager"].includes(currentUser.role)) {
         t.sla.firstResponseAt = new Date().toISOString();
       }
       t.updatedAt = new Date().toISOString();
@@ -2844,6 +2845,14 @@
       renderDetailNotes(t); 
       renderAll(); 
     });
+
+    // ================== ADMIN SELECT ALL CHECKBOX ==================
+    const adminSelectAllInput = document.getElementById("admin-select-all");
+    if (adminSelectAllInput) {
+      adminSelectAllInput.addEventListener("change", (e) => {
+        document.querySelectorAll(".admin-select").forEach(cb => cb.checked = e.target.checked);
+      });
+    }
 
     // ================== ADMIN DELETE & BULK ==================
     document.addEventListener("click", async (e) => {
@@ -2934,8 +2943,7 @@
         userForm.reset();
       }
       populateApproverDropdowns();
-      renderUserTable(); 
-      renderApproverTable();
+      renderAll(); 
     });
 
     window.editUser = function(index) {
@@ -2963,8 +2971,7 @@
       
       systemUsers.splice(index, 1);
       populateApproverDropdowns();
-      renderUserTable(); 
-      renderApproverTable();
+      renderAll(); 
     };
 
     function resetUserForm() {
@@ -3017,6 +3024,8 @@
       renderDashboard(); 
       renderAdminTable(); 
       renderApproveTasks();
+      renderUserTable();
+      renderApproverTable();
       renderKB();
     }
 
