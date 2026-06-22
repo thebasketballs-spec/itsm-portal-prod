@@ -2856,9 +2856,18 @@
 
     function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable(); renderKB();renderReports(); }
 
-    [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch].forEach(el => el.addEventListener("input", renderIncidents));
-    [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch].forEach(el => el.addEventListener("input", renderRequests));
-    [adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch].forEach(el => el.addEventListener("input", renderAdminTable));
+    // --- ระบบ Filter & ปุ่ม Clear ทั้ง 3 หน้า (Refactored) ---
+    const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
+    incFilters.forEach(el => el.addEventListener("input", renderIncidents));
+    incidentClearFilter.addEventListener("click", () => { incFilters.forEach(el => el.value = ""); renderIncidents(); });
+
+    const reqFilters = [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch];
+    reqFilters.forEach(el => el.addEventListener("input", renderRequests));
+    requestClearFilter.addEventListener("click", () => { reqFilters.forEach(el => el.value = ""); renderRequests(); });
+
+    const adminFilters = [adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch];
+    adminFilters.forEach(el => el.addEventListener("input", renderAdminTable));
+    adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
 
     loadDataFromFirebase();
   </script>
