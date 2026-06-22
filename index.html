@@ -2787,10 +2787,55 @@
     }
 
     // ================== OTHER UTILS ==================
-    function renderReports() { 
-      const all = [...incidents, ...requests]; const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
-      all.forEach(t => { const days = calcAgeDays(t.createdAt); if (days <= 1) buckets["0-1"]++; else if (days <= 3) buckets["1-3"]++; else if (days <= 7) buckets["3-7"]++; else buckets[">7"]++; });
+  function renderReports() { 
+      const all = [...incidents, ...requests]; 
+
+      // 1. ตาราง Aging (ของเดิม)
+      const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
+      all.forEach(t => { 
+        const days = calcAgeDays(t.createdAt); 
+        if (days <= 1) buckets["0-1"]++; else if (days <= 3) buckets["1-3"]++; else if (days <= 7) buckets["3-7"]++; else buckets[">7"]++; 
+      });
       agingRow.innerHTML = `<tr><td>Count</td><td>${buckets["0-1"]}</td><td>${buckets["1-3"]}</td><td>${buckets["3-7"]}</td><td>${buckets[">7"]}</td></tr>`;
+
+      // 2. ตาราง Resolution Rate (ตารางกลางที่เคยโล่ง)
+      const totalTickets = all.length;
+      const resolvedTickets = all.filter(t => ["Resolved", "Closed"].includes(t.status)).length;
+      const resRate = totalTickets > 0 ? ((resolvedTickets / totalTickets) * 100).toFixed(1) + "%" : "0%";
+      resolutionRow.innerHTML = `
+        <tr><td>Total Tickets</td><td><strong>${totalTickets}</strong></td></tr>
+        <tr><td>Resolved / Closed</td><td><strong style="color:#15803d;">${resolvedTickets}</strong></td></tr>
+        <tr style="background:#eef2ff;"><td><strong>Resolution Rate</strong></td><td><strong style="color:var(--banpu-primary);">${resRate}</strong></td></tr>
+      `;
+
+      // 3. ตาราง Staff Performance (เป้าหมายหลักที่คุณถามหา)
+      staffRow.innerHTML = "";
+      
+      // ดึงมาเฉพาะ User ที่ตั้งค่า assignTo = true (กลุ่มคนที่เป็น IT Support รับตั๋วได้)
+      const supportStaffs = systemUsers.filter(u => u.assignTo === true);
+
+      supportStaffs.forEach(staff => {
+        // หาตั๋วทั้งหมดที่พนักงานคนนี้เป็นคนถือ และมีสถานะแก้เสร็จแล้ว (Resolved หรือ Closed)
+        const staffResolved = all.filter(t => t.assignedTo === staff.id && ["Resolved", "Closed"].includes(t.status));
+        
+        const countResolved = staffResolved.length;
+        const countSlaMet = staffResolved.filter(t => t.sla && !t.sla.resolutionBreached).length;
+        const countSlaBreach = staffResolved.filter(t => t.sla && t.sla.resolutionBreached).length;
+
+        staffRow.innerHTML += `
+          <tr>
+            <td><strong>${staff.name}</strong> <span class="muted" style="font-size:10px;">(${staff.department || 'IT'})</span></td>
+            <td style="text-align:center;"><strong>${countResolved}</strong></td>
+            <td style="text-align:center;"><span style="color:#15803d; font-weight:600;">${countSlaMet}</span></td>
+            <td style="text-align:center;"><span style="color:${countSlaBreach > 0 ? '#b91c1c' : '#6b7280'}; font-weight:600;">${countSlaBreach}</span></td>
+          </tr>
+        `;
+      });
+
+      // Fallback กรณีฐานข้อมูลยังไม่มีใครถูกติ๊กให้เป็น IT Support เลย
+      if (supportStaffs.length === 0) {
+        staffRow.innerHTML = `<tr><td colspan="4" style="text-align:center;" class="muted">No IT Support staff configured</td></tr>`;
+      }
     }
     
     function checkSLA() { 
