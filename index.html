@@ -692,7 +692,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- ================== LOGIN ================== -->
   <div id="login-root">
     <div class="login-card">
       <h1>ITSM Service Portal</h1>
@@ -716,11 +715,9 @@
     </div>
   </div>
 
-  <!-- ================== APP ================== -->
   <div id="app-root">
     <div class="app-container">
       
-      <!-- STICKY HEADER CONTAINER -->
       <div class="sticky-header-container">
         <div class="top-bar">
           <div>
@@ -748,7 +745,6 @@
           </div>
         </div>
 
-        <!-- TABS NAVIGATION -->
         <div class="tabs" id="tabs">
           <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
           <div class="nav-tab" data-target="approve-tasks-section">
@@ -767,7 +763,6 @@
         </div>
       </div>
 
-      <!-- DASHBOARD -->
       <div id="dashboard-section" class="section active">
         <div class="grid">
           <div class="card">
@@ -815,7 +810,6 @@
         </div>
       </div>
 
-      <!-- MY TASKS (APPROVE) SECTION -->
       <div id="approve-tasks-section" class="section">
         <div class="card">
           <h2>My Tasks (Pending Approval)</h2>
@@ -839,7 +833,6 @@
         </div>
       </div>
 
-      <!-- INCIDENT -->
       <div id="incident-section" class="section">
         <div class="grid">
           <div class="card">
@@ -847,14 +840,12 @@
             <small>Use for system down, slow performance, errors, or issues impacting operations.</small>
             <form id="incident-form">
               <div class="form-row">
-                <!-- เปลี่ยน Requester เป็น Dropdown -->
                 <div class="form-group">
                   <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
                   <select id="incident-requester" required>
                     <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
                   </select>
                 </div>
-                <!-- Department ดึงอัตโนมัติ -->
                 <div class="form-group">
                   <label>Department *</label>
                   <input type="text" id="incident-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -865,7 +856,6 @@
                   <label>Phone</label>
                   <input type="tel" id="incident-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
-                <!-- Email ดึงอัตโนมัติ -->
                 <div class="form-group">
                   <label>Email *</label>
                   <input type="email" id="incident-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -885,7 +875,6 @@
                     <option value="Others">Others</option>
                   </select>
                 </div>
-                <!-- Cascading Datalist Module -->
                 <div class="form-group">
                   <label>Module</label>
                   <input type="text" id="incident-module" list="inc-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
@@ -897,7 +886,6 @@
                 <div class="form-group">
                   <label>Subject *</label>
                   <input type="text" id="incident-title" required placeholder="ระบุหัวข้อปัญหา เช่น TM1 ล็อกอินไม่ได้..." />
-                  <!-- สกัดกั้นตั๋วอัจฉริยะ (AI Deflection) -->
                   <div id="inc-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                 <div class="form-group">
@@ -948,13 +936,11 @@
                 </div>
               </div>
 
-              <!-- CC Email Field -->
               <div class="form-group">
                 <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
                 <input type="text" id="incident-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
               </div>
 
-              <!-- INCIDENT DESCRIPTION WITH PASTE & ATTACH FILE -->
               <div class="form-group">
                 <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
                 <textarea id="incident-description" required placeholder="พิมพ์รายละเอียดปัญหา และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
@@ -1046,7 +1032,6 @@
         </div>
       </div>
 
-      <!-- REQUEST -->
       <div id="request-section" class="section">
         <div class="grid">
           <div class="card">
@@ -1054,14 +1039,12 @@
             <small>Request: Access / Change / Service / Report / Dashboard</small>
             <form id="request-form">
               <div class="form-row">
-                <!-- เปลี่ยน Requester เป็น Dropdown -->
                 <div class="form-group">
                   <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
                   <select id="request-requester" required>
                     <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
                   </select>
                 </div>
-                <!-- Department ดึงอัตโนมัติ -->
                  <div class="form-group">
                   <label>Department *</label>
                   <input type="text" id="request-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -1072,7 +1055,6 @@
                   <label>Phone</label>
                   <input type="tel" id="request-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
-                <!-- Email ดึงอัตโนมัติ -->
                 <div class="form-group">
                   <label>Email *</label>
                   <input type="email" id="request-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
@@ -1091,7 +1073,6 @@
                     <option value="Others">Others</option>
                   </select>
                 </div>
-                <!-- Cascading Datalist Module -->
                 <div class="form-group">
                   <label>Module</label>
                   <input type="text" id="request-module" list="req-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
@@ -1103,7 +1084,6 @@
                 <div class="form-group">
                   <label>Subject *</label>
                   <input type="text" id="request-title" required placeholder="ระบุหัวข้อคำขอ..." />
-                  <!-- สกัดกั้นตั๋วอัจฉริยะ (AI Deflection) -->
                   <div id="req-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                  <div class="form-group">
@@ -1166,7 +1146,6 @@
                 </div>
               </div>
 
-              <!-- REQUEST DESCRIPTION WITH PASTE & ATTACH FILE -->
               <div class="form-group">
                 <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
                 <textarea id="request-description" required placeholder="พิมพ์รายละเอียดคำขอ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
@@ -1256,7 +1235,6 @@
         </div>
       </div>
 
-      <!-- MY TICKETS -->
       <div id="mytickets-section" class="section">
         <div class="card">
           <h2>My Tickets</h2>
@@ -1281,7 +1259,6 @@
         </div>
       </div>
 
-      <!-- REPORTS -->
       <div id="reports-section" class="section">
         <div class="grid">
           <div class="card">
@@ -1334,7 +1311,6 @@
         </div>
       </div>
 
-      <!-- ADMIN DASHBOARD -->
       <div id="admin-section" class="section">
         <div>
           <div class="card">
@@ -1400,7 +1376,6 @@
         </div>
       </div>
   
-      <!-- AUDIT LOG -->
       <div id="audit-section" class="section">
         <div class="card">
           <h2>Audit Log</h2>
@@ -1423,7 +1398,6 @@
         </div>
        </div>
 
-      <!-- KB -->
       <div id="kb-section" class="section">
         <div class="card">
           <h2>Knowledge Base / FAQ</h2>
@@ -1438,7 +1412,6 @@
         </div>
       </div>
             
-      <!-- USER MANAGEMENT -->
       <div id="user-section" class="section">
         <div class="card">
           <h2>User Management</h2>
@@ -1521,7 +1494,6 @@
         </div>
       </div>
 
-      <!-- APPROVER SECTION -->
       <div id="approver-section" class="section">
         <div class="card">
           <h2>Approver Management</h2>
@@ -1544,7 +1516,6 @@
     </div>
   </div>
 
-  <!-- Detail Modal -->
   <div class="modal-backdrop" id="detail-backdrop">
     <div class="modal detail-modal">
       <div class="modal-header">
@@ -1629,7 +1600,6 @@
            </div>
           <div class="detail-row" style="margin-top:6px;">
             <div class="detail-label">Requester / Dept</div>
-            <!-- OBO Visual indicator point inside modal -->
             <div class="detail-value" id="detail-requester-dept" style="text-align:right;"></div>
           </div>
           <div class="detail-row" style="margin-top:4px;">
@@ -1932,11 +1902,34 @@
       }
     }
 
-    // ================== HELPER FUNCTIONS ==================
+    // ================== HELPER FUNCTIONS (Running Number Generator) ==================
+    
+    // ➔ ฟังก์ชันสุ่มเลขตัวใหม่: ระบบ Running Number (เช่น INC-2606-0001)
+    function generateId(prefix, existingTickets) {
+      const now = new Date();
+      const yy = String(now.getFullYear()).slice(-2);
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const ymPrefix = `${prefix}-${yy}${mm}-`; // ผลลัพธ์: "INC-2606-"
+
+      // กรองหาตั๋วเฉพาะเดือนนี้
+      const monthTickets = existingTickets.filter(t => t.id && t.id.startsWith(ymPrefix));
+      let nextNum = 1;
+      
+      if (monthTickets.length > 0) {
+        // ดึงเลข 4 หลักท้ายออกมาหาค่าสูงสุด
+        const nums = monthTickets.map(t => {
+          const parts = t.id.split("-");
+          const val = parseInt(parts[parts.length - 1], 10);
+          return isNaN(val) ? 0 : val;
+        });
+        nextNum = Math.max(...nums) + 1;
+      }
+      return `${ymPrefix}${String(nextNum).padStart(4, "0")}`;
+    }
+
     function getUserById(id) { return systemUsers.find(u => u.id === id) || null; }
     function getUserName(id) { const u = getUserById(id); return u ? u.name : ""; }
     
-    // ฟังก์ชันติดสัญลักษณ์ OBO ท้ายชื่อผู้แจ้งในตารางส่วนกลาง
     function formatRequesterObo(requesterName, createdById) {
       if (!requesterName) return "-";
       const creatorName = getUserName(createdById);
@@ -1972,14 +1965,6 @@
       const mm = String(date.getMonth() + 1).padStart(2, "0");
       const dd = String(date.getDate()).padStart(2, "0");
       return `${dd}/${mm}/${yyyy}`;
-    }
-    function generateId(prefix) {
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const dd = String(now.getDate()).padStart(2, "0");
-      const rand = Math.floor(Math.random() * 9000) + 1000;
-      return `${prefix}-${yyyy}${mm}${dd}-${rand}`;
     }
     function getPriorityCode(priorityText) {
       if (!priorityText) return "P3";
@@ -2514,7 +2499,7 @@
       requestFileInput.value = "";
     });
 
-    // ================== CREATING TICKETS ==================
+    // ================== CREATING TICKETS (ใช้ Running Number ID) ==================
     incidentForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const requester = document.getElementById("incident-requester").value;
@@ -2542,7 +2527,8 @@
       const initialStatus = approver ? "Pending Approval" : "Open";
 
       const incident = {
-        id: generateId("INC"), type: "Incident", requester, dept, phone, email, system, module, title,
+        id: generateId("INC", incidents), // ➔ เรียกใช้ Running Number
+        type: "Incident", requester, dept, phone, email, system, module, title,
         category, impact, priority, dueDate: due || null, approver, ccEmails, reference, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
         attachments: [...incidentStagedAttachments], 
@@ -2600,7 +2586,8 @@
       const initialStatus = approver ? "Pending Approval" : "Open";
 
       const req = {
-        id: generateId("REQ"), type: "Request", requester, dept, phone, email, system, module, title,
+        id: generateId("REQ", requests), // ➔ เรียกใช้ Running Number
+        type: "Request", requester, dept, phone, email, system, module, title,
         requestType: type, category, impact, dueDate: due, approver, ccEmails, reference, remark, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
         attachments: [...requestStagedAttachments], 
@@ -2936,7 +2923,6 @@
       detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)";
       detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
       
-      // OBO Visual indicator point inside modal[cite: 2]
       const reqName = t.requester || "-";
       const deptName = t.dept ? ` / ${t.dept}` : "";
       const creatorName = getUserName(t.createdBy);
