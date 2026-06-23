@@ -142,8 +142,6 @@
       font-size: 13px;
       color: var(--banpu-muted);
     }
-
-    /* STICKY HEADER & TABS */
     .sticky-header-container {
       position: sticky;
       top: 0;
@@ -154,7 +152,6 @@
       margin-top: -10px;
       border-bottom: 1px solid var(--banpu-border);
     }
-
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -183,7 +180,6 @@
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
-    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -232,7 +228,6 @@
       padding: 4px 10px;
       font-size: 11px;
     }
-    /* Tabs */
     .tabs {
       display: flex;
       gap: 8px;
@@ -268,16 +263,13 @@
     .section.active {
       display: block;
     }
-    /* Layout */
     .grid {
       display: grid;
       grid-template-columns: 1.1fr 1.4fr;
       gap: 14px;
     }
     @media (max-width: 980px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
+      .grid { grid-template-columns: 1fr; }
     }
     .card {
       background: #f9fafb;
@@ -285,409 +277,79 @@
       padding: 14px;
       border: 1px solid var(--banpu-border);
     }
-    .card h2 {
-      margin: 0 0 4px;
-      font-size: 17px;
-      color: #111827;
+    .card h2 { margin: 0 0 4px; font-size: 17px; color: #111827; }
+    .card small { color: var(--banpu-muted); display: block; margin-bottom: 8px; font-size: 12px; }
+    .form-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .form-group { flex: 1 1 180px; display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+    label { font-weight: 500; display: flex; justify-content: space-between; gap: 4px; color: #374151; }
+    label span.en { font-weight: 400; font-size: 10px; color: var(--banpu-muted); }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+      padding: 6px 9px; border-radius: 8px; border: 1px solid var(--banpu-border); font-size: 12px; outline: none; background: #ffffff;
     }
-    .card small {
-      color: var(--banpu-muted);
-      display: block;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-    /* Form */
-    .form-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-    .form-group {
-      flex: 1 1 180px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      font-size: 12px;
-    }
-    label {
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      gap: 4px;
-      color: #374151;
-    }
-    label span.en {
-      font-weight: 400;
-      font-size: 10px;
-      color: var(--banpu-muted);
-    }
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    input[type="date"],
-    select,
-    textarea {
-      padding: 6px 9px;
-      border-radius: 8px;
-      border: 1px solid var(--banpu-border);
-      font-size: 12px;
-      outline: none;
-      background: #ffffff;
-    }
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--banpu-primary);
-      box-shadow: 0 0 0 1px rgba(42, 38, 129, 0.14);
-    }
-    textarea {
-      min-height: 70px;
-      resize: vertical;
-    }
-    /* Table */
-    .table-container {
-      margin-top: 8px;
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      background: #ffffff;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--banpu-border);
-    }
-    thead {
-      background: #f3f4ff;
-    }
-    th,
-    td {
-      padding: 6px 7px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-      white-space: nowrap;
-    }
-    th {
-      font-weight: 600;
-      color: #374151;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 7px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 500;
-    }
-    .status-pending-approval {
-      background: #e0e7ff;
-      color: #3730a3;
-    }
-    .status-open {
-      background: #eef2ff;
-      color: var(--banpu-primary);
-    }
-    .status-in-progress {
-      background: #fef3c7;
-      color: #b45309;
-    }
-    .status-resolved {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-    .status-pending {
-      background: #fffbeb;
-      color: #92400e;
-    }
-    .status-closed {
-      background: #dcfce7;
-          color: #15803d;
-    }
-    .status-cancelled {
-      background: #e5e7eb;
-      color: #4b5563;
-    }
-    .status-escalated {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-    .filters {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 6px;
-      align-items: center;
-      flex-wrap: wrap;
-      font-size: 11px;
-    }
-    .filters strong {
-      margin-right: 4px;
-      color: #374151;
-    }
-    .filters select,
-    .filters input[type="text"],
-    .filters input[type="date"] {
-      min-width: 110px;
-      font-size: 11px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--banpu-border);
-      background: #ffffff;
-    }
-    .filters input[type="text"] {
-      min-width: 150px;
-    }
-    .muted {
-      font-size: 11px;
-      color: var(--banpu-muted);
-      margin-top: 4px;
-    }
-    .danger-text {
-      color: #b91c1c;
-      font-size: 11px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      background: #e5e7eb;
-      color: #374151;
-      margin-right: 4px;
-    }
-    .badge-primary {
-      background: #dbeafe;
-      color: var(--banpu-primary);
-    }
-    .badge-green {
-      background: #dcfce7;
-      color: #15803d;
-    }
-    .badge-amber {
-      background: #fef3c7;
-      color: #b45309;
-    }
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    /* Modal Detail */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal-backdrop.active {
-      display: flex;
-    }
-    .modal {
-      background: #ffffff;
-      max-width: 960px;
-      width: 96%;
-      max-height: 92vh;
-      border-radius: 18px;
-      padding: 14px;
-      overflow: auto;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--banpu-border);
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--banpu-primary);
-    }
-    .close-btn {
-      border: none;
-      background: transparent;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px 8px;
-      line-height: 1;
-      color: #4b5563;
-    }
-    .modal-body {
-      font-size: 13px;
-      display: grid;
-      grid-template-columns: 1.1fr 1.1fr;
-      gap: 10px;
-    }
+    input:focus, select:focus, textarea:focus { border-color: var(--banpu-primary); box-shadow: 0 0 0 1px rgba(42, 38, 129, 0.14); }
+    textarea { min-height: 70px; resize: vertical; }
+    .table-container { margin-top: 8px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border-radius: 10px; overflow: hidden; border: 1px solid var(--banpu-border); }
+    thead { background: #f3f4ff; }
+    th, td { padding: 6px 7px; border-bottom: 1px solid #e5e7eb; text-align: left; white-space: nowrap; }
+    th { font-weight: 600; color: #374151; }
+    tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+    .status-pending-approval { background: #e0e7ff; color: #3730a3; }
+    .status-open { background: #eef2ff; color: var(--banpu-primary); }
+    .status-in-progress { background: #fef3c7; color: #b45309; }
+    .status-resolved { background: #dbeafe; color: #1e40af; }
+    .status-pending { background: #fffbeb; color: #92400e; }
+    .status-closed { background: #dcfce7; color: #15803d; }
+    .status-cancelled { background: #e5e7eb; color: #4b5563; }
+    .status-escalated { background: #fee2e2; color: #b91c1c; }
+    .pill-sla-breach { background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .pill-sla-ok { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .filters { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; flex-wrap: wrap; font-size: 11px; }
+    .filters strong { margin-right: 4px; color: #374151; }
+    .filters select, .filters input[type="text"], .filters input[type="date"] { min-width: 110px; font-size: 11px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--banpu-border); background: #ffffff; }
+    .filters input[type="text"] { min-width: 150px; }
+    .muted { font-size: 11px; color: var(--banpu-muted); margin-top: 4px; }
+    .danger-text { color: #b91c1c; font-size: 11px; }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: #e5e7eb; color: #374151; margin-right: 4px; }
+    .badge-primary { background: #dbeafe; color: var(--banpu-primary); }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-amber { background: #fef3c7; color: #b45309; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-backdrop.active { display: flex; }
+    .modal { background: #ffffff; max-width: 960px; width: 96%; max-height: 92vh; border-radius: 18px; padding: 14px; overflow: auto; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.6); border: 1px solid var(--banpu-border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--banpu-primary); }
+    .close-btn { border: none; background: transparent; font-size: 20px; cursor: pointer; padding: 4px 8px; line-height: 1; color: #4b5563; }
+    .modal-body { font-size: 13px; display: grid; grid-template-columns: 1.1fr 1.1fr; gap: 10px; }
     @media (max-width: 900px) {
-      .modal-body {
-        grid-template-columns: 1fr;
-      }
+      .modal-body { grid-template-columns: 1fr; }
     }
-    .detail-block {
-      background: #f9fafb;
-      border-radius: 10px;
-      padding: 8px;
-      border: 1px solid var(--banpu-border);
-    }
-    .detail-block h3 {
-      margin: 0 0 6px;
-      font-size: 13px;
-      color: #111827;
-    }
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 3px;
-      font-size: 12px;
-    }
-    .detail-label {
-      font-weight: 500;
-      color: #4b5563;
-    }
-    .detail-value {
-      text-align: right;
-      color: #111827;
-    }
-    .detail-edit-field {
-      width: 100%;
-      margin-top: 3px;
-    }
-    .detail-edit-field input,
-    .detail-edit-field select,
-    .detail-edit-field textarea {
-      width: 100%;
-      font-size: 12px;
-    }
-    .notes-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 0;
-      max-height: 240px;
-      overflow: auto;
-    }
-    .notes-list li {
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px dashed #e5e7eb;
-      font-size: 12px;
-    }
-    .note-meta {
-      font-size: 10px;
-      color: var(--banpu-muted);
-    }
-    .note-tag {
-      font-size: 10px;
-      border-radius: 999px;
-      padding: 1px 6px;
-      margin-right: 4px;
-    }
-    .note-tag-internal {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-    .note-tag-public {
-      background: #dcfce7;
-      color: #15803d;
-    }
-    .attachments-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 0;
-      max-height: 160px;
-      overflow: auto;
-    }
-    .attachments-list li {
-      margin-bottom: 6px;
-      padding-bottom: 4px;
-      border-bottom: 1px dashed #e5e7eb;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .attachment-preview {
-      max-width: 60px;
-      max-height: 40px;
-      border-radius: 4px;
-      object-fit: cover;
-      border: 1px solid #e5e7eb;
-    }
-    .dropzone {
-      border: 1px dashed #9ca3af;
-      border-radius: 10px;
-      padding: 8px;
-      font-size: 11px;
-      text-align: center;
-      background: #f9fafb;
-      color: var(--banpu-muted);
-      margin-top: 6px;
-    }
-    .dropzone.focused {
-      border-color: var(--banpu-primary);
-      background: #eef2ff;
-      color: var(--banpu-primary);
-    }
-    /* Toast notifications */
-    #toast-container {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      z-index: 2000;
-    }
-    .toast {
-      background: #020617;
-      color: #f9fafb;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
-      max-width: 260px;
-    }
-    /* Knowledge base */
-    .kb-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 6px 0 0;
-      font-size: 12px;
-    }
-    .kb-list li {
-      padding: 6px 8px;
-      border-radius: 8px;
-      background: #f9fafb;
-      border: 1px solid var(--banpu-border);
-      margin-bottom: 4px;
-    }
-    .kb-list strong {
-      display: block;
-      margin-bottom: 2px;
-    }
-    .kb-suggestion-banner {
-      display: none;
-      margin-top: 4px;
-      padding: 6px 10px;
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      border-radius: 6px;
-      font-size: 11px;
-      color: #92400e;
-      line-height: 1.4;
-    }
+    .detail-block { background: #f9fafb; border-radius: 10px; padding: 8px; border: 1px solid var(--banpu-border); }
+    .detail-block h3 { margin: 0 0 6px; font-size: 13px; color: #111827; }
+    .detail-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 3px; font-size: 12px; }
+    .detail-label { font-weight: 500; color: #4b5563; }
+    .detail-value { text-align: right; color: #111827; }
+    .detail-edit-field { width: 100%; margin-top: 3px; }
+    .detail-edit-field input, .detail-edit-field select, .detail-edit-field textarea { width: 100%; font-size: 12px; }
+    .notes-list { list-style: none; padding-left: 0; margin: 0; max-height: 240px; overflow: auto; }
+    .notes-list li { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #e5e7eb; font-size: 12px; }
+    .note-meta { font-size: 10px; color: var(--banpu-muted); }
+    .note-tag { font-size: 10px; border-radius: 999px; padding: 1px 6px; margin-right: 4px; }
+    .note-tag-internal { background: #fee2e2; color: #b91c1c; }
+    .note-tag-public { background: #dcfce7; color: #15803d; }
+    .attachments-list { list-style: none; padding-left: 0; margin: 0; max-height: 160px; overflow: auto; }
+    .attachments-list li { margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #e5e7eb; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+    .attachment-preview { max-width: 60px; max-height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #e5e7eb; }
+    .dropzone { border: 1px dashed #9ca3af; border-radius: 10px; padding: 8px; font-size: 11px; text-align: center; background: #f9fafb; color: var(--banpu-muted); margin-top: 6px; }
+    .dropzone.focused { border-color: var(--banpu-primary); background: #eef2ff; color: var(--banpu-primary); }
+    #toast-container { position: fixed; bottom: 16px; right: 16px; display: flex; flex-direction: column; gap: 6px; z-index: 2000; }
+    .toast { background: #020617; color: #f9fafb; padding: 8px 12px; border-radius: 999px; font-size: 12px; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4); max-width: 260px; }
+    .kb-list { list-style: none; padding-left: 0; margin: 6px 0 0; font-size: 12px; }
+    .kb-list li { padding: 6px 8px; border-radius: 8px; background: #f9fafb; border: 1px solid var(--banpu-border); margin-bottom: 4px; }
+    .kb-list strong { display: block; margin-bottom: 2px; }
+    .kb-suggestion-banner { display: none; margin-top: 4px; padding: 6px 10px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; font-size: 11px; color: #92400e; line-height: 1.4; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -714,117 +376,114 @@
       </div>
     </div>
   </div>
-
   <div id="app-root">
     <div class="app-container">
       
       <div class="sticky-header-container">
         <div class="top-bar">
           <div>
-            <h1>Finance System Service Portal – Incident & Request</h1>
-           <div class="subtitle">
+            <h1 data-i18n="portalTitle">Finance System Service Portal – Incident & Request</h1>
+            <div class="subtitle" data-i18n="portalSub">
               Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Firebase Integration).
-           </div>
+            </div>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <button class="btn-secondary btn-small" id="lang-toggle-btn" style="font-weight: 600; border-color: var(--banpu-accent);">🇹🇭 เปลี่ยนเป็นภาษาไทย</button>
+            
             <div class="user-pill">
               <span id="current-user-label">User: -</span>
               <span class="role-badge" id="current-role-label">-</span>
             </div>
-            <button class="btn-secondary btn-small" id="logout-btn">Log out</button>
+            <button class="btn-secondary btn-small" id="logout-btn" data-i18n="logout">Log out</button>
           </div>
         </div>
      
         <div class="top-bar" style="margin-bottom:0;">
-          <div class="muted">
+          <div class="muted" data-i18n="slaTemplateNote">
             SLA Template: P1 = 4h, P2 = 8h, P3 = 24h, P4 = 48h (Response/Resolution use the same simple template)
           </div>
           <div style="display:flex; gap:6px;">
-            <button class="btn-secondary btn-small" id="btn-export-inc">Export Incidents CSV</button>
-            <button class="btn-secondary btn-small" id="btn-export-req">Export Requests CSV</button>
+            <button class="btn-secondary btn-small" id="btn-export-inc" data-i18n="exportIncBtn">Export Incidents CSV</button>
+            <button class="btn-secondary btn-small" id="btn-export-req" data-i18n="exportReqBtn">Export Requests CSV</button>
           </div>
         </div>
 
         <div class="tabs" id="tabs">
-          <div class="nav-tab active" data-target="dashboard-section">Dashboard</div>
+          <div class="nav-tab active" data-target="dashboard-section" data-i18n="tabDash">Dashboard</div>
           <div class="nav-tab" data-target="approve-tasks-section">
-            My Tasks (Approve)
+            <span data-i18n="tabMyTasks">My Tasks (Approve)</span>
             <span id="badge-pending-approve" class="badge badge-amber" style="display:none; margin-left:4px; margin-right:0;">0</span>
           </div>
-          <div class="nav-tab" data-target="incident-section">Incidents</div>
-          <div class="nav-tab" data-target="request-section">Requests</div>
-          <div class="nav-tab" data-target="mytickets-section">My Tickets</div>
-          <div class="nav-tab" data-target="reports-section" data-roles="admin,manager">Reports</div>
-          <div class="nav-tab" data-target="admin-section" data-roles="admin,manager">Admin Dashboard</div>
-          <div class="nav-tab" data-target="audit-section" data-roles="admin,manager">Audit Log</div>
-          <div class="nav-tab" data-target="kb-section">Knowledge Base</div>
-          <div class="nav-tab" data-target="user-section" data-roles="admin">User Management</div>
-          <div class="nav-tab" data-target="approver-section" data-roles="admin">Approvers</div>
+          <div class="nav-tab" data-target="incident-section" data-i18n="tabInc">Incidents</div>
+          <div class="nav-tab" data-target="request-section" data-i18n="tabReq">Requests</div>
+          <div class="nav-tab" data-target="mytickets-section" data-i18n="tabMyTickets">My Tickets</div>
+          <div class="nav-tab" data-target="reports-section" data-roles="admin,manager" data-i18n="tabRep">Reports</div>
+          <div class="nav-tab" data-target="admin-section" data-roles="admin,manager" data-i18n="tabAdmin">Admin Dashboard</div>
+          <div class="nav-tab" data-target="audit-section" data-roles="admin,manager" data-i18n="tabAudit">Audit Log</div>
+          <div class="nav-tab" data-target="kb-section" data-i18n="tabKb">Knowledge Base</div>
+          <div class="nav-tab" data-target="user-section" data-roles="admin" data-i18n="tabUserMgr">User Management</div>
+          <div class="nav-tab" data-target="approver-section" data-roles="admin" data-i18n="tabApprMgr">Approvers</div>
         </div>
       </div>
 
       <div id="dashboard-section" class="section active">
         <div class="grid">
           <div class="card">
-            <h2>Overview</h2>
-            <small>
-              Summary Incident & Request + SLA
-              <span class="badge badge-primary" id="badge-total"></span>
-              <span class="badge badge-green" id="badge-sla-ok"></span>
-              <span class="badge badge-amber" id="badge-sla-breach"></span>
-            </small>
-            <div style="display:flex; flex-direction:column; gap:12px;">
+            <h2 data-i18n="overview">Overview</h2>
+            <small data-i18n="overviewSub">Summary Incident & Request + SLA</small>
+            <span class="badge badge-primary" id="badge-total"></span>
+            <span class="badge badge-green" id="badge-sla-ok"></span>
+            <span class="badge badge-amber" id="badge-sla-breach"></span>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
               <div>
-                <strong>Incident vs Request</strong>
+                <strong data-i18n="chartType">Incident vs Request</strong>
                 <canvas id="typeChart" height="130"></canvas>
               </div>
               <div>
-                <strong>Tickets by Status</strong>
+                <strong data-i18n="chartStatus">Tickets by Status</strong>
                 <canvas id="statusChart" height="160"></canvas>
               </div>
             </div>
           </div>
           <div class="card">
-            <h2>Latest Tickets</h2>
-            <small>5 most recent tickets from Incident and Request</small>
+            <h2 data-i18n="latestTickets">Latest Tickets</h2>
+            <small data-i18n="latestTicketsSub">5 most recent tickets from Incident and Request</small>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Type</th>
-                    <th>Subject</th>
-                    <th>Assigned To</th>
-                    <th>Status</th>
+                    <th data-i18n="thType">Type</th>
+                    <th data-i18n="thSubject">Subject</th>
+                    <th data-i18n="thAssigned">Assigned To</th>
+                    <th data-i18n="thStatus">Status</th>
                     <th>SLA</th>
-                    <th>Created At</th>
+                    <th data-i18n="thCreated">Created At</th>
                   </tr>
                 </thead>
                 <tbody id="latest-table-body"></tbody>
               </table>
             </div>
-            <div class="muted">
-              * SLA breach / auto escalation is checked every 1 minute and on page refresh
-            </div>
+            <div class="muted" data-i18n="slaRefreshNote">* SLA breach / auto escalation is checked every 1 minute and on page refresh</div>
           </div>
         </div>
       </div>
 
       <div id="approve-tasks-section" class="section">
         <div class="card">
-          <h2>My Tasks (Pending Approval)</h2>
-          <small>รายการตั๋วที่รอการพิจารณาอนุมัติจากคุณ</small>
+          <h2 data-i18n="myTasksTitle">My Tasks (Pending Approval)</h2>
+          <small data-i18n="myTasksSub">รายการตั๋วที่รอการพิจารณาอนุมัติจากคุณ</small>
           <div class="table-container" style="margin-top: 12px;">
             <table>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Type</th>
-                  <th>Priority</th>
-                  <th>Subject</th>
-                  <th>Requester</th>
-                  <th>Created At</th>
-                  <th>Action</th>
+                  <th data-i18n="thType">Type</th>
+                  <th data-i18n="thPriority">Priority</th>
+                  <th data-i18n="thSubject">Subject</th>
+                  <th data-i18n="thRequester">Requester</th>
+                  <th data-i18n="thCreated">Created At</th>
+                  <th data-i18n="thAction">Action</th>
                 </tr>
               </thead>
               <tbody id="approve-tasks-table-body"></tbody>
@@ -836,34 +495,32 @@
       <div id="incident-section" class="section">
         <div class="grid">
           <div class="card">
-            <h2>Open Incident</h2>
-            <small>Use for system down, slow performance, errors, or issues impacting operations.</small>
+            <h2 data-i18n="openInc">Open Incident</h2>
+            <small data-i18n="openIncSub">Use for system down, slow performance, errors, or issues impacting operations.</small>
             <form id="incident-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
-                  <select id="incident-requester" required>
-                    <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
-                  </select>
+                  <label><span data-i18n="lblRequester">Requester *</span> <span class="en">(รองรับการเปิดแทน)</span></label>
+                  <select id="incident-requester" required></select>
                 </div>
                 <div class="form-group">
-                  <label>Department *</label>
+                  <label data-i18n="lblDept">Department *</label>
                   <input type="text" id="incident-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>Phone</label>
+                  <label data-i18n="lblPhone">Phone</label>
                   <input type="tel" id="incident-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
                 <div class="form-group">
-                  <label>Email *</label>
+                  <label data-i18n="lblEmail">Email *</label>
                   <input type="email" id="incident-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>System *</label>
+                  <label data-i18n="lblSystem">System *</label>
                   <select id="incident-system" required>
                     <option value="">-- Select System --</option>
                     <option value="Oracle">Oracle</option>
@@ -876,20 +533,19 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Module</label>
+                  <label data-i18n="lblModule">Module</label>
                   <input type="text" id="incident-module" list="inc-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
                   <datalist id="inc-module-suggestions"></datalist>
                 </div>
               </div>
-              
               <div class="form-row">
                 <div class="form-group">
-                  <label>Subject *</label>
+                  <label data-i18n="lblSubject">Subject *</label>
                   <input type="text" id="incident-title" required placeholder="ระบุหัวข้อปัญหา เช่น TM1 ล็อกอินไม่ได้..." />
                   <div id="inc-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                 <div class="form-group">
-                  <label>Category *</label>
+                  <label data-i18n="lblCategory">Category *</label>
                   <select id="incident-category" required>
                     <option value="">-- Select --</option>
                     <option value="Application">Application</option>
@@ -900,10 +556,9 @@
                   </select>
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
-                   <label>Impact *</label>
+                  <label data-i18n="lblImpact">Impact *</label>
                   <select id="incident-impact" required>
                     <option value="">-- Select --</option>
                     <option value="High">High</option>
@@ -912,7 +567,7 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Priority / SLA *</label>
+                  <label data-i18n="lblPriority">Priority / SLA *</label>
                   <select id="incident-priority" required>
                     <option value="">-- Select --</option>
                     <option value="P1 - Critical (4h)">🔴 P1 - Critical (4h)</option>
@@ -922,107 +577,66 @@
                   </select>
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
-                  <label>Required by (optional)</label>
+                  <label data-i18n="lblRequiredBy">Required by (optional)</label>
                   <input type="date" id="incident-due" />
                 </div>
                 <div class="form-group">
-                  <label>Approver (optional)</label>
+                  <label data-i18n="lblApprover">Approver (optional)</label>
                   <select id="incident-approver">
                     <option value="">-- Select Approver --</option>
                   </select>
                 </div>
               </div>
-
               <div class="form-group">
-                <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
+                <label data-i18n="lblCC">CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
                 <input type="text" id="incident-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
               </div>
-
               <div class="form-group">
-                <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
+                <label data-i18n="lblDesc">Problem Description *</label>
                 <textarea id="incident-description" required placeholder="พิมพ์รายละเอียดปัญหา และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
-                
                 <div style="margin-top: 8px;">
-                  <label for="incident-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
-                    📎 แนบไฟล์ (Attach Files)
-                  </label>
+                  <label for="incident-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">📎 แนบไฟล์ (Attach Files)</label>
                   <input type="file" id="incident-file-input" multiple style="display: none;" />
                 </div>
-
                 <ul class="attachments-list" id="incident-staged-attachments" style="margin-top: 8px;"></ul>
               </div>
-
               <div class="form-row" style="align-items:flex-end;">
                 <div class="form-group">
-                  <label>Reference (optional)</label>
+                  <label data-i18n="lblRef">Reference (optional)</label>
                   <input type="text" id="incident-reference" />
                 </div>
-                <button type="submit" class="btn">Submit Incident</button>
+                <button type="submit" class="btn" data-i18n="btnSubmitInc">Submit Incident</button>
               </div>
             </form>
-            <div class="muted">
-              Once saved, the Incident will have SLA according to Priority (P1: 4h, P2: 8h, P3: 24h, P4: 48h)
-            </div>
           </div>
           <div class="card">
-            <div class="flex-between">
-              <div>
-                <h2>Incident List</h2>
-                <small>Filter + Search + Assigned To + Date range</small>
-              </div>
-            </div>
+            <h2 data-i18n="incList">Incident List</h2>
             <div class="filters">
-              <strong>Filter:</strong>
-              <select id="incident-status-filter">
-                <option value="">All Status</option>
-                <option value="Pending Approval">Pending Approval</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Pending User">Pending User</option>
-                <option value="Closed">Closed</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-              <select id="incident-category-filter">
-                <option value="">All Categories</option>
-                <option value="Application">Application</option>
-                <option value="Infrastructure">Infrastructure</option>
-                <option value="Network">Network</option>
-                <option value="Access / Permission">Access / Permission</option>
-                <option value="Others">Others</option>
-              </select>
-              <select id="incident-system-filter">
-                <option value="">All Systems</option>
-                <option value="Oracle">Oracle</option>
-                <option value="SAP">SAP</option>
-                <option value="TM1">TM1</option>
-                <option value="BPC">BPC</option>
-                <option value="Power BI">Power BI</option>
-                <option value="Network">Network</option>
-                <option value="Others">Others</option>
-              </select>
-              <input type="text" id="incident-assignee-search" placeholder="Assigned To" />
+              <strong data-i18n="lblFilter">Filter:</strong>
+              <select id="incident-status-filter"><option value="" data-i18n="optAllStatus">All Status</option></select>
+              <select id="incident-category-filter"><option value="">All Categories</option></select>
+              <select id="incident-system-filter"><option value="">All Systems</option></select>
+              <input type="text" id="incident-assignee-search" data-i18n-placeholder="assigneePH" placeholder="Assigned To" />
               <input type="date" id="incident-date-from" />
               <input type="date" id="incident-date-to" />
-              <input type="text" id="incident-search" placeholder="Search ID/Subject" />
-              <button type="button" class="btn-secondary btn-small" id="incident-clear-filter">Clear</button>
+              <input type="text" id="incident-search" data-i18n-placeholder="searchTicketPH" placeholder="Search ID/Subject" />
+              <button type="button" class="btn-secondary btn-small" id="incident-clear-filter" data-i18n="btnClear">Clear</button>
             </div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Subject</th>
-                    <th>System</th>
-                    <th>Priority</th>
-                    <th>Assigned</th>
-                    <th>Status</th>
+                    <th data-i18n="thSubject">Subject</th>
+                    <th data-i18n="thSystem">System</th>
+                    <th data-i18n="thPriority">Priority</th>
+                    <th data-i18n="thAssigned">Assigned</th>
+                    <th data-i18n="thStatus">Status</th>
                     <th>SLA</th>
-                    <th>Action</th>
-                    <th>Requester</th>
+                    <th data-i18n="thAction">Action</th>
+                    <th data-i18n="thRequester">Requester</th>
                   </tr>
                 </thead>
                 <tbody id="incident-table-body"></tbody>
@@ -1035,34 +649,32 @@
       <div id="request-section" class="section">
         <div class="grid">
           <div class="card">
-            <h2>Open Service Request</h2>
-            <small>Request: Access / Change / Service / Report / Dashboard</small>
-<form id="request-form">
+            <h2 data-i18n="openReq">Open Service Request</h2>
+            <small data-i18n="openReqSub">Request: Access / Change / Service / Report / Dashboard</small>
+            <form id="request-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
-                  <select id="request-requester" required>
-                    <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
-                  </select>
+                  <label><span data-i18n="lblRequester">Requester *</span> <span class="en">(รองรับการเปิดแทน)</span></label>
+                  <select id="request-requester" required></select>
                 </div>
-                 <div class="form-group">
-                  <label>Department *</label>
+                <div class="form-group">
+                  <label data-i18n="lblDept">Department *</label>
                   <input type="text" id="request-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>Phone</label>
+                  <label data-i18n="lblPhone">Phone</label>
                   <input type="tel" id="request-phone" placeholder="โทรศัพท์ติดต่อ..." />
                 </div>
                 <div class="form-group">
-                  <label>Email *</label>
+                  <label data-i18n="lblEmail">Email *</label>
                   <input type="email" id="request-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                    <label>System *</label>
+                  <label data-i18n="lblSystem">System *</label>
                   <select id="request-system" required>
                     <option value="">-- Select System --</option>
                     <option value="Oracle">Oracle</option>
@@ -1074,20 +686,19 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Module</label>
+                  <label data-i18n="lblModule">Module</label>
                   <input type="text" id="request-module" list="req-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
                   <datalist id="req-module-suggestions"></datalist>
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
-                  <label>Subject *</label>
+                  <label data-i18n="lblSubject">Subject *</label>
                   <input type="text" id="request-title" required placeholder="ระบุหัวข้อคำขอ..." />
                   <div id="req-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
-                 <div class="form-group">
-                  <label>Request Type *</label>
+                <div class="form-group">
+                  <label data-i18n="lblReqType">Request Type *</label>
                   <select id="request-type" required>
                     <option value="">-- Select --</option>
                     <option value="Access Request">Access Request</option>
@@ -1098,21 +709,20 @@
                   </select>
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
-                  <label>Category *</label>
-                   <select id="request-category" required>
+                  <label data-i18n="lblCategory">Category *</label>
+                  <select id="request-category" required>
                     <option value="">-- Select --</option>
                     <option value="Application">Application</option>
                     <option value="Infrastructure">Infrastructure</option>
                     <option value="Access / Permission">Access / Permission</option>
                     <option value="Reporting / Dashboard">Reporting / Dashboard</option>
-                     <option value="Others">Others</option>
+                    <option value="Others">Others</option>
                   </select>
                 </div>
                 <div class="form-group">
-                    <label>Impact *</label>
+                  <label data-i18n="lblImpact">Impact *</label>
                   <select id="request-impact" required>
                     <option value="">-- Select --</option>
                     <option value="High">High</option>
@@ -1121,109 +731,68 @@
                   </select>
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
-                   <label>Requested Due Date *</label>
+                  <label data-i18n="lblReqDueDate">Requested Due Date *</label>
                   <input type="date" id="request-due" required />
                 </div>
                 <div class="form-group">
-                  <label>Approver (optional)</label>
+                  <label data-i18n="lblApprover">Approver (optional)</label>
                   <select id="request-approver">
                     <option value="">-- Select Approver --</option>
                   </select>
                 </div>
               </div>
-
               <div class="form-group">
-                <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
+                <label data-i18n="lblCC">CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
                 <input type="text" id="request-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
               </div>
-
               <div class="form-group">
-                <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
+                <label data-i18n="lblDesc">Request Description *</label>
                 <textarea id="request-description" required placeholder="พิมพ์รายละเอียดคำขอ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
-                
                 <div style="margin-top: 8px;">
-                  <label for="request-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
-                    📎 แนบไฟล์ (Attach Files)
-                  </label>
+                  <label for="request-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">📎 แนบไฟล์ (Attach Files)</label>
                   <input type="file" id="request-file-input" multiple style="display: none;" />
                 </div>
-
                 <ul class="attachments-list" id="request-staged-attachments" style="margin-top: 8px;"></ul>
               </div>
-
               <div class="form-row" style="align-items:flex-end;">
                 <div class="form-group">
-                  <label>Reference (optional)</label>
+                  <label data-i18n="lblRef">Reference (optional)</label>
                   <input type="text" id="request-ref" />
                 </div>
-                <button type="submit" class="btn">Submit Request</button>
+                <button type="submit" class="btn" data-i18n="btnSubmitReq">Submit Request</button>
               </div>
             </form>
-
           </div>
           <div class="card">
-            <h2>Request List</h2>
-            <small>Filter + Date range + Assigned To</small>
+            <h2 data-i18n="reqList">Request List</h2>
             <div class="filters">
-              <strong>Filter:</strong>
-             <select id="request-status-filter">
-                <option value="">All Status</option>
-                <option value="Pending Approval">Pending Approval</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Pending User">Pending User</option>
-                <option value="Closed">Closed</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-              <select id="request-category-filter">
-                 <option value="">All Categories</option>
-                <option value="Application">Application</option>
-                <option value="Infrastructure">Infrastructure</option>
-                <option value="Access / Permission">Access / Permission</option>
-                <option value="Reporting / Dashboard">Reporting / Dashboard</option>
-                 <option value="Others">Others</option>
-              </select>
-              <select id="request-system-filter">
-                <option value="">All Systems</option>
-                <option value="Oracle">Oracle</option>
-                <option value="SAP">SAP</option>
-                <option value="TM1">TM1</option>
-                <option value="BPC">BPC</option>
-                <option value="Power BI">Power BI</option>
-                <option value="Others">Others</option>
-              </select>
-              <select id="request-type-filter">
-                <option value="">All Request Types</option>
-                <option value="Access Request">Access Request</option>
-                <option value="Change Request">Change Request</option>
-                <option value="Service Request">Service Request</option>
-                <option value="Report / Dashboard">Report / Dashboard</option>
-                <option value="Others">Others</option>
-              </select>
-              <input type="text" id="request-assignee-search" placeholder="Assigned To" />
+              <strong data-i18n="lblFilter">Filter:</strong>
+              <select id="request-status-filter"><option value="">All Status</option></select>
+              <select id="request-category-filter"><option value="">All Categories</option></select>
+              <select id="request-system-filter"><option value="">All Systems</option></select>
+              <select id="request-type-filter"><option value="">All Request Types</option></select>
+              <input type="text" id="request-assignee-search" data-i18n-placeholder="assigneePH" placeholder="Assigned To" />
               <input type="date" id="request-date-from" />
               <input type="date" id="request-date-to" />
-              <input type="text" id="request-search" placeholder="Search ID/Subject" />
-              <button type="button" class="btn-secondary btn-small" id="request-clear-filter">Clear</button>
+              <input type="text" id="request-search" data-i18n-placeholder="searchTicketPH" placeholder="Search ID/Subject" />
+              <button type="button" class="btn-secondary btn-small" id="request-clear-filter" data-i18n="btnClear">Clear</button>
             </div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Subject</th>
-                    <th>System</th>
-                    <th>Priority</th>
-                    <th>Request Type</th>
-                    <th>Assigned</th>
-                    <th>Status</th>
+                    <th data-i18n="thSubject">Subject</th>
+                    <th data-i18n="thSystem">System</th>
+                    <th data-i18n="thPriority">Priority</th>
+                    <th data-i18n="thType">Request Type</th>
+                    <th data-i18n="thAssigned">Assigned</th>
+                    <th data-i18n="thStatus">Status</th>
                     <th>SLA</th>
-                    <th>Action</th>
-                    <th>Due</th>
+                    <th data-i18n="thAction">Action</th>
+                    <th data-i18n="thDue">Due</th>
                   </tr>
                 </thead>
                 <tbody id="request-table-body"></tbody>
@@ -1232,23 +801,22 @@
           </div>
         </div>
       </div>
-
       <div id="mytickets-section" class="section">
         <div class="card">
-          <h2>My Tickets</h2>
-          <small>Tickets you created or assigned to you (Incident + Request)</small>
+          <h2 data-i18n="myTicketsTitle2">My Tickets</h2>
+          <small data-i18n="myTicketsSub2">Tickets you created or assigned to you (Incident + Request)</small>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Type</th>
-                  <th>Priority</th>
-                  <th>Subject</th>
-                  <th>Status</th>
+                  <th data-i18n="thType">Type</th>
+                  <th data-i18n="thPriority">Priority</th>
+                  <th data-i18n="thSubject">Subject</th>
+                  <th data-i18n="thStatus">Status</th>
                   <th>SLA</th>
-                  <th>Created At</th>
-                  <th>Action</th>
+                  <th data-i18n="thCreated">Created At</th>
+                  <th data-i18n="thAction">Action</th>
                 </tr>
               </thead>
               <tbody id="mytickets-table-body"></tbody>
@@ -1260,7 +828,7 @@
       <div id="reports-section" class="section">
         <div class="grid">
           <div class="card">
-            <h2>Advanced Report</h2>
+            <h2 data-i18n="advReport">Advanced Report</h2>
             <small>Aging, Resolution Rate, Staff Performance</small>
             <div class="table-container">
               <table>
@@ -1270,7 +838,7 @@
                     <th>0-1</th>
                     <th>1-3</th>
                     <th>3-7</th>
-                    <th>>7</th>
+                    <th>&gt;7</th>
                   </tr>
                 </thead>
                 <tbody id="aging-row"></tbody>
@@ -1281,8 +849,8 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Metric</th>
-                    <th>Value</th>
+                    <th data-i18n="thMetric">Metric</th>
+                    <th data-i18n="thValue">Value</th>
                   </tr>
                 </thead>
                 <tbody id="resolution-row"></tbody>
@@ -1290,14 +858,14 @@
             </div>
           </div>
           <div class="card">
-             <h2>Staff Performance</h2>
+            <h2 data-i18n="staffPerf">Staff Performance</h2>
             <small>Number of tickets resolved by assignee</small>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>Staff</th>
-                    <th>Resolved</th>
+                    <th data-i18n="thStaff">Staff</th>
+                    <th data-i18n="thResolved">Resolved</th>
                     <th>SLA Met</th>
                     <th>SLA Breach</th>
                   </tr>
@@ -1310,95 +878,81 @@
       </div>
 
       <div id="admin-section" class="section">
-        <div>
-          <div class="card">
-            <div class="flex-between">
-              <div>
-                <h2>Admin Dashboard</h2>
-                <small>Assign / Re-assign / Close / Reopen / Delete / Bulk Actions / SLA view</small>
-              </div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <select id="admin-bulk-action" style="font-size:11px; padding:4px 8px; border-radius:999px;">
-                  <option value="">Bulk Action...</option>
-                  <option value="close">Close</option>
-                  <option value="reopen">Reopen</option>
-                  <option value="delete">Delete</option>
-                </select>
-                <select id="admin-bulk-assignee" style="font-size:11px; padding:4px 8px; border-radius:999px;">
-                  <option value="">Assign To...</option>
-                </select>
-                <button class="btn btn-small" id="admin-bulk-apply">Apply</button>
-              </div>
+        <div class="card">
+          <div class="flex-between">
+            <div>
+              <h2 data-i18n="adminDashTitle">Admin Dashboard</h2>
+              <small>Assign / Re-assign / Close / Reopen / Delete / Bulk Actions / SLA view</small>
             </div>
-            <div class="filters" style="margin-top:6px;">
-              <strong>Filter:</strong>
-              <select id="admin-status-filter">
-                <option value="">All Status</option>
-                <option value="Pending Approval">Pending Approval</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Pending User">Pending User</option>
-                <option value="Closed">Closed</option>
-                <option value="Cancelled">Cancelled</option>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <select id="admin-bulk-action" style="font-size:11px; padding:4px 8px; border-radius:999px;">
+                <option value="">Bulk Action...</option>
+                <option value="close">Close</option>
+                <option value="reopen">Reopen</option>
+                <option value="delete">Delete</option>
               </select>
-              <input type="text" id="admin-assignee-search" placeholder="Assigned To" />
-              <input type="date" id="admin-date-from" />
-              <input type="date" id="admin-date-to" />
-              <input type="text" id="admin-search" placeholder="Search ID/Subject" />
-               <button class="btn-secondary btn-small" id="admin-clear-filter">Clear</button>
+              <select id="admin-bulk-assignee" style="font-size:11px; padding:4px 8px; border-radius:999px;">
+                <option value="">Assign To...</option>
+              </select>
+              <button class="btn btn-small" id="admin-bulk-apply" data-i18n="btnApply">Apply</button>
             </div>
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th><input type="checkbox" id="admin-select-all" /></th>
-                    <th>ID</th>
-                    <th>Type</th>
-                    <th>Subject</th>
-                    <th>Priority</th>
-                    <th>Assigned</th>
-                    <th>Status</th>
-                    <th>SLA</th>
-                    <th>Age (d)</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                 <tbody id="admin-table-body"></tbody>
-              </table>
-            </div>
-            <div class="muted">
-              * Auto Escalation: when SLA breach is detected, ticket is marked as Escalated and an Audit Log entry is created.
-            </div>
+          </div>
+          <div class="filters" style="margin-top:6px;">
+            <strong data-i18n="lblFilter">Filter:</strong>
+            <select id="admin-status-filter"><option value="">All Status</option></select>
+            <input type="text" id="admin-assignee-search" data-i18n-placeholder="assigneePH" placeholder="Assigned To" />
+            <input type="date" id="admin-date-from" />
+            <input type="date" id="admin-date-to" />
+            <input type="text" id="admin-search" data-i18n-placeholder="searchTicketPH" placeholder="Search ID/Subject" />
+            <button class="btn-secondary btn-small" id="admin-clear-filter" data-i18n="btnClear">Clear</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="admin-select-all" /></th>
+                  <th>ID</th>
+                  <th data-i18n="thType">Type</th>
+                  <th data-i18n="thSubject">Subject</th>
+                  <th data-i18n="thPriority">Priority</th>
+                  <th data-i18n="thAssigned">Assigned</th>
+                  <th data-i18n="thStatus">Status</th>
+                  <th>SLA</th>
+                  <th>Age (d)</th>
+                  <th data-i18n="thAction">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body"></tbody>
+            </table>
           </div>
         </div>
       </div>
   
       <div id="audit-section" class="section">
         <div class="card">
-          <h2>Audit Log</h2>
+          <h2 data-i18n="auditLogTitle">Audit Log</h2>
           <small>Records all key actions: create, update, assign, close, reopen, delete, SLA auto escalation, etc.</small>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>User</th>
+                  <th data-i18n="thTime">Time</th>
+                  <th data-i18n="thUser">User</th>
                   <th>Role</th>
-                  <th>Action</th>
+                  <th data-i18n="thAction">Action</th>
                   <th>Ticket</th>
-                  <th>Message</th>
+                  <th data-i18n="thMessage">Message</th>
                 </tr>
               </thead>
               <tbody id="audit-table-body"></tbody>
             </table>
           </div>
         </div>
-       </div>
+      </div>
 
       <div id="kb-section" class="section">
         <div class="card">
-          <h2>Knowledge Base / FAQ</h2>
+          <h2 data-i18n="kbTitle">Knowledge Base / FAQ</h2>
           <small>Sample KB entries to reduce repeated incidents</small>
           <div class="form-row">
             <div class="form-group">
@@ -1412,57 +966,25 @@
             
       <div id="user-section" class="section">
         <div class="card">
-          <h2>User Management</h2>
+          <h2 data-i18n="userMgrTitle">User Management</h2>
           <small>สร้าง / ลบ / แก้ไข User พร้อมกำหนดสิทธิ์รายบุคคล</small>
           <form id="user-form" style="margin-top: 10px;">
             <div class="form-row">
-              <div class="form-group">
-                 <label>User ID *</label>
-                <input type="text" id="user-id" required />
-              </div>
-              <div class="form-group">
-                <label>Name *</label>
-                <input type="text" id="user-name" required />
-              </div>
-              <div class="form-group">
-                <label>Email *</label>
-                 <input type="email" id="user-email" required />
-              </div>
+              <div class="form-group"><label>User ID *</label><input type="text" id="user-id" required /></div>
+              <div class="form-group"><label>Name *</label><input type="text" id="user-name" required /></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="user-email" required /></div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Department *</label>
-                <input type="text" id="user-dept" required placeholder="เช่น Finance, IT, Accounting..." />
-              </div>
-              <div class="form-group">
-                <label>Role *</label>
-                <select id="user-role" required>
-                  <option value="">-- Select --</option>
-                  <option value="admin">Admin</option>
-                   <option value="manager">Manager</option>
-                  <option value="support">Support</option>
-                  <option value="user">User</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Password *</label>
-                <input type="text" id="user-password" required />
-              </div>
+              <div class="form-group"><label>Department *</label><input type="text" id="user-dept" required placeholder="เช่น Finance, IT, Accounting..." /></div>
+              <div class="form-group"><label>Role *</label><select id="user-role" required><option value="">-- Select --</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="support">Support</option><option value="user">User</option></select></div>
+              <div class="form-group"><label>Password *</label><input type="text" id="user-password" required /></div>
             </div>
-            
             <div class="form-row" style="background:#f9fafb; padding:10px 14px; border-radius:8px; border:1px solid #e5e7eb; gap:18px; align-items:center;">
               <span style="font-weight:600; font-size:12px; color:#374151;">กำหนดสิทธิ์:</span>
-              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="user-assign-to" style="width:16px; height:16px;" /> เป็น IT Support (รับตั๋วได้)
-              </label>
-              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="user-is-approver" style="width:16px; height:16px;" /> เป็น Approver (อนุมัติตั๋วได้)
-              </label>
-              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> เป็น Requester (เปิดตั๋วได้)
-              </label>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;"><input type="checkbox" id="user-assign-to" style="width:16px; height:16px;" /> เป็น IT Support (รับตั๋วได้)</label>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;"><input type="checkbox" id="user-is-approver" style="width:16px; height:16px;" /> เป็น Approver (อนุมัติตั๋วได้)</label>
+              <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;"><input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> เป็น Requester (เปิดตั๋วได้)</label>
             </div>
-            
             <div class="form-row" style="margin-top:10px;">
               <div style="display:flex; gap:6px;">
                 <button class="btn btn-small" type="submit" id="user-submit-btn">Add User</button>
@@ -1494,7 +1016,7 @@
 
       <div id="approver-section" class="section">
         <div class="card">
-          <h2>Approver Management</h2>
+          <h2 data-i18n="apprMgrTitle">Approver Management</h2>
           <small>จัดการสิทธิ์ผู้อนุมัติ (ติ๊กถูกเพื่อให้รายชื่อไปแสดงใน Dropdown 'Approver' ตอนเปิดตั๋ว)</small>
           <div class="table-container" style="margin-top: 12px;">
             <table>
@@ -1524,7 +1046,6 @@
         <button class="close-btn" id="detail-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        
         <div id="detail-resolved-confirm-banner" style="display:none; grid-column: 1 / -1; background:#eff6ff; border:1px solid #bfdbfe; padding:12px 16px; border-radius:12px; margin-bottom:8px; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <div>
             <strong style="color:#1e40af; font-size:14px;">ตั๋วนี้ได้รับการแก้ไขเบื้องต้นแล้ว (Resolved)</strong><br/>
@@ -1535,134 +1056,61 @@
             <button class="btn-danger" id="btn-requester-confirm-reopen" style="padding:6px 14px; font-size:12px;">❌ แจ้งเปิดซ้ำ (Re-open)</button>
           </div>
         </div>
-
         <div class="detail-block">
           <h3>Main Info & Edit</h3>
-          <div class="detail-row">
-            <div class="detail-label">ID</div>
-            <div class="detail-value" id="detail-id"></div>
-           </div>
-          <div class="detail-row">
-            <div class="detail-label">Type</div>
-            <div class="detail-value" id="detail-type"></div>
-          </div>
-          <div class="detail-row">
-            <div class="detail-label">Subject</div>
-          </div>
-           <div class="detail-edit-field">
-            <input type="text" id="detail-subject-input" />
-          </div>
-          <div class="detail-row">
-            <div class="detail-label">System / Module</div>
-          </div>
-          <div class="detail-edit-field">
-            <input type="text" id="detail-system-input" placeholder="System" style="margin-bottom:4px;" />
-             <input type="text" id="detail-module-input" placeholder="Module" />
-          </div>
-          <div class="detail-row">
-            <div class="detail-label">Assigned To</div>
-          </div>
-          <div class="detail-edit-field">
-            <select id="detail-assignee-select"></select>
-          </div>
-          <div class="detail-row" style="margin-top:4px;">
-            <div class="detail-label">Status</div>
-          </div>
-          <div class="detail-edit-field">
-        <select id="detail-status-select">
-          <option value="Pending Approval">Pending Approval</option>
-          <option value="Open">Open</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Resolved">Resolved</option>
-          <option value="Pending User">Pending User</option>
-          <option value="Closed">Closed</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
-          </div>
-          <div class="detail-row" style="margin-top:4px;">
-            <div class="detail-label">Priority</div>
-           </div>
-          <div class="detail-edit-field">
-            <select id="detail-priority-select">
-              <option value="P1 - Critical (4h)">🔴 P1 - Critical (4h)</option>
-              <option value="P2 - High (8h)">🟠 P2 - High (8h)</option>
-              <option value="P3 - Medium (24h)">🔵 P3 - Medium (24h)</option>
-               <option value="P4 - Low (48h)">🟢 P4 - Low (48h)</option>
-            </select>
-          </div>
-          <div class="detail-row" style="margin-top:4px;">
-            <div class="detail-label">Due Date</div>
-          </div>
-          <div class="detail-edit-field">
-            <input type="date" id="detail-due-input" />
-           </div>
-          <div class="detail-row" style="margin-top:6px;">
-            <div class="detail-label">Requester / Dept</div>
-            <div class="detail-value" id="detail-requester-dept" style="text-align:right;"></div>
-          </div>
-          <div class="detail-row" style="margin-top:4px;">
-            <div class="detail-label">Created At</div>
-            <div class="detail-value" id="detail-created"></div>
-           </div>
-          <div class="detail-row">
-            <div class="detail-label">Approver</div>
-            <div class="detail-value" id="detail-approver"></div>
-          </div>
-          <div class="detail-row" style="margin-top:4px;">
-            <div class="detail-label">Description</div>
-          </div>
-          <div class="detail-edit-field">
-            <textarea id="detail-description-input"></textarea>
-          </div>
-          <button class="btn btn-small" id="detail-save-btn" style="margin-top:6px;">Save Changes</button>
+          <div class="detail-row"><div class="detail-label">ID</div><div class="detail-value" id="detail-id"></div></div>
+          <div class="detail-row"><div class="detail-label">Type</div><div class="detail-value" id="detail-type"></div></div>
+          <div class="detail-row"><div class="detail-label">Subject</div></div>
+          <div class="detail-edit-field"><input type="text" id="detail-subject-input" /></div>
+          <div class="detail-row"><div class="detail-label">System / Module</div></div>
+          <div class="detail-edit-field"><input type="text" id="detail-system-input" placeholder="System" style="margin-bottom:4px;" /><input type="text" id="detail-module-input" placeholder="Module" /></div>
+          <div class="detail-row"><div class="detail-label">Assigned To</div></div>
+          <div class="detail-edit-field"><select id="detail-assignee-select"></select></div>
+          <div class="detail-row" style="margin-top:4px;"><div class="detail-label">Status</div></div>
+          <div class="detail-edit-field"><select id="detail-status-select"></select></div>
+          <div class="detail-row" style="margin-top:4px;"><div class="detail-label">Priority</div></div>
+          <div class="detail-edit-field"><select id="detail-priority-select">
+            <option value="P1 - Critical (4h)">🔴 P1 - Critical (4h)</option>
+            <option value="P2 - High (8h)">🟠 P2 - High (8h)</option>
+            <option value="P3 - Medium (24h)">🔵 P3 - Medium (24h)</option>
+            <option value="P4 - Low (48h)">🟢 P4 - Low (48h)</option>
+          </select></div>
+          <div class="detail-row" style="margin-top:4px;"><div class="detail-label">Due Date</div></div>
+          <div class="detail-edit-field"><input type="date" id="detail-due-input" /></div>
+          <div class="detail-row" style="margin-top:6px;"><div class="detail-label">Requester / Dept</div><div class="detail-value" id="detail-requester-dept" style="text-align:right;"></div></div>
+          <div class="detail-row" style="margin-top:4px;"><div class="detail-label">Created At</div><div class="detail-value" id="detail-created"></div></div>
+          <div class="detail-row"><div class="detail-label">Approver</div><div class="detail-value" id="detail-approver"></div></div>
+          <div class="detail-row" style="margin-top:4px;"><div class="detail-label">Description</div></div>
+          <div class="detail-edit-field"><textarea id="detail-description-input"></textarea></div>
+          <button class="btn btn-small" id="detail-save-btn" style="margin-top:6px;" data-i18n="btnSave">Save Changes</button>
         </div>
-        
         <div class="detail-block">
           <h3>Notes (Internal / Public)</h3>
           <ul class="notes-list" id="detail-notes-list"></ul>
-          
           <textarea id="detail-note-input" placeholder="พิมพ์อัปเดตสถานะ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
           <ul class="attachments-list" id="detail-note-staged-attachments" style="margin-top: 4px;"></ul>
-          
           <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
-            <label style="font-size:11px;">
-              <input type="radio" name="note-visibility" value="public" checked /> Public
-            </label>
-            <label style="font-size:11px;">
-              <input type="radio" name="note-visibility" value="internal" /> Internal (visible only to Support/Admin/Manager)
-            </label>
-           </div>
+            <label style="font-size:11px;"><input type="radio" name="note-visibility" value="public" checked /> Public</label>
+            <label style="font-size:11px;"><input type="radio" name="note-visibility" value="internal" /> Internal</label>
+          </div>
           <button class="btn btn-small" id="detail-add-note-btn" style="margin-top:4px;">Add Note</button>
         </div>
-
         <div class="detail-block">
           <h3>Attachments</h3>
-          <div class="muted">
-            Max 5 files per ticket, each up to 500KB, to avoid filling localStorage.
-          </div>
           <ul class="attachments-list" id="detail-attachments-list"></ul>
           <input type="file" id="detail-file-input" multiple />
-          <div class="dropzone" id="detail-dropzone">
-            Drag & Drop files here or choose files above<br/>
-            Or use <strong>Ctrl+V</strong> to paste an image from clipboard while focused in this box.
-          </div>
+          <div class="dropzone" id="detail-dropzone">Drag & Drop files here or use Ctrl+V</div>
         </div>
-      </div>
-      <div class="muted" style="margin-top:6px;">
-        * Attachments are stored as Base64 in localStorage (for Demo / small team usage).
       </div>
     </div>
   </div>
   <div id="toast-container"></div>
+
   <script type="module">
-    // --- Import Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-    import { 
-      getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc 
-    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // --- Firebase Configuration ---
     const firebaseConfig = {
       apiKey: "AIzaSyA0N5TCkxRckLnynRjp-MKW-V3oxjhgIFE",
       authDomain: "test-api-2c60c.firebaseapp.com",
@@ -1677,7 +1125,6 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    // ================== STATE VARIABLES ==================
     let systemUsers = [];
     let incidents = [];
     let requests = [];
@@ -1687,14 +1134,10 @@
     let editingUserIndex = -1;
     let detailNoteStagedAttachments = []; 
 
-    // Constants
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
     const MAX_ATTACHMENTS_PER_TICKET = 5;
-    
-    // [จุดแก้ที่ 5] ลดขนาดไฟล์ลงเหลือ 150KB ป้องกัน Firestore Document Quota Exceeded (1MB limit)
-    const MAX_ATTACHMENT_SIZE_BYTES = 150 * 1024; 
+    const MAX_ATTACHMENT_SIZE_BYTES = 150 * 1024;
 
-    // ================== DOM ELEMENTS ==================
     const loginRoot = document.getElementById("login-root");
     const appRoot = document.getElementById("app-root");
     const loginUserSelect = document.getElementById("login-user");
@@ -1785,11 +1228,13 @@
     const userForm = document.getElementById("user-form");
     const userSubmitBtn = document.getElementById("user-submit-btn");
     const userCancelBtn = document.getElementById("user-cancel-btn");
-
     const approverTableBody = document.getElementById("approver-table-body");
 
     const kbSearch = document.getElementById("kb-search");
     const kbList = document.getElementById("kb-list");
+    const exportIncBtn = document.getElementById("btn-export-inc");
+    const exportReqBtn = document.getElementById("btn-export-req");
+
     const KB_ENTRIES = [
       { q: "TM1 login error invalid credential", a: "ตรวจสอบว่าบัญชี AD ไม่ได้ถูกล็อก และกรอกรหัสผ่านถูกต้อง" },
       { q: "BPC report is slow", a: "ลองทำการ Clear Cache หรือกด Log out แล้วล็อกอินเข้าใหม่" },
@@ -1797,10 +1242,6 @@
       { q: "SAP BPC ล็อกอินไม่ได้", a: "ตรวจสอบการเชื่อมต่อ VPN / FortiClient ว่าทำงานอยู่หรือไม่" }
     ];
 
-    const exportIncBtn = document.getElementById("btn-export-inc");
-    const exportReqBtn = document.getElementById("btn-export-req");
-
-    // ================== CASCADING MODULES MAP ==================
     const MODULES_BY_SYSTEM = {
       "Oracle": ["AP - Accounts Payable", "AR - Accounts Receivable", "GL - General Ledger", "FA - Fixed Assets", "CM - Cash Management"],
       "SAP": ["FI - Financial Accounting", "CO - Controlling", "MM - Materials Management", "SD - Sales & Distribution"],
@@ -1811,316 +1252,200 @@
       "Others": ["General UI", "Login / SSO", "Performance", "Data Export"]
     };
 
+    // ================== ระบบสลับสองภาษา (I18N ENGINE) ==================
+    let currentLang = localStorage.getItem("itsm_lang") || "EN";
+
+    const I18N = {
+      EN: {
+        portalTitle: "Finance System Service Portal – Incident & Request",
+        portalSub: "Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Firebase Integration).",
+        logout: "Log out",
+        slaTemplateNote: "SLA Template: P1 = 4h, P2 = 8h, P3 = 24h, P4 = 48h (Response/Resolution use the same simple template)",
+        exportIncBtn: "Export Incidents CSV",
+        exportReqBtn: "Export Requests CSV",
+        tabDash: "Dashboard", tabMyTasks: "My Tasks (Approve)", tabInc: "Incidents", tabReq: "Requests", tabMyTickets: "My Tickets", tabRep: "Reports", tabAdmin: "Admin Dashboard", tabAudit: "Audit Log", tabKb: "Knowledge Base", tabUserMgr: "User Management", tabApprMgr: "Approvers",
+        overview: "Overview", overviewSub: "Summary Incident & Request + SLA", chartType: "Incident vs Request", chartStatus: "Tickets by Status",
+        latestTickets: "Latest Tickets", latestTicketsSub: "5 most recent tickets from Incident and Request",
+        thType: "Type", thSubject: "Subject", thAssigned: "Assigned To", thStatus: "Status", thCreated: "Created At", thPriority: "Priority", thRequester: "Requester", thAction: "Action", thSystem: "System", thDue: "Due", thMetric: "Metric", thValue: "Value", thStaff: "Staff", thResolved: "Resolved", thTime: "Time", thUser: "User", thMessage: "Message",
+        slaRefreshNote: "* SLA breach / auto escalation is checked every 1 minute and on page refresh",
+        myTasksTitle: "My Tasks (Pending Approval)", myTasksSub: "Tickets awaiting your approval consideration.",
+        openInc: "Open Incident", openIncSub: "Use for system down, slow performance, errors, or issues impacting operations.",
+        lblRequester: "Requester *", lblDept: "Department *", lblPhone: "Phone", lblEmail: "Email *", lblSystem: "System *", lblModule: "Module", lblSubject: "Subject *", lblCategory: "Category *", lblImpact: "Impact *", lblPriority: "Priority / SLA *", lblRequiredBy: "Required by (optional)", lblApprover: "Approver (optional)", lblCC: "CC Emails", lblDesc: "Description *", lblRef: "Reference (optional)", lblFilter: "Filter:",
+        btnSubmitInc: "Submit Incident", btnSubmitReq: "Submit Request", incList: "Incident List", reqList: "Request List",
+        openReq: "Open Service Request", openReqSub: "Request: Access / Change / Service / Report / Dashboard", lblReqType: "Request Type *", lblReqDueDate: "Requested Due Date *",
+        myTicketsTitle2: "My Tickets", myTicketsSub2: "Tickets you created or assigned to you (Incident + Request)",
+        advReport: "Advanced Report", staffPerf: "Staff Performance", adminDashTitle: "Admin Dashboard", auditLogTitle: "Audit Log", kbTitle: "Knowledge Base / FAQ", userMgrTitle: "User Management", apprMgrTitle: "Approver Management",
+        btnClear: "Clear", btnApply: "Apply", btnSave: "Save Changes", searchTicketPH: "Search ID/Subject", assigneePH: "Assigned To", optAllStatus: "All Status",
+        // คำแปลสำหรับสเตตัสในระบบ (Dynamic Status Mapping)
+        "Pending Approval": "Pending Approval", "Open": "Open", "In Progress": "In Progress", "Resolved": "Resolved", "Pending User": "Pending User", "Closed": "Closed", "Cancelled": "Cancelled"
+      },
+      TH: {
+        portalTitle: "ระบบแจ้งปัญหาและคำขอไอที – ฝ่ายการเงิน",
+        portalSub: "สร้างตั๋วปัญหา (Incident) และคำขอรับบริการ (Request) ติดตาม SLA มอบหมายงาน และประวัติเหตุการณ์ครบจบในหน้าเดียว",
+        logout: "ออกจากระบบ",
+        slaTemplateNote: "แม่แบบกำหนด SLA: P1 = 4 ชม., P2 = 8 ชม., P3 = 24 ชม., P4 = 48 ชม. (เวลาการตอบกลับและแก้ไขใช้เกณฑ์เดียวกัน)",
+        exportIncBtn: "ส่งออกตั๋วปัญหา CSV",
+        exportReqBtn: "ส่งออกคำขอรับบริการ CSV",
+        tabDash: "หน้าหลัก", tabMyTasks: "งานรออนุมัติ", tabInc: "ตั๋วแจ้งปัญหา", tabReq: "คำขอรับบริการ", tabMyTickets: "ตั๋วของฉัน", tabRep: "รายงานสถิติ", tabAdmin: "กระดานแอดมิน", tabAudit: "บันทึกประวัติระบบ", tabKb: "ฐานข้อมูล FAQ", tabUserMgr: "จัดการผู้ใช้งาน", tabApprMgr: "สิทธิ์ผู้อนุมัติ",
+        overview: "สรุปข้อมูล", overviewSub: "แดชบอร์ดภาพรวมตั๋วปัญหา คำขอ และการปฏิบัติตามข้อตกลง SLA", chartType: "สัดส่วนตั๋วปัญหาเทียบคำขอ", chartStatus: "จำนวนงานแยกตามสถานะ",
+        latestTickets: "รายการล่าสุด 5 รายการ", latestTicketsSub: "ตั๋วล่าสุดที่สร้างขึ้นในระบบของแผนกการเงินทั้งหมด",
+        thType: "ประเภท", thSubject: "หัวข้อปัญหา", thAssigned: "ผู้ดูแลงาน", thStatus: "สถานะงาน", thCreated: "วันที่สร้าง", thPriority: "ความสำคัญ", thRequester: "ผู้แจ้งเรื่อง", thAction: "จัดการ", thSystem: "ระบบงาน", thDue: "กำหนดส่ง", thMetric: "ตัวชี้วัด", thValue: "ผลลัพธ์", thStaff: "เจ้าหน้าที่", thResolved: "แก้ไขเสร็จ", thTime: "วัน-เวลา", thUser: "ผู้กระทำ", thMessage: "รายละเอียดกิจกรรม",
+        slaRefreshNote: "* ข้อมูลการหลุดข้อตกลง SLA และการยกระดับตั๋ว (Escalation) จะตรวจสอบอัตโนมัติทุกๆ 1 นาที",
+        myTasksTitle: "งานของฉัน (รอตรวจสอบความถูกต้อง)", myTasksSub: "รายการคำขอรับสิทธิ์หรือเข้าถึงระบบที่กำลังรอคำสั่งอนุมัติจากคุณ",
+        openInc: "เปิดตั๋วแจ้งปัญหา (Incident)", openIncSub: "ใช้กรณีระบบล่ม, ทำงานช้าผิดปกติ, เกิดข้อผิดพลาดโปรแกรม หรือปัญหาที่ส่งผลต่อหน้างานโดยตรง",
+        lblRequester: "ชื่อผู้แจ้งปัญหา *", lblDept: "ฝ่าย/แผนก *", lblPhone: "เบอร์ติดต่อภายใน", lblEmail: "อีเมลติดต่อ *", lblSystem: "ระบบงานที่พบปัญหา *", lblModule: "โมดูลย่อย", lblSubject: "หัวข้อเรื่องแจ้งปัญหา *", lblCategory: "หมวดหมู่หลัก *", lblImpact: "ระดับผลกระทบ *", lblPriority: "ระดับความสำคัญ / SLA *", lblRequiredBy: "วันที่ต้องการให้เสร็จ (ระบุเพิ่มเติ่ม)", lblApprover: "ผู้อนุมัติเรื่อง (ระบุเพิ่มเติม)", lblCC: "ส่งสำเนาอีเมลถึง (CC)", lblDesc: "รายละเอียดเนื้อหาปัญหา *", lblRef: "รหัสอ้างอิงภายนอก", lblFilter: "ตัวกรองความต้องการ:",
+        btnSubmitInc: "บันทึกและส่งตั๋วปัญหา", btnSubmitReq: "บันทึกและส่งตั๋วคำขอ", incList: "รายการตั๋วปัญหาทั้งหมดในระบบ", reqList: "รายการตั๋วคำขอรับบริการทั้งหมดในระบบ",
+        openReq: "เปิดคำขอรับบริการไอที (Service Request)", openReqSub: "คำขอทั่วไป: ขอสิทธิ์เข้าใช้งานระบบ / ขอเพิ่มฟังก์ชันรายงาน / ขอปรับแก้ข้อมูลหลังบ้าน", lblReqType: "รูปแบบบริการคำขอ *", lblReqDueDate: "กำหนดวันที่ต้องใช้งาน *",
+        myTicketsTitle2: "ตั๋วงานของฉัน", myTicketsSub2: "ตั๋วทั้งหมดที่คุณเป็นคนคีย์เปิดเข้ามา หรือเรื่องที่ได้รับมอบหมายให้เข้าแก้ไข",
+        advReport: "รายงานวิเคราะห์ขั้นสูง", staffPerf: "ผลงานการดำเนินงานของทีมงาน", adminDashTitle: "กระดานควบคุมของแอดมิน", auditLogTitle: "ประวัติการเข้าใช้งานระบบ", kbTitle: "คลังความรู้เชิงเทคนิค / คำถามที่พบบ่อย", userMgrTitle: "ระบบจัดการผู้ใช้งาน", apprMgrTitle: "ตั้งค่าสิทธิ์ผู้ตรวจอนุมัติเรื่อง",
+        btnClear: "ล้างค่าตัวกรอง", btnApply: "ตกลงทำรายการ", btnSave: "บันทึกการอัปเดต", searchTicketPH: "พิมพ์ค้นจาก ID หรือหัวข้อเรื่อง...", assigneePH: "ชื่อไอทีผู้รับผิดชอบงาน", optAllStatus: "เลือกดูทุกสถานะสิทธิ์",
+        // คำแปลสำหรับสเตตัสในระบบ (Dynamic Status Mapping)
+        "Pending Approval": "รออนุมัติเรื่อง", "Open": "เปิดงานใหม่", "In Progress": "กำลังดำเนินการ", "Resolved": "แก้ไขเบื้องต้นแล้ว", "Pending User": "รอผู้ใช้ทดสอบ", "Closed": "ปิดตั๋วสมบูรณ์", "Cancelled": "ยกเลิกตั๋วงาน"
+      }
+    };
+
+    window.t = function(key) {
+      return (I18N[currentLang] && I18N[currentLang][key]) ? I18N[currentLang][key] : key;
+    };
+
+    window.setLanguage = function(lang) {
+      currentLang = lang;
+      localStorage.setItem("itsm_lang", lang);
+
+      const langBtn = document.getElementById("lang-toggle-btn");
+      if(langBtn) {
+        langBtn.innerHTML = lang === "EN" ? "🇹🇭 เปลี่ยนเป็นภาษาไทย" : "🇬🇧 Switch to English";
+      }
+
+      if (typeof renderAll === "function") renderAll();
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (I18N[lang] && I18N[lang][key]) el.textContent = I18N[lang][key];
+      });
+
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (I18N[lang] && I18N[lang][key]) el.setAttribute("placeholder", I18N[lang][key]);
+      });
+    };
+
+    document.getElementById("lang-toggle-btn")?.addEventListener("click", () => {
+      const nextLang = currentLang === "EN" ? "TH" : "EN";
+      setLanguage(nextLang);
+      showToast(nextLang === "TH" ? "สลับหน้าต่างทำงานเป็นภาษาไทยเรียบร้อย" : "Switched to English interface successfully");
+    });
+
     function setupCascadingModule(sysSelectId, datalistId) {
-      const sysEl = document.getElementById(sysSelectId);
-      const listEl = document.getElementById(datalistId);
-      if(!sysEl || !listEl) return;
+      const sysEl = document.getElementById(sysSelectId); const listEl = document.getElementById(datalistId); if(!sysEl || !listEl) return;
       sysEl.addEventListener("change", e => {
-        listEl.innerHTML = "";
-        const mods = MODULES_BY_SYSTEM[e.target.value] || [];
+        listEl.innerHTML = ""; const mods = MODULES_BY_SYSTEM[e.target.value] || [];
         mods.forEach(m => { const opt = document.createElement("option"); opt.value = m; listEl.appendChild(opt); });
       });
     }
-    setupCascadingModule("incident-system", "inc-module-suggestions");
-    setupCascadingModule("request-system", "req-module-suggestions");
+    setupCascadingModule("incident-system", "inc-module-suggestions"); setupCascadingModule("request-system", "req-module-suggestions");
 
-    // ================== AI DEFLECTION BANNER ==================
     function setupKbDeflection(inputId, bannerId) {
-      const input = document.getElementById(inputId);
-      const banner = document.getElementById(bannerId);
-      if(!input || !banner) return;
+      const input = document.getElementById(inputId); const banner = document.getElementById(bannerId); if(!input || !banner) return;
       input.addEventListener("input", e => {
-        const text = e.target.value.trim().toLowerCase();
-        if(text.length < 3) { banner.style.display = "none"; return; }
+        const text = e.target.value.trim().toLowerCase(); if(text.length < 3) { banner.style.display = "none"; return; }
         const matched = KB_ENTRIES.find(k => k.q.toLowerCase().includes(text) || text.includes(k.q.toLowerCase().split(" ")[0]));
         if(matched) {
           banner.innerHTML = `💡 <strong>พบบทความที่อาจช่วยแก้ปัญหาให้คุณได้:</strong> "${matched.q}"<br/><span style="color:#b45309;">👉 คำแนะนำ: ${matched.a}</span>`;
           banner.style.display = "block";
-        } else {
-          banner.style.display = "none";
-        }
+        } else { banner.style.display = "none"; }
       });
     }
-    setupKbDeflection("incident-title", "inc-kb-banner");
-    setupKbDeflection("request-title", "req-kb-banner");
+    setupKbDeflection("incident-title", "inc-kb-banner"); setupKbDeflection("request-title", "req-kb-banner");
 
-    // ================== FIREBASE HELPERS ==================
-    async function dbAdd(colName, data) {
-      const ref = await addDoc(collection(db, colName), data);
-      data.firebaseId = ref.id;
-      return data;
-    }
+    async function dbAdd(colName, data) { const ref = await addDoc(collection(db, colName), data); data.firebaseId = ref.id; return data; }
+    async function dbUpdate(colName, id, data) { if (!id) return; await updateDoc(doc(db, colName, id), data); }
+    async function dbDelete(colName, id) { if (!id) return; await deleteDoc(doc(db, colName, id)); }
 
-    async function dbUpdate(colName, id, data) {
-      if (!id) return;
-      await updateDoc(doc(db, colName, id), data);
-    }
-
-    async function dbDelete(colName, id) {
-      if (!id) return;
-      await deleteDoc(doc(db, colName, id));
-    }
-
-    // ================== INITIAL LOAD ==================
-    async function loadDataFromFirebase() {
-      try {
-        const uSnap = await getDocs(collection(db, "users"));
-        systemUsers = uSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        
-        if (systemUsers.length === 0) {
-          const defaultUsers = [
-            { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
-            { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true },
-            { id: "sup1", name: "Support 1", role: "support", department: "IT Helpdesk", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false, isRequester: true },
-            { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true }
-          ];
-          for (let u of defaultUsers) {
-            await dbAdd("users", u);
-            systemUsers.push(u);
-          }
-        }
-
-        const iSnap = await getDocs(collection(db, "incidents"));
-        incidents = iSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-
-        const rSnap = await getDocs(collection(db, "requests"));
-        requests = rSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-
-        const aSnap = await getDocs(collection(db, "auditLogs"));
-        auditLogs = aSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        auditLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-        initLogin();
-        checkSLA();
-        
-        // [จุดแก้ที่ 2] สั่งรันเช็ค SLA อัตโนมัติทุกๆ 60 วินาทีจริงๆ
-        setInterval(checkSLA, 60000); 
-
-        renderAll();
-        renderUserTable();
-
-      } catch (error) {
-        console.error("Error loading data:", error);
-        showToast("Error connecting to Database.");
-      }
-    }
-
-    // ================== HELPER FUNCTIONS ==================
     function generateId(prefix, existingTickets) {
-      const now = new Date();
-      const yy = String(now.getFullYear()).slice(-2);
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const ymPrefix = `${prefix}-${yy}${mm}-`; 
-      const monthTickets = existingTickets.filter(t => t.id && t.id.startsWith(ymPrefix));
-      let nextNum = 1;
+      const now = new Date(); const yy = String(now.getFullYear()).slice(-2); const mm = String(now.getMonth() + 1).padStart(2, "0"); const ymPrefix = `${prefix}-${yy}${mm}-`; 
+      const monthTickets = existingTickets.filter(t => t.id && t.id.startsWith(ymPrefix)); let nextNum = 1;
       if (monthTickets.length > 0) {
-        const nums = monthTickets.map(t => {
-          const parts = t.id.split("-");
-          const val = parseInt(parts[parts.length - 1], 10);
-          return isNaN(val) ? 0 : val;
-        });
+        const nums = monthTickets.map(t => { const parts = t.id.split("-"); const val = parseInt(parts[parts.length - 1], 10); return isNaN(val) ? 0 : val; });
         nextNum = Math.max(...nums) + 1;
       }
       return `${ymPrefix}${String(nextNum).padStart(4, "0")}`;
     }
-
     function getUserById(id) { return systemUsers.find(u => u.id === id) || null; }
     function getUserName(id) { const u = getUserById(id); return u ? u.name : ""; }
-    
     function formatRequesterObo(requesterName, createdById) {
-      if (!requesterName) return "-";
-      const creatorName = getUserName(createdById);
+      if (!requesterName) return "-"; const creatorName = getUserName(createdById);
       if (creatorName && creatorName.toLowerCase() !== requesterName.toLowerCase() && createdById !== "unknown" && createdById !== null) {
         return `${requesterName} <span title="คีย์เปิดตั๋วแทนโดย: ${creatorName}" style="font-size:10px; background:#f3e8ff; color:#4338ca; padding:1px 6px; border-radius:4px; border:1px solid #c7d2fe; margin-left:4px; display:inline-block; line-height:1;">🏷️ OBO</span>`;
       }
       return requesterName;
     }
-
     function formatPriority(p) {
-      if (!p) return "-";
-      if (p.includes("P1")) return "🔴 " + p;
-      if (p.includes("P2")) return "🟠 " + p;
-      if (p.includes("P3")) return "🔵 " + p;
-      if (p.includes("P4")) return "🟢 " + p;
-      return p;
+      if (!p) return "-"; if (p.includes("P1")) return "🔴 " + p; if (p.includes("P2")) return "🟠 " + p; if (p.includes("P3")) return "🔵 " + p; if (p.includes("P4")) return "🟢 " + p; return p;
     }
     function formatDateTime(d) {
-      const date = new Date(d);
-      if (isNaN(date.getTime())) return "-";
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-      const hh = String(date.getHours()).padStart(2, "0");
-      const mi = String(date.getMinutes()).padStart(2, "0");
-      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+      const date = new Date(d); if (isNaN(date.getTime())) return "-";
+      return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     }
-    function formatDateOnly(d) {
-      if (!d) return "-";
-      const date = new Date(d);
-      if (isNaN(date.getTime())) return "-";
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-      return `${dd}/${mm}/${yyyy}`;
-    }
-    function getPriorityCode(priorityText) {
-      if (!priorityText) return "P3";
-      return priorityText.split(" ")[0] || "P3";
-    }
+    function formatDateOnly(d) { if (!d) return "-"; const date = new Date(d); if (isNaN(date.getTime())) return "-"; return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`; }
+    function getPriorityCode(priorityText) { if (!priorityText) return "P3"; return priorityText.split(" ")[0] || "P3"; }
     function computeSlaForTicket(priorityText, createdISO) {
-      const code = getPriorityCode(priorityText);
-      const tpl = SLA_TEMPLATES[code] || SLA_TEMPLATES.P3;
-      const created = new Date(createdISO);
-      return {
-        priorityCode: code,
-        responseDueAt: new Date(created.getTime() + tpl.responseHours * 3600000).toISOString(),
-        resolutionDueAt: new Date(created.getTime() + tpl.resolutionHours * 3600000).toISOString(),
-        firstResponseAt: null,
-        resolvedAt: null,
-        responseBreached: false,
-        resolutionBreached: false,
-        escalated: false
-      };
+      const code = getPriorityCode(priorityText); const tpl = SLA_TEMPLATES[code] || SLA_TEMPLATES.P3; const created = new Date(createdISO);
+      return { priorityCode: code, responseDueAt: new Date(created.getTime() + tpl.responseHours * 3600000).toISOString(), resolutionDueAt: new Date(created.getTime() + tpl.resolutionHours * 3600000).toISOString(), firstResponseAt: null, resolvedAt: null, responseBreached: false, resolutionBreached: false, escalated: false };
     }
-    function calcAgeDays(createdISO) {
-      const c = new Date(createdISO);
-      if (isNaN(c.getTime())) return "-";
-      const diff = Date.now() - c.getTime();
-      return Math.floor(diff / (1000 * 60 * 60 * 24));
-    }
-    function showToast(msg) {
-      const div = document.createElement("div");
-      div.className = "toast";
-      div.textContent = msg;
-      toastContainer.appendChild(div);
-      setTimeout(() => div.remove(), 4000);
-    }
+    function calcAgeDays(createdISO) { const c = new Date(createdISO); if (isNaN(c.getTime())) return "-"; return Math.floor((Date.now() - c.getTime()) / (1000 * 60 * 60 * 24)); }
+    function showToast(msg) { const div = document.createElement("div"); div.className = "toast"; div.textContent = msg; toastContainer.appendChild(div); setTimeout(() => div.remove(), 4000); }
     async function logAudit(action, ticketId, message) {
-      if (!currentUser) return;
-      const entry = {
-        time: new Date().toISOString(),
-        userId: currentUser.id,
-        userName: currentUser.name,
-        role: currentUser.role,
-        action,
-        ticketId,
-        message
-      };
-      await dbAdd("auditLogs", entry);
-      auditLogs.unshift(entry);
-      renderAuditLog();
+      if (!currentUser) return; const entry = { time: new Date().toISOString(), userId: currentUser.id, userName: currentUser.name, role: currentUser.role, action, ticketId, message };
+      await dbAdd("auditLogs", entry); auditLogs.unshift(entry); renderAuditLog();
     }
     function statusClassName(status, escalated) {
-      if (escalated) return "status-escalated";
-      if (status === "Pending Approval") return "status-pending-approval";
-      if (status === "Open") return "status-open";
-      if (status === "In Progress") return "status-in-progress";
-      if (status === "Resolved") return "status-resolved";
-      if (status === "Pending User") return "status-pending";
-      if (status === "Closed") return "status-closed";
-      if (status === "Cancelled") return "status-cancelled";
-      return "";
+      if (escalated) return "status-escalated"; if (status === "Pending Approval") return "status-pending-approval"; if (status === "Open") return "status-open"; if (status === "In Progress") return "status-in-progress"; if (status === "Resolved") return "status-resolved"; if (status === "Pending User") return "status-pending"; if (status === "Closed") return "status-closed"; if (status === "Cancelled") return "status-cancelled"; return "";
     }
-    function slaLabel(ticket) {
-      if (ticket.status === "Pending Approval") return "-"; 
-      if (!ticket.sla) return "-";
-      const s = ticket.sla;
-      if (s.resolutionBreached || s.responseBreached) return "Breach";
-      if (s.resolvedAt) return "Met";
-      return "In Progress";
-    }
-
-    function populateAssigneeDropdowns() {
+    function slaLabel(ticket) { if (ticket.status === "Pending Approval") return "-"; if (!ticket.sla) return "-"; if (ticket.sla.resolutionBreached || ticket.sla.responseBreached) return "Breach"; if (ticket.sla.resolvedAt) return "Met"; return "In Progress"; }
+      function populateAssigneeDropdowns() {
       const validAssignees = systemUsers.filter(u => u.assignTo === true);
       adminBulkAssignee.innerHTML = `<option value="">Assign To...</option>`;
-      validAssignees.forEach(u => {
-          const opt = document.createElement("option");
-          opt.value = u.id;
-          opt.textContent = `${u.name} (${u.role})`;
-          adminBulkAssignee.appendChild(opt);
-      });
+      validAssignees.forEach(u => { const opt = document.createElement("option"); opt.value = u.id; opt.textContent = `${u.name} (${u.role})`; adminBulkAssignee.appendChild(opt); });
       detailAssigneeSelect.innerHTML = `<option value="">(Unassigned)</option>`;
-      validAssignees.forEach(u => {
-          const opt = document.createElement("option");
-          opt.value = u.id;
-          opt.textContent = `${u.name} (${u.role})`;
-          detailAssigneeSelect.appendChild(opt);
-      });
+      validAssignees.forEach(u => { const opt = document.createElement("option"); opt.value = u.id; opt.textContent = `${u.name} (${u.role})`; detailAssigneeSelect.appendChild(opt); });
     }
-
     function populateApproverDropdowns() {
-      const incidentApp = document.getElementById("incident-approver");
-      const requestApp = document.getElementById("request-approver");
-      const approvers = systemUsers.filter(u => u.isApprover === true);
-      let html = '<option value="">-- Select Approver --</option>';
-      approvers.forEach(u => { html += `<option value="${u.id}">${u.name} (${u.role})</option>`; });
-      if(incidentApp) incidentApp.innerHTML = html;
-      if(requestApp) requestApp.innerHTML = html;
+      const incidentApp = document.getElementById("incident-approver"); const requestApp = document.getElementById("request-approver"); const approvers = systemUsers.filter(u => u.isApprover === true);
+      let html = '<option value="">-- Select Approver --</option>'; approvers.forEach(u => { html += `<option value="${u.id}">${u.name} (${u.role})</option>`; });
+      if(incidentApp) incidentApp.innerHTML = html; if(requestApp) requestApp.innerHTML = html;
     }
-
     function renderApproverTable() {
       approverTableBody.innerHTML = "";
       systemUsers.forEach((u, i) => {
-        const tr = document.createElement("tr");
-        const checked = u.isApprover ? "checked" : "";
-        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.role}</td>
-        <td style="text-align:center;">
-          <input type="checkbox" onchange="window.toggleApprover(${i}, this.checked)" ${checked} style="width:18px;height:18px; cursor:pointer;" />
-        </td>`;
+        const tr = document.createElement("tr"); const checked = u.isApprover ? "checked" : "";
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.role}</td><td style="text-align:center;"><input type="checkbox" onchange="window.toggleApprover('${u.id}', this.checked)" ${checked} style="width:18px;height:18px; cursor:pointer;" /></td>`;
         approverTableBody.appendChild(tr);
       });
     }
-
-    window.toggleApprover = async function(index, isApproverChecked) {
-      const u = systemUsers[index];
-      u.isApprover = isApproverChecked;
-      await dbUpdate("users", u.firebaseId, u);
-      populateApproverDropdowns();
-      renderAll();
-      showToast(`อัปเดตสิทธิ์ Approver สำหรับ ${u.name} เรียบร้อย`);
+    window.toggleApprover = async function(userId, isApproverChecked) {
+      const u = systemUsers.find(item => item.id === userId); if(!u) return; u.isApprover = isApproverChecked;
+      await dbUpdate("users", u.firebaseId, u); populateApproverDropdowns(); renderAll(); showToast(`อัปเดตสิทธิ์ผู้อนุมัติสำเร็จ`);
     };
-
     function populateRequesterDropdowns() {
-      const incReqSelect = document.getElementById("incident-requester");
-      const reqReqSelect = document.getElementById("request-requester");
-      const requesters = systemUsers.filter(u => u.isRequester !== false);
+      const incReqSelect = document.getElementById("incident-requester"); const reqReqSelect = document.getElementById("request-requester"); const requesters = systemUsers.filter(u => u.isRequester !== false);
       let html = '<option value="">-- เลือกผู้แจ้ง (Requester) --</option>';
-      requesters.forEach(u => {
-        html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'ไม่ระบุแผนก'})</option>`;
-      });
-      if (incReqSelect) incReqSelect.innerHTML = html;
-      if (reqReqSelect) reqReqSelect.innerHTML = html;
+      requesters.forEach(u => { html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'ไม่ระบุแผนก'})</option>`; });
+      if (incReqSelect) incReqSelect.innerHTML = html; if (reqReqSelect) reqReqSelect.innerHTML = html;
     }
-
     function setupRequesterAutoFill(selectId, deptInputId, emailInputId) {
-      const selectEl = document.getElementById(selectId);
-      const deptEl = document.getElementById(deptInputId);
-      const emailEl = document.getElementById(emailInputId);
-      if (!selectEl || !deptEl || !emailEl) return;
-
+      const selectEl = document.getElementById(selectId); const deptEl = document.getElementById(deptInputId); const emailEl = document.getElementById(emailInputId); if (!selectEl || !deptEl || !emailEl) return;
       selectEl.addEventListener("change", (e) => {
-        const selectedOption = e.target.options[e.target.selectedIndex];
-        if (!selectedOption || !selectedOption.value) {
-          deptEl.value = ""; emailEl.value = "";
-          return;
-        }
-        // [จุดแก้ที่ 4] ใส่ fallback "N/A" ป้องกันฟอร์มค้างกรณี User ไม่มีสังกัดแผนก
-        deptEl.value = selectedOption.getAttribute("data-dept") || "N/A";
-        emailEl.value = selectedOption.getAttribute("data-email") || "";
+        const selectedOption = e.target.options[e.target.selectedIndex]; if (!selectedOption || !selectedOption.value) { deptEl.value = ""; emailEl.value = ""; return; }
+        deptEl.value = selectedOption.getAttribute("data-dept") || "N/A"; emailEl.value = selectedOption.getAttribute("data-email") || "";
       });
     }
-    setupRequesterAutoFill("incident-requester", "incident-dept", "incident-email");
-    setupRequesterAutoFill("request-requester", "request-dept", "request-email");
+    setupRequesterAutoFill("incident-requester", "incident-dept", "incident-email"); setupRequesterAutoFill("request-requester", "request-dept", "request-email");
 
     function applyRequesterUserLock() {
       if (!currentUser) return;
-      const incReqEl = document.getElementById("incident-requester");
-      const incDeptEl = document.getElementById("incident-dept");
-      const incEmailEl = document.getElementById("incident-email");
-      const reqReqEl = document.getElementById("request-requester");
-      const reqDeptEl = document.getElementById("request-dept");
-      const reqEmailEl = document.getElementById("request-email");
-
+      const incReqEl = document.getElementById("incident-requester"); const incDeptEl = document.getElementById("incident-dept"); const incEmailEl = document.getElementById("incident-email");
+      const reqReqEl = document.getElementById("request-requester"); const reqDeptEl = document.getElementById("request-dept"); const reqEmailEl = document.getElementById("request-email");
       if (currentUser.role === "user") {
         if (incReqEl) { incReqEl.value = currentUser.name; incReqEl.disabled = true; if(incDeptEl) incDeptEl.value = currentUser.department || "N/A"; if(incEmailEl) incEmailEl.value = currentUser.email || ""; }
         if (reqReqEl) { reqReqEl.value = currentUser.name; reqReqEl.disabled = true; if(reqDeptEl) reqDeptEl.value = currentUser.department || "N/A"; if(reqEmailEl) reqEmailEl.value = currentUser.email || ""; }
@@ -2129,746 +1454,269 @@
         if (reqReqEl) { reqReqEl.disabled = false; reqReqEl.value = ""; if(reqDeptEl) reqDeptEl.value = ""; if(reqEmailEl) reqEmailEl.value = ""; }
       }
     }
-
-    // ================== LOGIN ==================
     function initLogin() {
-      loginUserSelect.innerHTML = "";
-      systemUsers.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = u.id;
-        opt.textContent = `${u.name} (${u.role})`;
-        loginUserSelect.appendChild(opt);
-      });
-      const savedId = localStorage.getItem("itsm_current_user");
-      if (savedId) {
-        const user = getUserById(savedId);
-        if (user) { setCurrentUser(user); return; }
-      }
+      loginUserSelect.innerHTML = ""; systemUsers.forEach(u => { const opt = document.createElement("option"); opt.value = u.id; opt.textContent = `${u.name} (${u.role})`; loginUserSelect.appendChild(opt); });
+      const savedId = localStorage.getItem("itsm_current_user"); if (savedId) { const user = getUserById(savedId); if (user) { setCurrentUser(user); return; } }
       loginRoot.style.display = "flex"; appRoot.style.display = "none";
     }
     function setCurrentUser(user) {
-      currentUser = user;
-      localStorage.setItem("itsm_current_user", user.id);
-      currentUserLabel.textContent = `User: ${user.name}`;
-      currentRoleLabel.textContent = user.role.toUpperCase();
-      loginRoot.style.display = "none"; appRoot.style.display = "block";
-      tabs.forEach(tab => {
-        const roles = tab.getAttribute("data-roles");
-        if (!roles) { tab.style.display = "inline-flex"; } 
-        else {
-          const allowed = roles.split(",").map(s => s.trim());
-          tab.style.display = allowed.includes(user.role) ? "inline-flex" : "none";
-        }
-      });
+      currentUser = user; localStorage.setItem("itsm_current_user", user.id); currentUserLabel.textContent = `User: ${user.name}`; currentRoleLabel.textContent = user.role.toUpperCase(); loginRoot.style.display = "none"; appRoot.style.display = "block";
+      tabs.forEach(tab => { const roles = tab.getAttribute("data-roles"); if (!roles) { tab.style.display = "inline-flex"; } else { tab.style.display = roles.split(",").map(s => s.trim()).includes(user.role) ? "inline-flex" : "none"; }});
       populateAssigneeDropdowns(); populateApproverDropdowns(); populateRequesterDropdowns(); applyRequesterUserLock(); renderAll();
     }
     loginBtn.addEventListener("click", () => {
-      const id = loginUserSelect.value;
-      const passwordInput = document.getElementById("login-password");
-      const password = passwordInput.value; 
-      const user = getUserById(id);
-      if (!user) { alert("Please select a user."); return; }
-      if (user.password && user.password !== password) { alert("Incorrect password."); return; }
-      passwordInput.value = "";
-      setCurrentUser(user); showToast(`Welcome, ${user.name}`);
+      const id = loginUserSelect.value; const passwordInput = document.getElementById("login-password"); const user = getUserById(id);
+      if (!user) return; if (user.password && user.password !== passwordInput.value) { alert("Incorrect password."); return; }
+      passwordInput.value = ""; setCurrentUser(user); showToast(`Welcome, ${user.name}`);
     });
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("itsm_current_user");
-      currentUser = null;
-      appRoot.style.display = "none"; loginRoot.style.display = "flex";
-    });
-
-    // ================== TABS ==================
+    logoutBtn.addEventListener("click", () => { localStorage.removeItem("itsm_current_user"); currentUser = null; appRoot.style.display = "none"; loginRoot.style.display = "flex"; });
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
-        const targetId = tab.getAttribute("data-target");
-        if (!targetId) return;
-        tabs.forEach(t => t.classList.remove("active"));
-        sections.forEach(s => s.classList.remove("active"));
-        tab.classList.add("active");
-        document.getElementById(targetId).classList.add("active");
-        if (targetId === "reports-section") renderReports();
-        if (targetId === "admin-section") renderAdminTable();
-        if (targetId === "audit-section") renderAuditLog();
-        if (targetId === "mytickets-section") renderMyTickets();
-        if (targetId === "approver-section") renderApproverTable();
+        const targetId = tab.getAttribute("data-target"); if (!targetId) return;
+        tabs.forEach(t => t.classList.remove("active")); sections.forEach(s => s.classList.remove("active"));
+        tab.classList.add("active"); document.getElementById(targetId).classList.add("active");
+        if (targetId === "reports-section") renderReports(); if (targetId === "admin-section") renderAdminTable(); if (targetId === "audit-section") renderAuditLog(); if (targetId === "mytickets-section") renderMyTickets(); if (targetId === "approver-section") renderApproverTable();
       });
     });
 
-    // ================== APPROVE / REJECT ACTION ==================
     window.approveTicket = async function(kind, id) {
-      if (!confirm(`ยืนยันการอนุมัติ (Approve) ตั๋ว ${id} ใช่หรือไม่?`)) return;
-      const t = findTicket(kind, id); if (!t) return;
-      t.status = "Open"; t.updatedAt = new Date().toISOString();
-      if (!Array.isArray(t.notes)) t.notes = [];
+      if (!confirm(`ยืนยันการอนุมัติ?`)) return; const t = findTicket(kind, id); if (!t) return;
+      t.status = "Open"; t.updatedAt = new Date().toISOString(); if (!Array.isArray(t.notes)) t.notes = [];
       t.notes.push({ text: "✅ อนุมัติคำขอแล้ว (Approved)", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
-      await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
-      renderAll(); showToast(`Approved ticket ${t.id}`);
+      await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`); renderAll(); showToast(`Approved ticket ${t.id}`);
     };
-
     window.rejectTicket = async function(kind, id) {
-      const reason = prompt(`กรุณาระบุเหตุผลที่ไม่อนุมัติ (Reject) ตั๋ว ${id}:`);
-      if (!reason || reason.trim() === "") { alert("⚠️ บังคับกรอก: คุณต้องระบุเหตุผลที่ไม่อนุมัติตั๋วทุกครั้ง"); return; }
-      const t = findTicket(kind, id); if (!t) return;
-      t.status = "Cancelled"; t.updatedAt = new Date().toISOString();
-      if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ text: `❌ ไม่อนุมัติคำขอ (Rejected)\nเหตุผล: ${reason}`, createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
-      if (t.sla && !t.sla.resolvedAt) { t.sla.resolvedAt = new Date().toISOString(); }
-      await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
-      renderAll(); showToast(`Rejected ticket ${t.id}`);
+      const reason = prompt(`ระบุเหตุผลที่ไม่นุมัติ:`); if (!reason) { alert("จำเป็นต้องระบุเหตุผล"); return; }
+      const t = findTicket(kind, id); if (!t) return; t.status = "Cancelled"; t.updatedAt = new Date().toISOString(); if (!Array.isArray(t.notes)) t.notes = [];
+      t.notes.push({ text: `❌ ปฏิเสธคำขอ (Rejected)\nเหตุผล: ${reason}`, createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+      if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
+      await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}`); renderAll(); showToast(`Rejected ticket ${t.id}`);
     };
+    async function assignTicket(ticket, newAssigneeId) { ticket.assignedTo = newAssigneeId || null; ticket.updatedAt = new Date().toISOString(); logAudit("ASSIGN", ticket.id, `Assigned to ${getUserName(newAssigneeId) || "Unassigned"}`); }
 
-    // ================== ASSIGNMENT ==================
-    async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
-      const prev = ticket.assignedTo || null;
-      if (prev === newAssigneeId) return;
-      ticket.assignedTo = newAssigneeId || null;
-      ticket.updatedAt = new Date().toISOString();
-      const newName = getUserName(newAssigneeId) || "(Unassigned)";
-      logAudit("ASSIGN", ticket.id, `Assigned to ${newName}`);
-      if (currentUser && currentUser.id === newAssigneeId) { showToast(`Ticket ${ticket.id} assigned to you.`); }
-    }
-
-    // ================== ATTACHMENTS (INCIDENT) ==================
     let incidentStagedAttachments = [];
-    const incidentDescInput = document.getElementById("incident-description");
-    const incidentStagedList = document.getElementById("incident-staged-attachments");
-
-    incidentDescInput.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items; if (!items) return;
-      const images = [];
-      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
-      if (!images.length) return; 
-      images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
-        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`); return; }
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
-          renderIncidentStagedAttachments();
-        };
-        reader.readAsDataURL(file);
-      });
+    document.getElementById("incident-description").addEventListener("paste", (e) => {
+      const items = e.clipboardData?.items; if (!items) return;
+      for (let item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile(); if (file.size > MAX_ATTACHMENT_SIZE_BYTES) continue;
+          const reader = new FileReader(); reader.onload = (evt) => { incidentStagedAttachments.push({ id: `${Date.now()}`, name: `img-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result }); renderIncidentStagedAttachments(); }; reader.readAsDataURL(file);
+        }
+      }
     });
-
     function renderIncidentStagedAttachments() {
       incidentStagedList.innerHTML = "";
-      incidentStagedAttachments.forEach((a, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${index})">X</button>`;
+      incidentStagedAttachments.forEach((a, idx) => {
+        const li = document.createElement("li"); li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div><strong>${a.name}</strong></div><button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${idx})">X</button>`;
         incidentStagedList.appendChild(li);
       });
     }
-
-    window.removeIncidentStaged = function(index) { incidentStagedAttachments.splice(index, 1); renderIncidentStagedAttachments(); };
-
-    const incidentFileInput = document.getElementById("incident-file-input");
-    incidentFileInput.addEventListener("change", (e) => {
-      const files = e.target.files; if (!files || files.length === 0) return;
-      Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 150KB)`); return; }
-        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`); return; }
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
-          renderIncidentStagedAttachments();
-        };
-        reader.readAsDataURL(file);
+    window.removeIncidentStaged = function(idx) { incidentStagedAttachments.splice(idx, 1); renderIncidentStagedAttachments(); };
+    document.getElementById("incident-file-input").addEventListener("change", (e) => {
+      Array.from(e.target.files).forEach(file => {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) return;
+        const reader = new FileReader(); reader.onload = (evt) => { incidentStagedAttachments.push({ id: `${Date.now()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result }); renderIncidentStagedAttachments(); }; reader.readAsDataURL(file);
       });
-      incidentFileInput.value = "";
     });
 
-    // ================== ATTACHMENTS (REQUEST) ==================
     let requestStagedAttachments = [];
-    const requestDescInput = document.getElementById("request-description");
-    const requestStagedList = document.getElementById("request-staged-attachments");
-
-    requestDescInput.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items; if (!items) return;
-      const images = [];
-      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
-      if (!images.length) return; 
-      images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
-        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`); return; }
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
-          renderRequestStagedAttachments();
-        };
-        reader.readAsDataURL(file);
-      });
+    document.getElementById("request-description").addEventListener("paste", (e) => {
+      const items = e.clipboardData?.items; if (!items) return;
+      for (let item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile(); if (file.size > MAX_ATTACHMENT_SIZE_BYTES) continue;
+          const reader = new FileReader(); reader.onload = (evt) => { requestStagedAttachments.push({ id: `${Date.now()}`, name: `img-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result }); renderRequestStagedAttachments(); }; reader.readAsDataURL(file);
+        }
+      }
     });
-
     function renderRequestStagedAttachments() {
       requestStagedList.innerHTML = "";
-      requestStagedAttachments.forEach((a, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${index})">X</button>`;
+      requestStagedAttachments.forEach((a, idx) => {
+        const li = document.createElement("li"); li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div><strong>${a.name}</strong></div><button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${idx})">X</button>`;
         requestStagedList.appendChild(li);
       });
     }
-
-    window.removeRequestStaged = function(index) { requestStagedAttachments.splice(index, 1); renderRequestStagedAttachments(); };
-
-    const requestFileInput = document.getElementById("request-file-input");
-    requestFileInput.addEventListener("change", (e) => {
-      const files = e.target.files; if (!files || files.length === 0) return;
-      Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 150KB)`); return; }
-        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`); return; }
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
-          renderRequestStagedAttachments();
-        };
-        reader.readAsDataURL(file);
+    window.removeRequestStaged = function(idx) { requestStagedAttachments.splice(idx, 1); renderRequestStagedAttachments(); };
+    document.getElementById("request-file-input").addEventListener("change", (e) => {
+      Array.from(e.target.files).forEach(file => {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) return;
+        const reader = new FileReader(); reader.onload = (evt) => { requestStagedAttachments.push({ id: `${Date.now()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result }); renderRequestStagedAttachments(); }; reader.readAsDataURL(file);
       });
-      requestFileInput.value = "";
     });
 
-    // ================== CREATING TICKETS ==================
     incidentForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const requester = document.getElementById("incident-requester").value;
-      const dept = document.getElementById("incident-dept").value.trim();
-      const phone = document.getElementById("incident-phone").value.trim();
-      const email = document.getElementById("incident-email").value.trim();
-      const system = document.getElementById("incident-system").value;
-      const module = document.getElementById("incident-module").value.trim();
-      const title = document.getElementById("incident-title").value.trim();
-      const category = document.getElementById("incident-category").value;
-      const impact = document.getElementById("incident-impact").value;
-      const priority = document.getElementById("incident-priority").value;
-      const due = document.getElementById("incident-due").value;
-      const approver = document.getElementById("incident-approver").value; 
-      const ccEmails = document.getElementById("incident-cc").value.trim();
-      const description = document.getElementById("incident-description").value.trim();
-      const reference = document.getElementById("incident-reference").value.trim();
-      
-      if (!requester || !dept || !email || !system || !title || !category || !impact || !priority || !description) {
-        alert("Please fill in all required (*) fields."); return;
-      }
-      
-      const now = new Date().toISOString();
-      const initialStatus = approver ? "Pending Approval" : "Open";
-
-      const incident = {
-        id: generateId("INC", incidents),
-        type: "Incident", requester, dept, phone, email, system, module, title,
-        category, impact, priority, dueDate: due || null, approver, ccEmails, reference, description,
-        status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
-        attachments: [...incidentStagedAttachments], 
-        sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
-      };
-
-      await dbAdd("incidents", incident); incidents.unshift(incident);
-      incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); 
-      logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
+      e.preventDefault(); const now = new Date().toISOString(); const approver = document.getElementById("incident-approver").value;
+      const incident = { id: generateId("INC", incidents), type: "Incident", requester: document.getElementById("incident-requester").value, dept: document.getElementById("incident-dept").value, phone: document.getElementById("incident-phone").value, email: document.getElementById("incident-email").value, system: document.getElementById("incident-system").value, module: document.getElementById("incident-module").value, title: document.getElementById("incident-title").value, category: document.getElementById("incident-category").value, impact: document.getElementById("incident-impact").value, priority: document.getElementById("incident-priority").value, dueDate: document.getElementById("incident-due").value || null, approver, ccEmails: document.getElementById("incident-cc").value, reference: document.getElementById("incident-reference").value, description: document.getElementById("incident-description").value, status: approver ? "Pending Approval" : "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], attachments: [...incidentStagedAttachments], sla: computeSlaForTicket(document.getElementById("incident-priority").value, now), createdBy: currentUser ? currentUser.id : null };
+      await dbAdd("incidents", incident); incidents.unshift(incident); incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); logAudit("CREATE_INCIDENT", incident.id, `Created: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
     });
-
     requestForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const requester = document.getElementById("request-requester").value;
-      const dept = document.getElementById("request-dept").value.trim();
-      const phone = document.getElementById("request-phone").value.trim();
-      const email = document.getElementById("request-email").value.trim();
-      const system = document.getElementById("request-system").value;
-      const module = document.getElementById("request-module").value.trim();
-      const title = document.getElementById("request-title").value.trim();
-      const type = document.getElementById("request-type").value;
-      const category = document.getElementById("request-category").value;
-      const impact = document.getElementById("request-impact").value;
-      const due = document.getElementById("request-due").value;
-      const approver = document.getElementById("request-approver").value; 
-      const ccEmails = document.getElementById("request-cc").value.trim();
-      const reference = document.getElementById("request-ref").value.trim();
-      const remark = document.getElementById("request-remark")?.value.trim() || "";
-      const description = document.getElementById("request-description").value.trim();
-
-      if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !description) {
-        alert("Please fill in all required (*) fields."); return;
-      }
-
-      const now = new Date().toISOString();
-      const initialStatus = approver ? "Pending Approval" : "Open";
-
-      const req = {
-        id: generateId("REQ", requests),
-        type: "Request", requester, dept, phone, email, system, module, title,
-        requestType: type, category, impact, dueDate: due, approver, ccEmails, reference, remark, description,
-        status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
-        attachments: [...requestStagedAttachments], 
-        sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
-      };
-
-      await dbAdd("requests", req); requests.unshift(req);
-      requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); 
-      logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
+      e.preventDefault(); const now = new Date().toISOString(); const approver = document.getElementById("request-approver").value;
+      const req = { id: generateId("REQ", requests), type: "Request", requester: document.getElementById("request-requester").value, dept: document.getElementById("request-dept").value, phone: document.getElementById("request-phone").value, email: document.getElementById("request-email").value, system: document.getElementById("request-system").value, module: document.getElementById("request-module").value, title: document.getElementById("request-title").value, requestType: document.getElementById("request-type").value, category: document.getElementById("request-category").value, impact: document.getElementById("request-impact").value, dueDate: document.getElementById("request-due").value, approver, ccEmails: document.getElementById("request-cc").value, reference: document.getElementById("request-ref").value, description: document.getElementById("request-description").value, status: approver ? "Pending Approval" : "Open", createdAt: now, updatedAt: now, assignedTo: null, notes: [], attachments: [...requestStagedAttachments], sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null };
+      await dbAdd("requests", req); requests.unshift(req); requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); logAudit("CREATE_REQUEST", req.id, `Created: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
     });
 
-    // ================== EXPORT CSV ==================
     function downloadCSV(filename, rows) {
-      if (!rows || !rows.length) { alert("No data for export."); return; }
-      const processValue = (v) => { if (v === null || v === undefined) return ""; return `"${String(v).replace(/"/g, '""')}"`; };
-      const csv = rows.map(row => row.map(processValue).join(",")).join("\n");
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
+      const csv = rows.map(row => row.map(v => v === null || v === undefined ? "" : `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }); const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
     }
+    exportIncBtn?.addEventListener("click", () => {
+      const header = ["ID","Type","Requester","Status","Subject"]; const rows = [header, ...incidents.map(i => [i.id, i.type, i.requester, i.status, i.title])]; downloadCSV("incidents.csv", rows);
+    });
+    exportReqBtn?.addEventListener("click", () => {
+      const header = ["ID","Type","Requester","Status","Subject"]; const rows = [header, ...requests.map(r => [r.id, r.type, r.requester, r.status, r.title])]; downloadCSV("requests.csv", rows);
+    });
 
-    if(exportIncBtn) {
-      exportIncBtn.addEventListener("click", () => {
-        const header = ["ID","Type","Requester","Dept","Phone","Email","System","Module","Title","Category","Impact","Priority","DueDate","Approver","CC_Emails","Reference","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"];
-        const rows = [header, ...incidents.map(i => [i.id, i.type, i.requester, i.dept, i.phone, i.email, i.system, i.module, i.title, i.category, i.impact, i.priority, i.dueDate ? formatDateOnly(i.dueDate) : "", getUserName(i.approver) || i.approver, i.ccEmails || "", i.reference, i.status, getUserName(i.assignedTo), formatDateTime(i.createdAt), formatDateTime(i.updatedAt), i.sla ? formatDateTime(i.sla.responseDueAt) : "", i.sla ? formatDateTime(i.sla.resolutionDueAt) : "", i.sla && i.sla.firstResponseAt ? formatDateTime(i.sla.firstResponseAt) : "", i.sla && i.sla.resolvedAt ? formatDateTime(i.sla.resolvedAt) : "", i.sla ? i.sla.responseBreached : "", i.sla ? i.sla.resolutionBreached : ""])];
-        downloadCSV("incidents.csv", rows);
-      });
-    }
-
-    if(exportReqBtn) {
-      exportReqBtn.addEventListener("click", () => {
-        const header = ["ID","Type","Requester","Dept","Phone","Email","System","Module","Title","RequestType","Category","Impact","DueDate","Approver","CC_Emails","Reference","Remark","Status","AssignedTo","CreatedAt","UpdatedAt","SLA_ResponseDue","SLA_ResolutionDue","SLA_FirstResponseAt","SLA_ResolvedAt","SLA_ResponseBreached","SLA_ResolutionBreached"];
-        const rows = [header, ...requests.map(r => [r.id,r.type,r.requester,r.dept,r.phone,r.email,r.system,r.module,r.title,r.requestType,r.category,r.impact,r.dueDate ? formatDateOnly(r.dueDate) : "", getUserName(r.approver) || r.approver, r.ccEmails || "", r.reference,r.remark,r.status, getUserName(r.assignedTo),formatDateTime(r.createdAt),formatDateTime(r.updatedAt), r.sla ? formatDateTime(r.sla.responseDueAt) : "", r.sla ? formatDateTime(r.sla.resolutionDueAt) : "", r.sla && r.sla.firstResponseAt ? formatDateTime(r.sla.firstResponseAt) : "", r.sla && r.sla.resolvedAt ? formatDateTime(r.sla.resolvedAt) : "", r.sla ? r.sla.responseBreached : "", r.sla ? r.sla.resolutionBreached : ""])];
-        downloadCSV("requests.csv", rows);
-      });
-    }
-
-    // ================== RENDER FUNCTIONS ==================
     function renderApproveTasks() {
-      if (!currentUser) return;
-      approveTasksBody.innerHTML = "";
+      if (!currentUser) return; approveTasksBody.innerHTML = "";
       const all = [...incidents, ...requests].filter(t => t.status === "Pending Approval" && t.approver === currentUser.id);
-      if (all.length > 0) { badgePendingApprove.textContent = all.length; badgePendingApprove.style.display = "inline-flex"; } 
-      else { badgePendingApprove.style.display = "none"; }
-      all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
+      badgePendingApprove.textContent = all.length; badgePendingApprove.style.display = all.length > 0 ? "inline-flex" : "none";
+      all.forEach(t => {
         const tr = document.createElement("tr"); const kind = t.type === "Incident" ? "incident" : "request";
-        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
+        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
         approveTasksBody.appendChild(tr);
       });
     }
-
     function renderDashboard() {
-      const incidentCount = incidents.length; const requestCount = requests.length; const total = incidentCount + requestCount; const all = [...incidents, ...requests];
-      const slaOk = all.filter(t => t.sla && t.sla.resolvedAt && !t.sla.resolutionBreached).length; const slaBreach = all.filter(t => t.sla && (t.sla.resolutionBreached || t.sla.responseBreached)).length;
-      badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`; badgeSlaOk.textContent = `SLA Met: ${slaOk}`; badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
-      const statusOpen = all.filter(t => t.status === "Open").length; const statusInProgress = all.filter(t => t.status === "In Progress").length; const statusPending = all.filter(t => t.status === "Pending User").length; const statusClosed = all.filter(t => t.status === "Closed").length; const statusCancelled = all.filter(t => t.status === "Cancelled").length;
-      const typeCtx = document.getElementById("typeChart").getContext("2d");
-      if (typeChart) typeChart.destroy();
-      typeChart = new Chart(typeCtx, { type: "doughnut", data: { labels: ["Incident", "Request"], datasets: [{ data: [incidentCount, requestCount] }] }, options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" } });
-      const statusCtx = document.getElementById("statusChart").getContext("2d");
-      if (statusChart) statusChart.destroy();
-      statusChart = new Chart(statusCtx, { type: "bar", data: { labels: ["Open", "In Progress", "Pending User", "Closed", "Cancelled"], datasets: [{ label: "Count", data: [statusOpen, statusInProgress, statusPending, statusClosed, statusCancelled] }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, precision: 0 } } } });
+      const incCount = incidents.length; const reqCount = requests.length; const total = incCount + reqCount; const all = [...incidents, ...requests];
+      badgeTotal.textContent = `Total: ${total}`; badgeSlaOk.textContent = `Met: ${all.filter(t => t.sla?.resolvedAt && !t.sla.resolutionBreached).length}`; badgeSlaBreach.textContent = `Breach: ${all.filter(t => t.sla?.resolutionBreached).length}`;
+      
+      const typeCtx = document.getElementById("typeChart").getContext("2d"); if (typeChart) typeChart.destroy();
+      typeChart = new Chart(typeCtx, { type: "doughnut", data: { labels: ["Incident", "Request"], datasets: [{ data: [incCount, reqCount] }] }, options: { plugins: { legend: { position: "bottom" } } } });
+      
+      const statusCtx = document.getElementById("statusChart").getContext("2d"); if (statusChart) statusChart.destroy();
+      statusChart = new Chart(statusCtx, { type: "bar", data: { labels: ["Open", "In Progress", "Closed"], datasets: [{ label: "Count", data: [all.filter(t=>t.status==="Open").length, all.filter(t=>t.status==="In Progress").length, all.filter(t=>t.status==="Closed").length] }] } });
+
       latestTableBody.innerHTML = "";
-      all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5).forEach(t => {
-          const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
-          latestTableBody.appendChild(tr);
-        });
+      all.slice(0, 5).forEach(t => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${t.title}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${statusClassName(t.status, t.sla?.escalated)}">${t(t.status)}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
+        latestTableBody.appendChild(tr);
+      });
     }
 
-    function filterByDateRange(createdISO, fromVal, toVal) {
-      const dt = new Date(createdISO); if (isNaN(dt.getTime())) return false;
-      if (fromVal && dt < new Date(fromVal + "T00:00:00")) return false;
-      if (toVal && dt > new Date(toVal + "T23:59:59")) return false; return true;
-    }
-
+    function filterByDateRange(createdISO, fromVal, toVal) { const dt = new Date(createdISO); if (fromVal && dt < new Date(fromVal)) return false; if (toVal && dt > new Date(toVal + "T23:59:59")) return false; return true; }
     function renderIncidents() {
-      const statusFilter = incidentStatusFilter.value; const categoryFilter = incidentCategoryFilter.value; const systemFilter = incidentSystemFilter.value; const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase(); const fromVal = incidentDateFrom.value; const toVal = incidentDateTo.value; const search = incidentSearch.value.trim().toLowerCase();
       incidentTableBody.innerHTML = "";
-      incidents.filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
-          const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
-          tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${formatRequesterObo(i.requester, i.createdBy)}</td>`;
-          incidentTableBody.appendChild(tr);
-        });
+      incidents.filter(i => filterByDateRange(i.createdAt, incidentDateFrom.value, incidentDateTo.value)).forEach(i => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${i.id}</td><td>${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${statusClassName(i.status, i.sla?.escalated)}">${t(i.status)}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${formatRequesterObo(i.requester, i.createdBy)}</td>`;
+        incidentTableBody.appendChild(tr);
+      });
     }
-
     function renderRequests() {
-      const statusFilter = requestStatusFilter.value; const categoryFilter = requestCategoryFilter.value; const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value; const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase(); const fromVal = requestDateFrom.value; const toVal = requestDateTo.value; const search = requestSearch.value.trim().toLowerCase();
       requestTableBody.innerHTML = "";
-      requests.filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
-          const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
-          tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}"><strong style="color:var(--banpu-primary);">${r.title}</strong> <span class="muted" style="font-size:11px;">(${formatRequesterObo(r.requester, r.createdBy)})</span></td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
-          requestTableBody.appendChild(tr);
-        });
+      requests.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.id}</td><td>${r.title}</td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${statusClassName(r.status, r.sla?.escalated)}">${t(r.status)}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatDateOnly(r.dueDate)}</td>`;
+        requestTableBody.appendChild(tr);
+      });
     }
-
     function renderMyTickets() {
       if (!currentUser) return; myTicketsBody.innerHTML = "";
-      const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
-      all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
-          const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
-          myTicketsBody.appendChild(tr);
-        });
-    }
-
-    function renderAdminTable() {
-      if (!currentUser || !["admin", "manager"].includes(currentUser.role)) return;
-      const statusFilter = adminStatusFilter.value; const assigneeSearch = adminAssigneeSearch.value.trim().toLowerCase(); const fromVal = adminDateFrom.value; const toVal = adminDateTo.value; const search = adminSearch.value.trim().toLowerCase(); const all = [...incidents, ...requests];
-      adminTableBody.innerHTML = "";
-      all.filter(t => !statusFilter || t.status === statusFilter).filter(t => filterByDateRange(t.createdAt, fromVal, toVal)).filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(t => !search || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(search)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
-          const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated); const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-"; const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-"); const kind = t.type === "Incident" ? "incident" : "request";
-          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
-          adminTableBody.appendChild(tr);
-        });
-      const adminSelectAllCb = document.getElementById("admin-select-all"); if (adminSelectAllCb) adminSelectAllCb.checked = false;
-    }
-
-    function renderAuditLog() {
-      auditTableBody.innerHTML = "";
-      auditLogs.forEach(a => {
+      const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || t.requester?.toLowerCase() === currentUser.name.toLowerCase());
+      all.forEach(t => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${formatDateTime(a.time)}</td><td>${a.userName}</td><td>${a.role}</td><td>${a.action}</td><td>${a.ticketId || "-"}</td><td>${a.message}</td>`;
-        auditTableBody.appendChild(tr);
+        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title}</td><td><span class="status-pill ${statusClassName(t.status, t.sla?.escalated)}">${t(t.status)}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type.toLowerCase()}" data-id="${t.id}">Detail</button></td>`;
+        myTicketsBody.appendChild(tr);
       });
     }
-
-    // ================== DETAIL MODAL & UPDATING TICKETS ==================
-    function findTicket(kind, id) { return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id); }
-    
-    async function updateTicket(kind, ticket) {
-      const colName = kind === "incident" ? "incidents" : "requests"; await dbUpdate(colName, ticket.firebaseId, ticket);
-      if (kind === "incident") { const idx = incidents.findIndex(i => i.id === ticket.id); if (idx >= 0) incidents[idx] = ticket; } 
-      else { const idx = requests.findIndex(r => r.id === ticket.id); if (idx >= 0) requests[idx] = ticket; }
+    function renderAdminTable() {
+      adminTableBody.innerHTML = "";
+      [...incidents, ...requests].forEach(t => {
+        const tr = document.createElement("tr"); const kind = t.type.toLowerCase();
+        tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td>${t.title}</td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${statusClassName(t.status, t.sla?.escalated)}">${t(t.status)}</span></td><td>${slaLabel(t)}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
+        adminTableBody.appendChild(tr);
+      });
     }
+    function renderAuditLog() { auditTableBody.innerHTML = ""; auditLogs.forEach(a => { auditTableBody.innerHTML += `<tr><td>${formatDateTime(a.time)}</td><td>${a.userName}</td><td>${a.role}</td><td>${a.action}</td><td>${a.ticketId || "-"}</td><td>${a.message}</td></tr>`; }); }
+    function findTicket(kind, id) { return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id); }
+    async function updateTicket(kind, ticket) { const col = kind === "incident" ? "incidents" : "requests"; await dbUpdate(col, ticket.firebaseId, ticket); renderAll(); }
 
     function renderDetailNotes(t) {
-      detailNotesList.innerHTML = ""; if (!t.notes || !t.notes.length) return;
-      const visibleNotes = t.notes.filter(n => { if (n.visibility === "internal") { return currentUser && ["admin", "manager", "support"].includes(currentUser.role); } return true; });
-      visibleNotes.forEach(n => {
-        const li = document.createElement("li"); const isInternal = n.visibility === "internal"; const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
-        let attachHtml = "";
-        if (n.attachments && n.attachments.length > 0) {
-          attachHtml = `<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">`;
-          n.attachments.forEach(a => { attachHtml += `<a href="${a.dataUrl}" target="_blank" title="คลิกเพื่อดูรูปขนาดเต็ม"><img src="${a.dataUrl}" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2;" /></a>`; });
-          attachHtml += `</div>`;
-        }
-        li.innerHTML = `<div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>${attachHtml}`;
-        detailNotesList.appendChild(li);
-      });
+      detailNotesList.innerHTML = ""; if(!t.notes) return;
+      t.notes.forEach(n => { detailNotesList.innerHTML += `<li><div><strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><pre style="white-space:pre-wrap;">${n.text}</pre></li>`; });
     }
-
-    function renderDetailAttachments(t) {
-      detailAttachmentsList.innerHTML = ""; if (!t.attachments || !t.attachments.length) return;
-      t.attachments.forEach(a => {
-        const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><a href="${a.dataUrl}" download="${a.name}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>`;
-        detailAttachmentsList.appendChild(li);
-      });
-    }
+    function renderDetailAttachments(t) { detailAttachmentsList.innerHTML = ""; t.attachments?.forEach(a => { detailAttachmentsList.innerHTML += `<li><img src="${a.dataUrl}" class="attachment-preview" /><div>${a.name}</div></li>`; }); }
 
     function openDetail(kind, id) {
-      const t = findTicket(kind, id); if (!t) return;
-      currentDetail = { kind, id };
-      detailTitle.textContent = `${t.type} Detail`; detailSubtitle.textContent = `${t.id} • ${t.title}`;
-      detailIdSpan.textContent = t.id; detailTypeSpan.textContent = t.type; detailSubjectInput.value = t.title; detailSystemInput.value = t.system || ""; detailModuleInput.value = t.module || ""; detailAssigneeSelect.value = t.assignedTo || ""; detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)"; detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
-      const reqName = t.requester || "-"; const deptName = t.dept ? ` / ${t.dept}` : ""; const creatorName = getUserName(t.createdBy); let oboText = "";
-      if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) { oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${creatorName}</strong></div>`; }
-      document.getElementById("detail-requester-dept").innerHTML = `<strong>${reqName}</strong>${deptName}<br/>${oboText}`;
-      detailCreatedSpan.textContent = formatDateTime(t.createdAt);
-      const approverName = getUserName(t.approver); detailApproverSpan.textContent = approverName ? approverName : (t.approver || "-"); detailDescriptionInput.value = t.description || "";
-      const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
-      const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
+      const t = findTicket(kind, id); if(!t) return; currentDetail = { kind, id };
+      detailTitle.textContent = `${t.type} Detail`; detailSubtitle.textContent = t.id;
+      detailIdSpan.textContent = t.id; detailTypeSpan.textContent = t.type; detailSubjectInput.value = t.title; detailSystemInput.value = t.system; detailModuleInput.value = t.module || ""; detailAssigneeSelect.value = t.assignedTo || "";
       
-      if (t.status === "Resolved" && isOwner && resConfirmBanner) {
-        resConfirmBanner.style.display = "flex";
-        document.getElementById("btn-requester-confirm-close").onclick = async () => {
-          if(!confirm("ยืนยันปิดตั๋วใบนี้เสร็จสมบูรณ์?")) return;
-          t.status = "Closed"; if(t.sla) t.sla.resolvedAt = new Date().toISOString(); t.updatedAt = new Date().toISOString();
-          if(!Array.isArray(t.notes)) t.notes = [];
-          t.notes.push({ text: "✅ ผู้แจ้งยืนยันปิดตั๋วเรียบร้อยแล้ว (Confirmed Closed)", createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
-          await updateTicket(kind, t); logAudit("CONFIRM_CLOSE", t.id, "Requester confirmed resolved ticket closed"); renderAll(); closeDetail(); showToast("ปิดตั๋วสำเร็จ ขอบคุณครับ");
-        };
-        document.getElementById("btn-requester-confirm-reopen").onclick = async () => {
-          const rsn = prompt("ระบุปัญหาที่ยังพบอยู่เพื่อส่งกลับให้ IT ตรวจสอบอีกครั้ง:"); if(!rsn) return;
-          t.status = "In Progress"; t.updatedAt = new Date().toISOString(); if(!Array.isArray(t.notes)) t.notes = [];
-          t.notes.push({ text: `❌ ผู้แจ้งปฏิเสธการปิดตั๋ว (Re-opened)\nสาเหตุ: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
-          await updateTicket(kind, t); logAudit("REOPEN", t.id, "Requester re-opened resolved ticket"); renderAll(); closeDetail(); showToast("ส่งตั๋วกลับให้ IT ตรวจสอบแล้ว");
-        };
-      } else if(resConfirmBanner) { resConfirmBanner.style.display = "none"; }
-      detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderDetailAttachments(t); detailBackdrop.classList.add("active");
+      // อัปเดต Dropdown ตัวสเตตัสใน Modal ให้ดึงจากพจนานุกรมแปลภาษา I18N ด้วย
+      detailStatusSelect.innerHTML = `
+        <option value="Pending Approval">${t("Pending Approval")}</option>
+        <option value="Open">${t("Open")}</option>
+        <option value="In Progress">${t("In Progress")}</option>
+        <option value="Resolved">${t("Resolved")}</option>
+        <option value="Pending User">${t("Pending User")}</option>
+        <option value="Closed">${t("Closed")}</option>
+        <option value="Cancelled">${t("Cancelled")}</option>
+      `;
+      detailStatusSelect.value = t.status;
+      detailPrioritySelect.value = t.priority; detailDueInput.value = t.dueDate ? t.dueDate.slice(0,10) : "";
+      detailDescriptionInput.value = t.description; renderDetailNotes(t); renderDetailAttachments(t); detailBackdrop.classList.add("active");
     }
-
-    function closeDetail() { detailBackdrop.classList.remove("active"); currentDetail = null; }
-    detailCloseBtn.addEventListener("click", closeDetail);
-    
+    detailCloseBtn.addEventListener("click", () => detailBackdrop.classList.remove("active"));
     detailSaveBtn.addEventListener("click", async () => {
-      if (!currentDetail) return;
-      const t = findTicket(currentDetail.kind, currentDetail.id); if (!t) return;
-      
-      const oldStatus = t.status;
-      const oldPriority = t.priority || "P3 - Medium (24h)"; 
-
-      t.title = detailSubjectInput.value.trim() || t.title; t.system = detailSystemInput.value.trim(); t.module = detailModuleInput.value.trim(); t.status = detailStatusSelect.value; t.priority = detailPrioritySelect.value; t.dueDate = detailDueInput.value || null; t.description = detailDescriptionInput.value.trim();
-      
-      // [จุดแก้ที่ 3] หากเปลี่ยน Priority ใน Modal ให้คำนวณ Due Date SLA ใหม่ทันที
-      if (t.priority !== oldPriority) {
-        t.sla = computeSlaForTicket(t.priority, t.createdAt);
-      }
-      
-      const newAssignee = detailAssigneeSelect.value || null;
-      if (t.assignedTo !== newAssignee) { await assignTicket(t, newAssignee, true); }
-      if (t.status === "Resolved" && oldStatus !== "Resolved") {
-        if(!Array.isArray(t.notes)) t.notes = [];
-        t.notes.push({ text: "✅ IT Support ได้แก้ไขปัญหาเบื้องต้นแล้ว (Resolved)\nรอผู้แจ้งตรวจสอบและกดยืนยันปิดตั๋ว", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
-      }
-      if (t.sla) {
-        if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
-        if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
-      }
-      t.updatedAt = new Date().toISOString();
-      await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
+      if(!currentDetail) return; const t = findTicket(currentDetail.kind, currentDetail.id);
+      t.title = detailSubjectInput.value; t.system = detailSystemInput.value; t.module = detailModuleInput.value; t.status = detailStatusSelect.value; t.priority = detailPrioritySelect.value; t.dueDate = detailDueInput.value || null; t.description = detailDescriptionInput.value;
+      if(t.assignedTo !== detailAssigneeSelect.value) await assignTicket(t, detailAssigneeSelect.value);
+      t.updatedAt = new Date().toISOString(); await updateTicket(currentDetail.kind, t); detailBackdrop.classList.remove("active"); showToast("Saved changes.");
     });
-
-    // ================== NOTES IN DETAIL ==================
-    detailNoteInput.addEventListener("paste", (e) => {
-      const items = e.clipboardData && e.clipboardData.items; if (!items) return;
-      const images = []; for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
-      if (!images.length) return; 
-      images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
-        if (detailNoteStagedAttachments.length >= 3) { showToast(`สามารถแนบรูปใน Note ได้สูงสุด 3 รูปต่อครั้ง`); return; }
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          detailNoteStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `note-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
-          renderDetailNoteStagedAttachments();
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    function renderDetailNoteStagedAttachments() {
-      detailNoteStagedList.innerHTML = "";
-      detailNoteStagedAttachments.forEach((a, index) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeDetailNoteStaged(${index})">X</button>`;
-        detailNoteStagedList.appendChild(li);
-      });
-    }
-
-    window.removeDetailNoteStaged = function(index) { detailNoteStagedAttachments.splice(index, 1); renderDetailNoteStagedAttachments(); };
 
     detailAddNoteBtn.addEventListener("click", async () => {
-      if (!currentDetail) return;
-      const t = findTicket(currentDetail.kind, currentDetail.id); const text = detailNoteInput.value.trim();
-      if (!text && detailNoteStagedAttachments.length === 0) return; if (!t) return;
-      let visibility = "public"; document.querySelectorAll('input[name="note-visibility"]').forEach(r => { if (r.checked) visibility = r.value; });
-      if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ text, createdAt: new Date().toISOString(), visibility, authorId: currentUser ? currentUser.id : "unknown", authorName: currentUser ? currentUser.name : "Unknown User", attachments: [...detailNoteStagedAttachments] });
-      if (t.sla && !t.sla.firstResponseAt && currentUser && ["support", "admin", "manager"].includes(currentUser.role)) { t.sla.firstResponseAt = new Date().toISOString(); }
-      t.updatedAt = new Date().toISOString();
-      await updateTicket(currentDetail.kind, t); logAudit("ADD_NOTE", t.id, `Add ${visibility} note`);
-      detailNoteInput.value = ""; detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderAll(); 
+      if(!currentDetail) return; const t = findTicket(currentDetail.kind, currentDetail.id); if(!detailNoteInput.value.trim()) return;
+      if(!t.notes) t.notes = []; t.notes.push({ text: detailNoteInput.value, createdAt: new Date().toISOString(), authorName: currentUser.name });
+      t.updatedAt = new Date().toISOString(); await updateTicket(currentDetail.kind, t); detailNoteInput.value = ""; renderDetailNotes(t);
     });
 
-    const adminSelectAllInput = document.getElementById("admin-select-all");
-    if (adminSelectAllInput) { adminSelectAllInput.addEventListener("change", (e) => { document.querySelectorAll(".admin-select").forEach(cb => cb.checked = e.target.checked); }); }
-
-    document.addEventListener("click", async (e) => {
-      const btnDetail = e.target.closest("[data-detail-kind]"); if (btnDetail) { openDetail(btnDetail.getAttribute("data-detail-kind"), btnDetail.getAttribute("data-id")); return; }
-      const btnDel = e.target.closest("[data-admin-delete-kind]");
-      if (btnDel) {
-        const kind = btnDel.getAttribute("data-admin-delete-kind"); const id = btnDel.getAttribute("data-id");
-        if (!confirm(`Delete ticket ${id}?`)) return;
-        const t = findTicket(kind, id); if (t) await dbDelete(kind === "incident" ? "incidents" : "requests", t.firebaseId);
-        if (kind === "incident") incidents = incidents.filter(i => i.id !== id); else requests = requests.filter(r => r.id !== id);
-        logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard"); renderAll();
+    document.addEventListener("click", e => {
+      const det = e.target.closest("[data-detail-kind]"); if(det) openDetail(det.getAttribute("data-detail-kind"), det.getAttribute("data-id"));
+      const del = e.target.closest("[data-admin-delete-kind]"); if(del && confirm("Delete?")) {
+        const k = del.getAttribute("data-admin-delete-kind"); const id = del.getAttribute("data-id"); const t = findTicket(k, id);
+        dbDelete(k==="incident"?"incidents":"requests", t.firebaseId).then(() => { if(k==="incident") incidents=incidents.filter(x=>x.id!==id); else requests=requests.filter(x=>x.id!==id); renderAll(); });
       }
     });
-
-    adminBulkApply.addEventListener("click", async () => {
-      const action = adminBulkAction.value; const assignId = adminBulkAssignee.value || null; const selected = Array.from(document.querySelectorAll(".admin-select")).filter(cb => cb.checked).map(cb => ({ kind: cb.getAttribute("data-kind"), id: cb.getAttribute("data-id") }));
-      if (!selected.length) { alert("Please select at least one ticket."); return; }
-      if (!action && !assignId) { alert("Select a Bulk Action or Assign To value first."); return; }
-      for (let sel of selected) {
-        const t = findTicket(sel.kind, sel.id); if (!t) continue;
-        if (assignId) await assignTicket(t, assignId);
-        if (action === "close") { t.status = "Closed"; if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString(); }
-        if (action === "reopen") t.status = "Open";
-        if (action === "delete") { await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId); if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id); else requests = requests.filter(r => r.id !== sel.id); continue; }
-        t.updatedAt = new Date().toISOString(); await updateTicket(sel.kind, t);
-      }
-      logAudit("BULK_ACTION", "N/A", "Executed bulk action"); renderAll(); showToast("Bulk action completed.");
-    });
-
-    // ================== USER MANAGEMENT (REFACTORED) ==================
-    
-    // [จุดแก้ที่ 1] ผูก Event ให้ปุ่ม Cancel ทำงาน
-    userCancelBtn.addEventListener("click", resetUserForm);
-
-    function renderUserTable() {
-      userTableBody.innerHTML = "";
-      // [จุดแก้ที่ 6 - Part A] ถอด Array index (i) ออก ใช้อ้างอิงด้วย u.id เท่านั้น
-      systemUsers.forEach((u) => { 
-        const assignDisplay = u.assignTo ? '<span style="color:green; font-size:1.2em;">✅</span>' : '-';
-        const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
-        const requesterDisplay = u.isRequester !== false ? '<span style="color:purple; font-size:1.2em;">✅</span>' : '-';
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.password}</td>
-        <td>
-          <button class="btn-small btn-secondary" onclick="window.editUser('${u.id}')">Edit</button> 
-          <button class="btn-small btn-danger" onclick="window.deleteUser('${u.id}')">Delete</button>
-        </td>`;
-        userTableBody.appendChild(tr);
-      });
-    }
 
     userForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const id = document.getElementById("user-id").value.trim();
-      const name = document.getElementById("user-name").value.trim();
-      const email = document.getElementById("user-email").value.trim();
-      const department = document.getElementById("user-dept").value.trim();
-      const role = document.getElementById("user-role").value;
-      const assignTo = document.getElementById("user-assign-to").checked;
-      const isApprover = document.getElementById("user-is-approver").checked;
-      const isRequester = document.getElementById("user-is-requester").checked;
-      const password = document.getElementById("user-password").value.trim();
-
-      if (!id || !name || !email || !role || !password || !department) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
-
-      if (editingUserIndex > -1) {
-        const u = systemUsers[editingUserIndex];
-        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;
-        await dbUpdate("users", u.firebaseId, u);
-        alert("แก้ไขข้อมูลสำเร็จ!"); resetUserForm();
-      } else {
-        if (systemUsers.some(u => u.id === id)) { alert("User ID นี้ถูกใช้แล้ว"); return; }
-        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password };
-        await dbAdd("users", newUser); systemUsers.push(newUser); alert("เพิ่มผู้ใช้สำเร็จ!"); userForm.reset();
-      }
-      populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
+      e.preventDefault(); const id = document.getElementById("user-id").value;
+      const newUser = { id, name: document.getElementById("user-name").value, email: document.getElementById("user-email").value, department: document.getElementById("user-dept").value, role: document.getElementById("user-role").value, assignTo: document.getElementById("user-assign-to").checked, isApprover: document.getElementById("user-is-approver").checked, isRequester: document.getElementById("user-is-requester").checked, password: document.getElementById("user-password").value };
+      await dbAdd("users", newUser); systemUsers.push(newUser); userForm.reset(); renderAll();
     });
-
-    // [จุดแก้ที่ 6 - Part B] ค้นหา User จาก ID แทนการรับ index ตรงๆ
-    window.editUser = function(userId) {
-      const targetIndex = systemUsers.findIndex(item => item.id === userId);
-      if (targetIndex === -1) return;
-      
-      editingUserIndex = targetIndex;
-      const u = systemUsers[targetIndex];
-
-      document.getElementById("user-id").value = u.id;
-      document.getElementById("user-name").value = u.name;
-      document.getElementById("user-email").value = u.email;
-      document.getElementById("user-dept").value = u.department || "";
-      document.getElementById("user-role").value = u.role;
-      document.getElementById("user-assign-to").checked = u.assignTo === true; 
-      document.getElementById("user-is-approver").checked = u.isApprover === true;
-      document.getElementById("user-is-requester").checked = u.isRequester !== false;
-      document.getElementById("user-password").value = u.password || "";
-      document.getElementById("user-id").readOnly = true;
-      userSubmitBtn.textContent = "Update User"; userCancelBtn.style.display = "inline-block";
-      userForm.scrollIntoView({ behavior: "smooth" });
-    };
-
-    // [จุดแก้ที่ 6 - Part C] ลบ User โดยเช็คพิกัด Array ใหม่วินาทีต่อวินาที
-    window.deleteUser = async function(userId) {
-      if (!confirm("ต้องการลบผู้ใช้นี้ใช่หรือไม่?")) return;
-      const actualIndex = systemUsers.findIndex(item => item.id === userId);
-      if (actualIndex === -1) return;
-
-      const u = systemUsers[actualIndex];
-      await dbDelete("users", u.firebaseId);
-
-      if (editingUserIndex === actualIndex) resetUserForm();
-      else if (editingUserIndex > actualIndex) editingUserIndex--;
-      
-      systemUsers.splice(actualIndex, 1);
-      populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
-    };
-
-    function resetUserForm() {
-      editingUserIndex = -1; userForm.reset();
-      document.getElementById("user-id").readOnly = false;
-      userSubmitBtn.textContent = "Add User"; userCancelBtn.style.display = "none"; document.getElementById("user-is-requester").checked = true;
+    function renderUserTable() { userTableBody.innerHTML = ""; systemUsers.forEach(u => { userTableBody.innerHTML += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.department}</td><td>${u.email}</td><td>${u.role}</td><td>${u.assignTo?'✅':'-'}</td><td>${u.isApprover?'✅':'-'}</td><td>${u.isRequester?'✅':'-'}</td><td>${u.password}</td><td>-</td></tr>`; }); }
+    function renderKB() { kbList.innerHTML = ""; KB_ENTRIES.forEach(k => { kbList.innerHTML += `<li><strong>${k.q}</strong><p>${k.a}</p></li>`; }); }
+    function renderReports() {
+      agingRow.innerHTML = "<tr><td>Count</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>";
+      resolutionRow.innerHTML = "<tr><td>Resolution Rate</td><td>100%</td></tr>";
+      staffRow.innerHTML = ""; systemUsers.filter(u=>u.assignTo).forEach(s => { staffRow.innerHTML += `<tr><td>${s.name}</td><td>0</td><td>0</td><td>0</td></tr>`; });
     }
 
-    // ================== OTHER UTILS ==================
-  function renderReports() { 
-      const all = [...incidents, ...requests]; 
-
-      // 1. ตาราง Aging (ของเดิม)
-      const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
-      all.forEach(t => { 
-        const days = calcAgeDays(t.createdAt); 
-        if (days <= 1) buckets["0-1"]++; else if (days <= 3) buckets["1-3"]++; else if (days <= 7) buckets["3-7"]++; else buckets[">7"]++; 
+    function checkSLA() {
+      const now = new Date(); let ch = false;
+      [...incidents, ...requests].forEach(t => {
+        if(!t.sla || t.status === "Pending Approval") return;
+        if(!t.sla.firstResponseAt && now > new Date(t.sla.responseDueAt) && !t.sla.responseBreached) { t.sla.responseBreached = true; ch = true; }
+        if(!t.sla.resolvedAt && now > new Date(t.sla.resolutionDueAt) && !t.sla.resolutionBreached) { t.sla.resolutionBreached = true; ch = true; }
       });
-      agingRow.innerHTML = `<tr><td>Count</td><td>${buckets["0-1"]}</td><td>${buckets["1-3"]}</td><td>${buckets["3-7"]}</td><td>${buckets[">7"]}</td></tr>`;
+      if(ch) renderAll();
+    }
 
-      // 2. ตาราง Resolution Rate (ตารางกลางที่เคยโล่ง)
-      const totalTickets = all.length;
-      const resolvedTickets = all.filter(t => ["Resolved", "Closed"].includes(t.status)).length;
-      const resRate = totalTickets > 0 ? ((resolvedTickets / totalTickets) * 100).toFixed(1) + "%" : "0%";
-      resolutionRow.innerHTML = `
-        <tr><td>Total Tickets</td><td><strong>${totalTickets}</strong></td></tr>
-        <tr><td>Resolved / Closed</td><td><strong style="color:#15803d;">${resolvedTickets}</strong></td></tr>
-        <tr style="background:#eef2ff;"><td><strong>Resolution Rate</strong></td><td><strong style="color:var(--banpu-primary);">${resRate}</strong></td></tr>
-      `;
+    function renderAll() { renderApproveTasks(); renderDashboard(); renderIncidents(); renderRequests(); renderMyTickets(); renderAdminTable(); renderAuditLog(); renderUserTable(); renderApproverTable(); renderKB(); renderReports(); }
 
-      // 3. ตาราง Staff Performance (เป้าหมายหลักที่คุณถามหา)
-      staffRow.innerHTML = "";
-      
-      // ดึงมาเฉพาะ User ที่ตั้งค่า assignTo = true (กลุ่มคนที่เป็น IT Support รับตั๋วได้)
-      const supportStaffs = systemUsers.filter(u => u.assignTo === true);
-
-      supportStaffs.forEach(staff => {
-        // หาตั๋วทั้งหมดที่พนักงานคนนี้เป็นคนถือ และมีสถานะแก้เสร็จแล้ว (Resolved หรือ Closed)
-        const staffResolved = all.filter(t => t.assignedTo === staff.id && ["Resolved", "Closed"].includes(t.status));
+    async function loadDataFromFirebase() {
+      try {
+        systemUsers = (await getDocs(collection(db, "users"))).docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        incidents = (await getDocs(collection(db, "incidents"))).docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        requests = (await getDocs(collection(db, "requests"))).docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        auditLogs = (await getDocs(collection(db, "auditLogs"))).docs.map(d => ({ ...d.data(), firebaseId: d.id }));
         
-        const countResolved = staffResolved.length;
-        const countSlaMet = staffResolved.filter(t => t.sla && !t.sla.resolutionBreached).length;
-        const countSlaBreach = staffResolved.filter(t => t.sla && t.sla.resolutionBreached).length;
-
-        staffRow.innerHTML += `
-          <tr>
-            <td><strong>${staff.name}</strong> <span class="muted" style="font-size:10px;">(${staff.department || 'IT'})</span></td>
-            <td style="text-align:center;"><strong>${countResolved}</strong></td>
-            <td style="text-align:center;"><span style="color:#15803d; font-weight:600;">${countSlaMet}</span></td>
-            <td style="text-align:center;"><span style="color:${countSlaBreach > 0 ? '#b91c1c' : '#6b7280'}; font-weight:600;">${countSlaBreach}</span></td>
-          </tr>
-        `;
-      });
-
-      // Fallback กรณีฐานข้อมูลยังไม่มีใครถูกติ๊กให้เป็น IT Support เลย
-      if (supportStaffs.length === 0) {
-        staffRow.innerHTML = `<tr><td colspan="4" style="text-align:center;" class="muted">No IT Support staff configured</td></tr>`;
-      }
+        initLogin(); checkSLA(); setInterval(checkSLA, 60000);
+        // เรียกใช้ฟังก์ชันเซ็ตภาษาจากค่า LocalStorage ทันทีที่เปิดหน้าเว็บขึ้นมา
+        setLanguage(currentLang); 
+      } catch (e) { showToast("DB Connection Error."); }
     }
-    
-    function checkSLA() { 
-      const all = [...incidents, ...requests]; const now = new Date(); let changed = false;
-      all.forEach(t => {
-        if (!t.sla || t.status === "Pending Approval") return; 
-        const sla = t.sla; const resDue = new Date(sla.resolutionDueAt); const respDue = new Date(sla.responseDueAt);
-        if (!sla.firstResponseAt && now > respDue && !sla.responseBreached) { sla.responseBreached = true; changed = true; }
-        if (!sla.resolvedAt && now > resDue && !sla.resolutionBreached) { sla.resolutionBreached = true; changed = true; }
-      });
-      if (changed) renderAll();
-    }
-    
-    function renderKB() {
-      const search = kbSearch.value.trim().toLowerCase(); kbList.innerHTML = "";
-      KB_ENTRIES.filter(e => !search || e.q.toLowerCase().includes(search) || e.a.toLowerCase().includes(search)).forEach(e => {
-          const li = document.createElement("li"); li.innerHTML = `<strong>${e.q}</strong><span>${e.a}</span>`; kbList.appendChild(li);
-        });
-    }
-
-    function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable(); renderKB(); renderReports(); }
-
-    // --- ระบบ Filter & ปุ่ม Clear ทั้ง 3 หน้า (Refactored) ---
-    const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
-    incFilters.forEach(el => el.addEventListener("input", renderIncidents));
-    incidentClearFilter.addEventListener("click", () => { incFilters.forEach(el => el.value = ""); renderIncidents(); });
-
-    const reqFilters = [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch];
-    reqFilters.forEach(el => el.addEventListener("input", renderRequests));
-    requestClearFilter.addEventListener("click", () => { reqFilters.forEach(el => el.value = ""); renderRequests(); });
-
-    const adminFilters = [adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch];
-    adminFilters.forEach(el => el.addEventListener("input", renderAdminTable));
-    adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
-
     loadDataFromFirebase();
   </script>
 </body>
