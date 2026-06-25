@@ -406,7 +406,7 @@
     }
     .status-closed {
       background: #dcfce7;
-          color: #15803d;
+      color: #15803d;
     }
     .status-cancelled {
       background: #e5e7eb;
@@ -812,7 +812,7 @@
       <div id="approve-tasks-section" class="section">
         <div class="card">
           <h2>My Tasks (Pending Approval)</h2>
-          <small>รายการตั๋วที่รอการพิจารณาอนุมัติจากคุณ</small>
+          <small>Tickets pending your approval</small>
           <div class="table-container" style="margin-top: 12px;">
             <table>
               <thead>
@@ -840,24 +840,24 @@
             <form id="incident-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
+                  <label>Requester * <span class="en" style="color:#6b7280;">(OBO Supported)</span></label>
                   <select id="incident-requester" required>
-                    <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
+                    <option value="">-- Select Requester --</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label>Department *</label>
-                  <input type="text" id="incident-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
+                  <input type="text" id="incident-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="Auto-filled based on requester..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone</label>
-                  <input type="tel" id="incident-phone" placeholder="โทรศัพท์ติดต่อ..." />
+                  <input type="tel" id="incident-phone" placeholder="Contact Phone..." />
                 </div>
                 <div class="form-group">
                   <label>Email *</label>
-                  <input type="email" id="incident-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
+                  <input type="email" id="incident-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="Auto-filled based on requester..." />
                 </div>
               </div>
               <div class="form-row">
@@ -876,7 +876,7 @@
                 </div>
                 <div class="form-group">
                   <label>Module</label>
-                  <input type="text" id="incident-module" list="inc-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
+                  <input type="text" id="incident-module" list="inc-module-suggestions" autocomplete="off" placeholder="Select or type Module name..." />
                   <datalist id="inc-module-suggestions"></datalist>
                 </div>
               </div>
@@ -884,7 +884,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Subject *</label>
-                  <input type="text" id="incident-title" required placeholder="ระบุหัวข้อปัญหา เช่น TM1 ล็อกอินไม่ได้..." />
+                  <input type="text" id="incident-title" required placeholder="Enter issue subject (e.g., Cannot login to TM1)..." />
                   <div id="inc-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                 <div class="form-group">
@@ -930,17 +930,17 @@
              </div>
 
               <div class="form-group">
-                <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
-                <input type="text" id="incident-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
+                <label>CC Emails <span class="en">(Comma separated)</span></label>
+                <input type="text" id="incident-cc" placeholder="e.g., user2@banpu.com, mgr@banpu.com" />
               </div>
 
               <div class="form-group">
-                <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
-                <textarea id="incident-description" required placeholder="พิมพ์รายละเอียดปัญหา และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+                <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(Press Ctrl+V to paste images)</span></label>
+                <textarea id="incident-description" required placeholder="Type problem details and press Ctrl+V here to paste images..."></textarea>
                 
                 <div style="margin-top: 8px;">
                   <label for="incident-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
-                    📎 แนบไฟล์ (Attach Files)
+                    📎 Attach Files
                   </label>
                   <input type="file" id="incident-file-input" multiple style="display: none;" />
                 </div>
@@ -1032,24 +1032,24 @@
             <form id="request-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
+                  <label>Requester * <span class="en" style="color:#6b7280;">(OBO Supported)</span></label>
                   <select id="request-requester" required>
-                    <option value="">-- เลือกผู้แจ้ง (Requester) --</option>
+                    <option value="">-- Select Requester --</option>
                   </select>
                 </div>
                  <div class="form-group">
                   <label>Department *</label>
-                  <input type="text" id="request-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
+                  <input type="text" id="request-dept" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="Auto-filled based on requester..." />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone</label>
-                  <input type="tel" id="request-phone" placeholder="โทรศัพท์ติดต่อ..." />
+                  <input type="tel" id="request-phone" placeholder="Contact Phone..." />
                 </div>
                 <div class="form-group">
                   <label>Email *</label>
-                  <input type="email" id="request-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="ระบุอัตโนมัติตามผู้แจ้ง..." />
+                  <input type="email" id="request-email" required readonly style="background:#f3f4f6; color:#6b7280;" placeholder="Auto-filled based on requester..." />
                 </div>
               </div>
               <div class="form-row">
@@ -1067,7 +1067,7 @@
                 </div>
                 <div class="form-group">
                   <label>Module</label>
-                  <input type="text" id="request-module" list="req-module-suggestions" autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อ Module..." />
+                  <input type="text" id="request-module" list="req-module-suggestions" autocomplete="off" placeholder="Select or type Module name..." />
                   <datalist id="req-module-suggestions"></datalist>
                 </div>
               </div>
@@ -1075,7 +1075,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Subject *</label>
-                  <input type="text" id="request-title" required placeholder="ระบุหัวข้อคำขอ..." />
+                  <input type="text" id="request-title" required placeholder="Enter request subject..." />
                   <div id="req-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                  <div class="form-group">
@@ -1128,17 +1128,17 @@
               </div>
 
               <div class="form-group">
-                <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
-                <input type="text" id="request-cc" placeholder="เช่น user2@banpu.com, mgr@banpu.com" />
+                <label>CC Emails <span class="en">(Comma separated)</span></label>
+                <input type="text" id="request-cc" placeholder="e.g., user2@banpu.com, mgr@banpu.com" />
               </div>
 
               <div class="form-group">
-                <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(กด Ctrl+V เพื่อวางรูปภาพได้)</span></label>
-                <textarea id="request-description" required placeholder="พิมพ์รายละเอียดคำขอ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+                <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(Press Ctrl+V to paste images)</span></label>
+                <textarea id="request-description" required placeholder="Type request details and press Ctrl+V here to paste images..."></textarea>
                 
                 <div style="margin-top: 8px;">
                   <label for="request-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
-                    📎 แนบไฟล์ (Attach Files)
+                    📎 Attach Files
                   </label>
                   <input type="file" id="request-file-input" multiple style="display: none;" />
                 </div>
@@ -1403,7 +1403,7 @@
       <div id="user-section" class="section">
         <div class="card">
           <h2>User Management</h2>
-          <small>สร้าง / ลบ / แก้ไข User พร้อมกำหนดสิทธิ์รายบุคคล</small>
+          <small>Create / Delete / Edit User and manage individual permissions</small>
           <form id="user-form" style="margin-top: 10px;">
             <div class="form-row">
               <div class="form-group">
@@ -1422,7 +1422,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Department *</label>
-                <input type="text" id="user-dept" required placeholder="เช่น Finance, IT, Accounting..." />
+                <input type="text" id="user-dept" required placeholder="e.g., Finance, IT, Accounting..." />
               </div>
               <div class="form-group">
                 <label>Role *</label>
@@ -1441,15 +1441,15 @@
             </div>
             
             <div class="form-row" style="background:#f9fafb; padding:10px 14px; border-radius:8px; border:1px solid #e5e7eb; gap:18px; align-items:center;">
-              <span style="font-weight:600; font-size:12px; color:#374151;">กำหนดสิทธิ์:</span>
+              <span style="font-weight:600; font-size:12px; color:#374151;">Permissions:</span>
               <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="user-assign-to" style="width:16px; height:16px;" /> เป็น IT Support (รับตั๋วได้)
+                <input type="checkbox" id="user-assign-to" style="width:16px; height:16px;" /> Is IT Support (Can receive tickets)
               </label>
               <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="user-is-approver" style="width:16px; height:16px;" /> เป็น Approver (อนุมัติตั๋วได้)
+                <input type="checkbox" id="user-is-approver" style="width:16px; height:16px;" /> Is Approver (Can approve tickets)
               </label>
               <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> เป็น Requester (เปิดตั๋วได้)
+                <input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> Is Requester (Can create tickets)
               </label>
             </div>
             
@@ -1485,7 +1485,7 @@
       <div id="approver-section" class="section">
         <div class="card">
           <h2>Approver Management</h2>
-          <small>จัดการสิทธิ์ผู้อนุมัติ (ติ๊กถูกเพื่อให้รายชื่อไปแสดงใน Dropdown 'Approver' ตอนเปิดตั๋ว)</small>
+          <small>Manage approver permissions (Check the box to show the name in the 'Approver' dropdown when creating a ticket)</small>
           <div class="table-container" style="margin-top: 12px;">
             <table>
               <thead>
@@ -1517,12 +1517,12 @@
         
         <div id="detail-resolved-confirm-banner" style="display:none; grid-column: 1 / -1; background:#eff6ff; border:1px solid #bfdbfe; padding:12px 16px; border-radius:12px; margin-bottom:8px; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <div>
-            <strong style="color:#1e40af; font-size:14px;">ตั๋วนี้ได้รับการแก้ไขเบื้องต้นแล้ว (Resolved)</strong><br/>
-            <span style="font-size:12px; color:#3b82f6;">กรุณาทดสอบระบบ หากใช้งานได้ปกติโปรดกดยืนยันปิดตั๋ว หากยังพบปัญหาอยู่กดแจ้งเปิดซ้ำ</span>
+            <strong style="color:#1e40af; font-size:14px;">This ticket has been Resolved.</strong><br/>
+            <span style="font-size:12px; color:#3b82f6;">Please test the system. If it works normally, confirm to close the ticket. If the issue persists, you can re-open it.</span>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn badge-green" id="btn-requester-confirm-close" style="padding:6px 14px; font-size:12px;">✅ ยืนยันปิดตั๋ว (Confirm Close)</button>
-            <button class="btn-danger" id="btn-requester-confirm-reopen" style="padding:6px 14px; font-size:12px;">❌ แจ้งเปิดซ้ำ (Re-open)</button>
+            <button class="btn badge-green" id="btn-requester-confirm-close" style="padding:6px 14px; font-size:12px;">✅ Confirm Close</button>
+            <button class="btn-danger" id="btn-requester-confirm-reopen" style="padding:6px 14px; font-size:12px;">❌ Re-open</button>
           </div>
         </div>
 
@@ -1617,7 +1617,7 @@
           <h3>Notes (Internal / Public)</h3>
           <ul class="notes-list" id="detail-notes-list"></ul>
           
-          <textarea id="detail-note-input" placeholder="พิมพ์อัปเดตสถานะ และกด Ctrl+V ที่นี่เพื่อวางรูปภาพ..."></textarea>
+          <textarea id="detail-note-input" placeholder="Type status update and press Ctrl+V here to paste images..."></textarea>
           <ul class="attachments-list" id="detail-note-staged-attachments" style="margin-top: 4px;"></ul>
           
           <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
@@ -1687,7 +1687,7 @@
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
     const MAX_ATTACHMENTS_PER_TICKET = 5;
     
-    // [จุดแก้ที่ 5] ลดขนาดไฟล์ลงเหลือ 150KB ป้องกัน Firestore Document Quota Exceeded (1MB limit)
+    // Max 150KB per file to prevent Firestore Document Quota Exceeded (1MB limit)
     const MAX_ATTACHMENT_SIZE_BYTES = 150 * 1024; 
 
     // ================== DOM ELEMENTS ==================
@@ -1787,10 +1787,10 @@
     const kbSearch = document.getElementById("kb-search");
     const kbList = document.getElementById("kb-list");
     const KB_ENTRIES = [
-      { q: "TM1 login error invalid credential", a: "ตรวจสอบว่าบัญชี AD ไม่ได้ถูกล็อก และกรอกรหัสผ่านถูกต้อง" },
-      { q: "BPC report is slow", a: "ลองทำการ Clear Cache หรือกด Log out แล้วล็อกอินเข้าใหม่" },
-      { q: "Request new TM1 user", a: "ใช้เมนู Service Request > Access Request พร้อมระบุ Role ที่ต้องการ" },
-      { q: "SAP BPC ล็อกอินไม่ได้", a: "ตรวจสอบการเชื่อมต่อ VPN / FortiClient ว่าทำงานอยู่หรือไม่" }
+      { q: "TM1 login error invalid credential", a: "Ensure AD account is not locked and password is correct." },
+      { q: "BPC report is slow", a: "Try clearing cache or log out and log in again." },
+      { q: "Request new TM1 user", a: "Use the menu Service Request > Access Request and specify the required Role." },
+      { q: "SAP BPC cannot login", a: "Check if your VPN / FortiClient connection is active." }
     ];
 
     const exportIncBtn = document.getElementById("btn-export-inc");
@@ -1829,7 +1829,7 @@
         if(text.length < 3) { banner.style.display = "none"; return; }
         const matched = KB_ENTRIES.find(k => k.q.toLowerCase().includes(text) || text.includes(k.q.toLowerCase().split(" ")[0]));
         if(matched) {
-          banner.innerHTML = `💡 <strong>พบบทความที่อาจช่วยแก้ปัญหาให้คุณได้:</strong> "${matched.q}"<br/><span style="color:#b45309;">👉 คำแนะนำ: ${matched.a}</span>`;
+          banner.innerHTML = `💡 <strong>Found an article that might help:</strong> "${matched.q}"<br/><span style="color:#b45309;">👉 Suggestion: ${matched.a}</span>`;
           banner.style.display = "block";
         } else {
           banner.style.display = "none";
@@ -1888,7 +1888,7 @@
         initLogin();
         checkSLA();
         
-        // [จุดแก้ที่ 2] สั่งรันเช็ค SLA อัตโนมัติทุกๆ 60 วินาทีจริงๆ
+        // Auto SLA check every 60 seconds
         setInterval(checkSLA, 60000); 
 
         renderAll();
@@ -1926,7 +1926,7 @@
       if (!requesterName) return "-";
       const creatorName = getUserName(createdById);
       if (creatorName && creatorName.toLowerCase() !== requesterName.toLowerCase() && createdById !== "unknown" && createdById !== null) {
-        return `${requesterName} <span title="คีย์เปิดตั๋วแทนโดย: ${creatorName}" style="font-size:10px; background:#f3e8ff; color:#4338ca; padding:1px 6px; border-radius:4px; border:1px solid #c7d2fe; margin-left:4px; display:inline-block; line-height:1;">🏷️ OBO</span>`;
+        return `${requesterName} <span title="Opened on behalf by: ${creatorName}" style="font-size:10px; background:#f3e8ff; color:#4338ca; padding:1px 6px; border-radius:4px; border:1px solid #c7d2fe; margin-left:4px; display:inline-block; line-height:1;">🏷️ OBO</span>`;
       }
       return requesterName;
     }
@@ -2052,7 +2052,6 @@
       if(incidentApp) incidentApp.innerHTML = html;
       if(requestApp) requestApp.innerHTML = html;
       
-      // เพิ่มส่วนนี้เข้าไปเพื่อให้ Modal ดึงรายชื่อไปแสดง
       const detailApp = document.getElementById("detail-approver-select");
       if(detailApp) detailApp.innerHTML = html;
     }
@@ -2076,16 +2075,16 @@
       await dbUpdate("users", u.firebaseId, u);
       populateApproverDropdowns();
       renderAll();
-      showToast(`อัปเดตสิทธิ์ Approver สำหรับ ${u.name} เรียบร้อย`);
+      showToast(`Approver permission updated for ${u.name}`);
     };
 
     function populateRequesterDropdowns() {
       const incReqSelect = document.getElementById("incident-requester");
       const reqReqSelect = document.getElementById("request-requester");
       const requesters = systemUsers.filter(u => u.isRequester !== false);
-      let html = '<option value="">-- เลือกผู้แจ้ง (Requester) --</option>';
+      let html = '<option value="">-- Select Requester --</option>';
       requesters.forEach(u => {
-        html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'ไม่ระบุแผนก'})</option>`;
+        html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'No department'})</option>`;
       });
       if (incReqSelect) incReqSelect.innerHTML = html;
       if (reqReqSelect) reqReqSelect.innerHTML = html;
@@ -2103,7 +2102,6 @@
           deptEl.value = ""; emailEl.value = "";
           return;
         }
-        // [จุดแก้ที่ 4] ใส่ fallback "N/A" ป้องกันฟอร์มค้างกรณี User ไม่มีสังกัดแผนก
         deptEl.value = selectedOption.getAttribute("data-dept") || "N/A";
         emailEl.value = selectedOption.getAttribute("data-email") || "";
       });
@@ -2195,22 +2193,22 @@
     });
     // ================== APPROVE / REJECT ACTION ==================
     window.approveTicket = async function(kind, id) {
-      if (!confirm(`ยืนยันการอนุมัติ (Approve) ตั๋ว ${id} ใช่หรือไม่?`)) return;
+      if (!confirm(`Are you sure you want to approve ticket ${id}?`)) return;
       const t = findTicket(kind, id); if (!t) return;
       t.status = "Open"; t.updatedAt = new Date().toISOString();
       if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ text: "✅ อนุมัติคำขอแล้ว (Approved)", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+      t.notes.push({ text: "✅ Approved", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
       await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
       renderAll(); showToast(`Approved ticket ${t.id}`);
     };
 
     window.rejectTicket = async function(kind, id) {
-      const reason = prompt(`กรุณาระบุเหตุผลที่ไม่อนุมัติ (Reject) ตั๋ว ${id}:`);
-      if (!reason || reason.trim() === "") { alert("⚠️ บังคับกรอก: คุณต้องระบุเหตุผลที่ไม่อนุมัติตั๋วทุกครั้ง"); return; }
+      const reason = prompt(`Please provide a reason for rejecting ticket ${id}:`);
+      if (!reason || reason.trim() === "") { alert("⚠️ Required: You must provide a reason for rejection."); return; }
       const t = findTicket(kind, id); if (!t) return;
       t.status = "Cancelled"; t.updatedAt = new Date().toISOString();
       if (!Array.isArray(t.notes)) t.notes = [];
-      t.notes.push({ text: `❌ ไม่อนุมัติคำขอ (Rejected)\nเหตุผล: ${reason}`, createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+      t.notes.push({ text: `❌ Rejected\nReason: ${reason}`, createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
       if (t.sla && !t.sla.resolvedAt) { t.sla.resolvedAt = new Date().toISOString(); }
       await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
       renderAll(); showToast(`Rejected ticket ${t.id}`);
@@ -2238,8 +2236,8 @@
       for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
-        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image size is too large (Max 150KB)`); return; }
+        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2264,8 +2262,8 @@
     incidentFileInput.addEventListener("change", (e) => {
       const files = e.target.files; if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 150KB)`); return; }
-        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max 150KB)`); return; }
+        if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files per ticket`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2287,8 +2285,8 @@
       for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
-        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image size is too large (Max 150KB)`); return; }
+        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2313,8 +2311,8 @@
     requestFileInput.addEventListener("change", (e) => {
       const files = e.target.files; if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ไฟล์ ${file.name} มีขนาดใหญ่เกินไป (Max 150KB)`); return; }
-        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`แนบไฟล์ได้สูงสุด ${MAX_ATTACHMENTS_PER_TICKET} ไฟล์ต่อ 1 ตั๋ว`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max 150KB)`); return; }
+        if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files per ticket`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2404,7 +2402,6 @@
       requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
       
-      // เพิ่มส่วนนี้: ถ้าสถานะตั๋วติด Pending Approval ให้เด้งหน้าเปิดเมลทันที
       if (req.status === "Pending Approval") {
         triggerEmailDraft(req);
       }
@@ -2543,7 +2540,7 @@
         let attachHtml = "";
         if (n.attachments && n.attachments.length > 0) {
           attachHtml = `<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">`;
-          n.attachments.forEach(a => { attachHtml += `<img src="${a.dataUrl}" title="คลิกเพื่อดูรูปขนาดเต็ม" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2; cursor:pointer;" onclick="window.viewImage(this.src)" />`; });
+          n.attachments.forEach(a => { attachHtml += `<img src="${a.dataUrl}" title="Click to view full size" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2; cursor:pointer;" onclick="window.viewImage(this.src)" />`; });
           attachHtml += `</div>`;
         }
         li.innerHTML = `<div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>${attachHtml}`;
@@ -2577,17 +2574,17 @@
       if (t.status === "Resolved" && isOwner && resConfirmBanner) {
         resConfirmBanner.style.display = "flex";
         document.getElementById("btn-requester-confirm-close").onclick = async () => {
-          if(!confirm("ยืนยันปิดตั๋วใบนี้เสร็จสมบูรณ์?")) return;
+          if(!confirm("Are you sure you want to close this ticket?")) return;
           t.status = "Closed"; if(t.sla) t.sla.resolvedAt = new Date().toISOString(); t.updatedAt = new Date().toISOString();
           if(!Array.isArray(t.notes)) t.notes = [];
-          t.notes.push({ text: "✅ ผู้แจ้งยืนยันปิดตั๋วเรียบร้อยแล้ว (Confirmed Closed)", createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
-          await updateTicket(kind, t); logAudit("CONFIRM_CLOSE", t.id, "Requester confirmed resolved ticket closed"); renderAll(); closeDetail(); showToast("ปิดตั๋วสำเร็จ ขอบคุณครับ");
+          t.notes.push({ text: "✅ Requester confirmed ticket closed", createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
+          await updateTicket(kind, t); logAudit("CONFIRM_CLOSE", t.id, "Requester confirmed resolved ticket closed"); renderAll(); closeDetail(); showToast("Ticket closed successfully. Thank you.");
         };
         document.getElementById("btn-requester-confirm-reopen").onclick = async () => {
-          const rsn = prompt("ระบุปัญหาที่ยังพบอยู่เพื่อส่งกลับให้ IT ตรวจสอบอีกครั้ง:"); if(!rsn) return;
+          const rsn = prompt("Please specify the ongoing issue to send back to IT:"); if(!rsn) return;
           t.status = "In Progress"; t.updatedAt = new Date().toISOString(); if(!Array.isArray(t.notes)) t.notes = [];
-          t.notes.push({ text: `❌ ผู้แจ้งปฏิเสธการปิดตั๋ว (Re-opened)\nสาเหตุ: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
-          await updateTicket(kind, t); logAudit("REOPEN", t.id, "Requester re-opened resolved ticket"); renderAll(); closeDetail(); showToast("ส่งตั๋วกลับให้ IT ตรวจสอบแล้ว");
+          t.notes.push({ text: `❌ Requester rejected closing (Re-opened)\nReason: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
+          await updateTicket(kind, t); logAudit("REOPEN", t.id, "Requester re-opened resolved ticket"); renderAll(); closeDetail(); showToast("Ticket sent back to IT for investigation.");
         };
       } else if(resConfirmBanner) { resConfirmBanner.style.display = "none"; }
       detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderDetailAttachments(t); detailBackdrop.classList.add("active");
@@ -2602,7 +2599,7 @@
       
       const oldStatus = t.status;
       const oldPriority = t.priority || "P3 - Medium (24h)"; 
-      const oldApprover = t.approver || null; // เก็บชื่อผู้อนุมัติคนเดิมไว้เช็กก่อนแก้
+      const oldApprover = t.approver || null; 
 
       t.title = detailSubjectInput.value.trim() || t.title; 
       t.system = detailSystemInput.value.trim(); 
@@ -2614,14 +2611,12 @@
       const newApprover = document.getElementById("detail-approver-select").value || null;
       t.approver = newApprover;
 
-      // เพิ่มส่วนนี้: ถ้าตั๋วเดิมไม่มีคนอนุมัติ หรือเปลี่ยนคนอนุมัติใหม่ ให้ตั้งสถานะเป็น Pending Approval อัตโนมัติ
       if (newApprover && newApprover !== oldApprover) {
         t.status = "Pending Approval";
       } else {
-        t.status = detailStatusSelect.value; // ถ้าไม่มีการเปลี่ยนผู้อนุมัติ ให้ใช้ค่าตาม Dropdown ปกติ
+        t.status = detailStatusSelect.value; 
       }
       
-      // [จุดแก้ที่ 3] หากเปลี่ยน Priority ใน Modal ให้คำนวณ Due Date SLA ใหม่ทันที
       if (t.priority !== oldPriority) {
         t.sla = computeSlaForTicket(t.priority, t.createdAt);
       }
@@ -2630,7 +2625,7 @@
       if (t.assignedTo !== newAssignee) { await assignTicket(t, newAssignee, true); }
       if (t.status === "Resolved" && oldStatus !== "Resolved") {
         if(!Array.isArray(t.notes)) t.notes = [];
-        t.notes.push({ text: "✅ IT Support ได้แก้ไขปัญหาเบื้องต้นแล้ว (Resolved)\nรอผู้แจ้งตรวจสอบและกดยืนยันปิดตั๋ว", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+        t.notes.push({ text: "✅ IT Support has resolved the issue.\nWaiting for requester to confirm and close the ticket.", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
       }
       if (t.sla) {
         if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
@@ -2639,7 +2634,6 @@
     t.updatedAt = new Date().toISOString();
       await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
       
-      // เพิ่มส่วนนี้: ถ้ามีการใส่ผู้อนุมัติคนใหม่เข้ามา ให้ทำการเปิดหน้าต่างดราฟต์เมลส่งต่อทันที
       if (newApprover && newApprover !== oldApprover) {
         triggerEmailDraft(t);
       }
@@ -2651,8 +2645,8 @@
       const images = []; for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`ขนาดรูปภาพใหญ่เกินไป (Max 150KB)`); return; }
-        if (detailNoteStagedAttachments.length >= 3) { showToast(`สามารถแนบรูปใน Note ได้สูงสุด 3 รูปต่อครั้ง`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image size is too large (Max 150KB)`); return; }
+        if (detailNoteStagedAttachments.length >= 3) { showToast(`You can attach up to 3 images per note.`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           detailNoteStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `note-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2716,14 +2710,11 @@
       logAudit("BULK_ACTION", "N/A", "Executed bulk action"); renderAll(); showToast("Bulk action completed.");
     });
 
-    // ================== USER MANAGEMENT (REFACTORED) ==================
-    
-    // [จุดแก้ที่ 1] ผูก Event ให้ปุ่ม Cancel ทำงาน
+    // ================== USER MANAGEMENT ==================
     userCancelBtn.addEventListener("click", resetUserForm);
 
     function renderUserTable() {
       userTableBody.innerHTML = "";
-      // [จุดแก้ที่ 6 - Part A] ถอด Array index (i) ออก ใช้อ้างอิงด้วย u.id เท่านั้น
       systemUsers.forEach((u) => { 
         const assignDisplay = u.assignTo ? '<span style="color:green; font-size:1.2em;">✅</span>' : '-';
         const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
@@ -2750,22 +2741,21 @@
       const isRequester = document.getElementById("user-is-requester").checked;
       const password = document.getElementById("user-password").value.trim();
 
-      if (!id || !name || !email || !role || !password || !department) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
+      if (!id || !name || !email || !role || !password || !department) { alert("Please fill in all required fields."); return; }
 
       if (editingUserIndex > -1) {
         const u = systemUsers[editingUserIndex];
         u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;
         await dbUpdate("users", u.firebaseId, u);
-        alert("แก้ไขข้อมูลสำเร็จ!"); resetUserForm();
+        alert("User updated successfully!"); resetUserForm();
       } else {
-        if (systemUsers.some(u => u.id === id)) { alert("User ID นี้ถูกใช้แล้ว"); return; }
+        if (systemUsers.some(u => u.id === id)) { alert("This User ID is already in use."); return; }
         const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password };
-        await dbAdd("users", newUser); systemUsers.push(newUser); alert("เพิ่มผู้ใช้สำเร็จ!"); userForm.reset();
+        await dbAdd("users", newUser); systemUsers.push(newUser); alert("User added successfully!"); userForm.reset();
       }
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     });
 
-    // [จุดแก้ที่ 6 - Part B] ค้นหา User จาก ID แทนการรับ index ตรงๆ
     window.editUser = function(userId) {
       const targetIndex = systemUsers.findIndex(item => item.id === userId);
       if (targetIndex === -1) return;
@@ -2787,9 +2777,8 @@
       userForm.scrollIntoView({ behavior: "smooth" });
     };
 
-    // [จุดแก้ที่ 6 - Part C] ลบ User โดยเช็คพิกัด Array ใหม่วินาทีต่อวินาที
     window.deleteUser = async function(userId) {
-      if (!confirm("ต้องการลบผู้ใช้นี้ใช่หรือไม่?")) return;
+      if (!confirm("Are you sure you want to delete this user?")) return;
       const actualIndex = systemUsers.findIndex(item => item.id === userId);
       if (actualIndex === -1) return;
 
@@ -2813,7 +2802,6 @@
   function renderReports() { 
       const all = [...incidents, ...requests]; 
 
-      // 1. ตาราง Aging (ของเดิม)
       const buckets = { "0-1": 0, "1-3": 0, "3-7": 0, ">7": 0 };
       all.forEach(t => { 
         const days = calcAgeDays(t.createdAt); 
@@ -2821,7 +2809,6 @@
       });
       agingRow.innerHTML = `<tr><td>Count</td><td>${buckets["0-1"]}</td><td>${buckets["1-3"]}</td><td>${buckets["3-7"]}</td><td>${buckets[">7"]}</td></tr>`;
 
-      // 2. ตาราง Resolution Rate (ตารางกลางที่เคยโล่ง)
       const totalTickets = all.length;
       const resolvedTickets = all.filter(t => ["Resolved", "Closed"].includes(t.status)).length;
       const resRate = totalTickets > 0 ? ((resolvedTickets / totalTickets) * 100).toFixed(1) + "%" : "0%";
@@ -2831,14 +2818,11 @@
         <tr style="background:#eef2ff;"><td><strong>Resolution Rate</strong></td><td><strong style="color:var(--banpu-primary);">${resRate}</strong></td></tr>
       `;
 
-      // 3. ตาราง Staff Performance (เป้าหมายหลักที่คุณถามหา)
       staffRow.innerHTML = "";
       
-      // ดึงมาเฉพาะ User ที่ตั้งค่า assignTo = true (กลุ่มคนที่เป็น IT Support รับตั๋วได้)
       const supportStaffs = systemUsers.filter(u => u.assignTo === true);
 
       supportStaffs.forEach(staff => {
-        // หาตั๋วทั้งหมดที่พนักงานคนนี้เป็นคนถือ และมีสถานะแก้เสร็จแล้ว (Resolved หรือ Closed)
         const staffResolved = all.filter(t => t.assignedTo === staff.id && ["Resolved", "Closed"].includes(t.status));
         
         const countResolved = staffResolved.length;
@@ -2855,7 +2839,6 @@
         `;
       });
 
-      // Fallback กรณีฐานข้อมูลยังไม่มีใครถูกติ๊กให้เป็น IT Support เลย
       if (supportStaffs.length === 0) {
         staffRow.innerHTML = `<tr><td colspan="4" style="text-align:center;" class="muted">No IT Support staff configured</td></tr>`;
       }
@@ -2881,7 +2864,6 @@
 
     function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable(); renderKB(); renderReports(); }
 
-    // --- ระบบ Filter & ปุ่ม Clear ทั้ง 3 หน้า (Refactored) ---
     const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
     incFilters.forEach(el => el.addEventListener("input", renderIncidents));
     incidentClearFilter.addEventListener("click", () => { incFilters.forEach(el => el.value = ""); renderIncidents(); });
@@ -2895,7 +2877,7 @@
     adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
 
     loadDataFromFirebase();
-    // ฟังก์ชันสำหรับเด้งไปหน้า Draft Email ในคอมพิวเตอร์ของผู้ใช้
+    
     function triggerEmailDraft(t) {
       if (!t.approver) return;
       const appUser = getUserById(t.approver);
@@ -2903,18 +2885,17 @@
       
       const to = appUser.email;
       const cc = t.ccEmails || "";
-      const subject = `[ขออนุมัติระบบ ITSM] ตั๋วเลขที่ ${t.id}: ${t.title}`;
-      const body = `เรียนคุณ ${appUser.name},\n\nมีคำขอเปิดบริการ (Service Request) ใหม่ในระบบที่ต้องการการพิจารณาอนุมัติจากคุณครับ\n\nรายละเอียดตั๋ว:\n- Ticket ID: ${t.id}\n- ระบบที่เกี่ยวข้อง: ${t.system}\n- หัวข้อ: ${t.title}\n- ผู้แจ้ง: ${t.requester}\n\nกรุณาเข้าสู่ระบบ Finance System Service Portal เพื่อกดอนุมัติ (Approve) หรือปฏิเสธ (Reject) คำขอนี้ด้วยครับ\n\nขอบคุณครับ\nระบบอัตโนมัติ ITSM Portal`;
+      const subject = `[ITSM Approval Request] Ticket ${t.id}: ${t.title}`;
+      const body = `Dear ${appUser.name},\n\nA new Service Request has been created that requires your approval.\n\nTicket Details:\n- Ticket ID: ${t.id}\n- System: ${t.system}\n- Subject: ${t.title}\n- Requester: ${t.requester}\n\nPlease log in to the Finance System Service Portal to Approve or Reject this request.\n\nBest regards,\nITSM Portal Automated System`;
       
       let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       if (cc) {
         mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
       }
       
-      // สั่งให้ Browser เปิดโปรแกรมส่งเมล (เช่น Outlook, Windows Mail) ขึ้นมาดราฟต์ทันที
       window.location.href = mailtoUrl;
     }
-    // ฟังก์ชันสำหรับเปิดดูรูปภาพ Base64 ขนาดเต็มใน Tab ใหม่
+    
     window.viewImage = function(dataUrl) {
       const newTab = window.open();
       if (newTab) {
@@ -2928,7 +2909,7 @@
         `);
         newTab.document.close();
       } else {
-        alert("Pop-up ถูกบล็อก กรุณาอนุญาต Pop-up สำหรับเว็บไซต์นี้");
+        alert("Pop-up blocked. Please allow pop-ups for this site.");
       }
     };
   </script>
