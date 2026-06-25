@@ -2549,7 +2549,7 @@
         let attachHtml = "";
         if (n.attachments && n.attachments.length > 0) {
           attachHtml = `<div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">`;
-          n.attachments.forEach(a => { attachHtml += `<a href="${a.dataUrl}" target="_blank" title="คลิกเพื่อดูรูปขนาดเต็ม"><img src="${a.dataUrl}" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2;" /></a>`; });
+          n.attachments.forEach(a => { attachHtml += `<img src="${a.dataUrl}" title="คลิกเพื่อดูรูปขนาดเต็ม" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2; cursor:pointer;" onclick="window.viewImage(this.src)" />`; });
           attachHtml += `</div>`;
         }
         li.innerHTML = `<div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>${attachHtml}`;
@@ -2920,6 +2920,23 @@
       // สั่งให้ Browser เปิดโปรแกรมส่งเมล (เช่น Outlook, Windows Mail) ขึ้นมาดราฟต์ทันที
       window.location.href = mailtoUrl;
     }
+    // ฟังก์ชันสำหรับเปิดดูรูปภาพ Base64 ขนาดเต็มใน Tab ใหม่
+    window.viewImage = function(dataUrl) {
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.write(`
+          <html lang="en">
+            <head><title>Image Preview</title></head>
+            <body style="margin:0; display:flex; justify-content:center; align-items:center; background:#0f172a; height:100vh;">
+              <img src="${dataUrl}" style="max-width:100%; max-height:100%; object-fit:contain;" />
+            </body>
+          </html>
+        `);
+        newTab.document.close();
+      } else {
+        alert("Pop-up ถูกบล็อก กรุณาอนุญาต Pop-up สำหรับเว็บไซต์นี้");
+      }
+    };
   </script>
 </body>
 </html>
