@@ -928,13 +928,7 @@
                   <label>Required by (optional)</label>
                   <input type="date" id="incident-due" />
                 </div>
-                <div class="form-group">
-                  <label>Approver (optional)</label>
-                  <select id="incident-approver">
-                    <option value="">-- Select Approver --</option>
-                  </select>
-                </div>
-              </div>
+             </div>
 
               <div class="form-group">
                 <label>CC Emails <span class="en">(คั่นด้วยเครื่องหมายจุลภาค ,)</span></label>
@@ -2341,7 +2335,7 @@
       const impact = document.getElementById("incident-impact").value;
       const priority = document.getElementById("incident-priority").value;
       const due = document.getElementById("incident-due").value;
-      const approver = document.getElementById("incident-approver").value; 
+      const approver = "";
       const ccEmails = document.getElementById("incident-cc").value.trim();
       const description = document.getElementById("incident-description").value.trim();
       const reference = document.getElementById("incident-reference").value.trim();
