@@ -2632,7 +2632,23 @@
         if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
       }
     t.updatedAt = new Date().toISOString();
-      await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
+     // ในส่วนของ detailSaveBtn.addEventListener
+await updateTicket(currentDetail.kind, t); 
+logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); 
+
+// เพิ่มส่วนนี้เพื่อตรวจสอบและส่งอีเมลแจ้ง Assignee คนใหม่
+if (newAssignee) {
+    const assigneeUser = getUserById(newAssignee);
+    if (assigneeUser && assigneeUser.email) {
+        // คุณสามารถสร้างฟังก์ชันใหม่ หรือใช้ตรรกะแบบ triggerEmailDraft 
+        // เพื่อส่งอีเมลแจ้งเตือนผู้รับผิดชอบคนใหม่ได้ที่นี่
+        console.log("Sending assignment notification to:", assigneeUser.email);
+        // triggerAssignmentEmail(t, assigneeUser); 
+    }
+}
+
+renderAll(); 
+showToast("Changes saved.");
       
       if (newApprover && newApprover !== oldApprover) {
         triggerEmailDraft(t);
