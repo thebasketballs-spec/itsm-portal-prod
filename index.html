@@ -762,7 +762,6 @@
           <div class="nav-tab" data-target="approver-section" data-roles="admin">Approvers</div>
         </div>
       </div>
-
       <div id="dashboard-section" class="section active">
         <div class="grid">
           <div class="card">
@@ -1025,13 +1024,12 @@
           </div>
         </div>
       </div>
-
       <div id="request-section" class="section">
         <div class="grid">
           <div class="card">
             <h2>Open Service Request</h2>
             <small>Request: Access / Change / Service / Report / Dashboard</small>
-<form id="request-form">
+            <form id="request-form">
               <div class="form-row">
                 <div class="form-group">
                   <label>Requester * <span class="en" style="color:#6b7280;">(รองรับการเปิดแทน)</span></label>
@@ -1250,7 +1248,6 @@
           </div>
         </div>
       </div>
-
       <div id="reports-section" class="section">
         <div class="grid">
           <div class="card">
@@ -1403,7 +1400,6 @@
           <ul class="kb-list" id="kb-list"></ul>
         </div>
       </div>
-            
       <div id="user-section" class="section">
         <div class="card">
           <h2>User Management</h2>
@@ -1799,7 +1795,6 @@
 
     const exportIncBtn = document.getElementById("btn-export-inc");
     const exportReqBtn = document.getElementById("btn-export-req");
-
     // ================== CASCADING MODULES MAP ==================
     const MODULES_BY_SYSTEM = {
       "Oracle": ["AP - Accounts Payable", "AR - Accounts Receivable", "GL - General Ledger", "FA - Fixed Assets", "CM - Cash Management"],
@@ -2198,7 +2193,6 @@
         if (targetId === "approver-section") renderApproverTable();
       });
     });
-
     // ================== APPROVE / REJECT ACTION ==================
     window.approveTicket = async function(kind, id) {
       if (!confirm(`ยืนยันการอนุมัติ (Approve) ตั๋ว ${id} ใช่หรือไม่?`)) return;
