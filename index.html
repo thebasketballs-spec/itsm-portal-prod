@@ -1598,10 +1598,16 @@
             <div class="detail-label">Created At</div>
             <div class="detail-value" id="detail-created"></div>
            </div>
-          <div class="detail-row">
+                <div class="detail-row">
             <div class="detail-label">Approver</div>
-            <div class="detail-value" id="detail-approver"></div>
           </div>
+          <div class="detail-edit-field">
+            <select id="detail-approver-select">
+              <option value="">-- No Approver --</option>
+            </select>
+          </div>
+
+          
           <div class="detail-row" style="margin-top:4px;">
             <div class="detail-label">Description</div>
           </div>
@@ -2042,7 +2048,7 @@
       });
     }
 
-    function populateApproverDropdowns() {
+   function populateApproverDropdowns() {
       const incidentApp = document.getElementById("incident-approver");
       const requestApp = document.getElementById("request-approver");
       const approvers = systemUsers.filter(u => u.isApprover === true);
@@ -2050,6 +2056,10 @@
       approvers.forEach(u => { html += `<option value="${u.id}">${u.name} (${u.role})</option>`; });
       if(incidentApp) incidentApp.innerHTML = html;
       if(requestApp) requestApp.innerHTML = html;
+      
+      // เพิ่มส่วนนี้เข้าไปเพื่อให้ Modal ดึงรายชื่อไปแสดง
+      const detailApp = document.getElementById("detail-approver-select");
+      if(detailApp) detailApp.innerHTML = html;
     }
 
     function renderApproverTable() {
@@ -2560,7 +2570,8 @@
       if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) { oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${creatorName}</strong></div>`; }
       document.getElementById("detail-requester-dept").innerHTML = `<strong>${reqName}</strong>${deptName}<br/>${oboText}`;
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
-      const approverName = getUserName(t.approver); detailApproverSpan.textContent = approverName ? approverName : (t.approver || "-"); detailDescriptionInput.value = t.description || "";
+      const detailApproverSelect = document.getElementById("detail-approver-select");
+      if (detailApproverSelect) detailApproverSelect.value = t.approver || "";  
       const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
       const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
       
@@ -2593,7 +2604,7 @@
       const oldStatus = t.status;
       const oldPriority = t.priority || "P3 - Medium (24h)"; 
 
-      t.title = detailSubjectInput.value.trim() || t.title; t.system = detailSystemInput.value.trim(); t.module = detailModuleInput.value.trim(); t.status = detailStatusSelect.value; t.priority = detailPrioritySelect.value; t.dueDate = detailDueInput.value || null; t.description = detailDescriptionInput.value.trim();
+      t.title = detailSubjectInput.value.trim() || t.title; t.system = detailSystemInput.value.trim(); t.module = detailModuleInput.value.trim(); t.status = detailStatusSelect.value; t.priority = detailPrioritySelect.value; t.dueDate = detailDueInput.value || null; t.description = detailDescriptionInput.value.trim();t.approver = document.getElementById("detail-approver-select").value || null;
       
       // [จุดแก้ที่ 3] หากเปลี่ยน Priority ใน Modal ให้คำนวณ Due Date SLA ใหม่ทันที
       if (t.priority !== oldPriority) {
