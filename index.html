@@ -2406,9 +2406,14 @@
         sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
       };
 
-      await dbAdd("requests", req); requests.unshift(req);
+     await dbAdd("requests", req); requests.unshift(req);
       requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
+      
+      // เพิ่มส่วนนี้: ถ้าสถานะตั๋วติด Pending Approval ให้เด้งหน้าเปิดเมลทันที
+      if (req.status === "Pending Approval") {
+        triggerEmailDraft(req);
+      }
     });
 
     // ================== EXPORT CSV ==================
@@ -2603,8 +2608,24 @@
       
       const oldStatus = t.status;
       const oldPriority = t.priority || "P3 - Medium (24h)"; 
+      const oldApprover = t.approver || null; // เก็บชื่อผู้อนุมัติคนเดิมไว้เช็กก่อนแก้
 
-      t.title = detailSubjectInput.value.trim() || t.title; t.system = detailSystemInput.value.trim(); t.module = detailModuleInput.value.trim(); t.status = detailStatusSelect.value; t.priority = detailPrioritySelect.value; t.dueDate = detailDueInput.value || null; t.description = detailDescriptionInput.value.trim();t.approver = document.getElementById("detail-approver-select").value || null;
+      t.title = detailSubjectInput.value.trim() || t.title; 
+      t.system = detailSystemInput.value.trim(); 
+      t.module = detailModuleInput.value.trim(); 
+      t.priority = detailPrioritySelect.value; 
+      t.dueDate = detailDueInput.value || null; 
+      t.description = detailDescriptionInput.value.trim();
+      
+      const newApprover = document.getElementById("detail-approver-select").value || null;
+      t.approver = newApprover;
+
+      // เพิ่มส่วนนี้: ถ้าตั๋วเดิมไม่มีคนอนุมัติ หรือเปลี่ยนคนอนุมัติใหม่ ให้ตั้งสถานะเป็น Pending Approval อัตโนมัติ
+      if (newApprover && newApprover !== oldApprover) {
+        t.status = "Pending Approval";
+      } else {
+        t.status = detailStatusSelect.value; // ถ้าไม่มีการเปลี่ยนผู้อนุมัติ ให้ใช้ค่าตาม Dropdown ปกติ
+      }
       
       // [จุดแก้ที่ 3] หากเปลี่ยน Priority ใน Modal ให้คำนวณ Due Date SLA ใหม่ทันที
       if (t.priority !== oldPriority) {
@@ -2621,8 +2642,13 @@
         if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
         if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
       }
-      t.updatedAt = new Date().toISOString();
+    t.updatedAt = new Date().toISOString();
       await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
+      
+      // เพิ่มส่วนนี้: ถ้ามีการใส่ผู้อนุมัติคนใหม่เข้ามา ให้ทำการเปิดหน้าต่างดราฟต์เมลส่งต่อทันที
+      if (newApprover && newApprover !== oldApprover) {
+        triggerEmailDraft(t);
+      }
     });
 
     // ================== NOTES IN DETAIL ==================
@@ -2875,6 +2901,25 @@
     adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
 
     loadDataFromFirebase();
+    // ฟังก์ชันสำหรับเด้งไปหน้า Draft Email ในคอมพิวเตอร์ของผู้ใช้
+    function triggerEmailDraft(t) {
+      if (!t.approver) return;
+      const appUser = getUserById(t.approver);
+      if (!appUser || !appUser.email) return;
+      
+      const to = appUser.email;
+      const cc = t.ccEmails || "";
+      const subject = `[ขออนุมัติระบบ ITSM] ตั๋วเลขที่ ${t.id}: ${t.title}`;
+      const body = `เรียนคุณ ${appUser.name},\n\nมีคำขอเปิดบริการ (Service Request) ใหม่ในระบบที่ต้องการการพิจารณาอนุมัติจากคุณครับ\n\nรายละเอียดตั๋ว:\n- Ticket ID: ${t.id}\n- ระบบที่เกี่ยวข้อง: ${t.system}\n- หัวข้อ: ${t.title}\n- ผู้แจ้ง: ${t.requester}\n\nกรุณาเข้าสู่ระบบ Finance System Service Portal เพื่อกดอนุมัติ (Approve) หรือปฏิเสธ (Reject) คำขอนี้ด้วยครับ\n\nขอบคุณครับ\nระบบอัตโนมัติ ITSM Portal`;
+      
+      let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      if (cc) {
+        mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+      }
+      
+      // สั่งให้ Browser เปิดโปรแกรมส่งเมล (เช่น Outlook, Windows Mail) ขึ้นมาดราฟต์ทันที
+      window.location.href = mailtoUrl;
+    }
   </script>
 </body>
 </html>
