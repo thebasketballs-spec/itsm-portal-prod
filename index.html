@@ -2611,7 +2611,7 @@
     function closeDetail() { detailBackdrop.classList.remove("active"); currentDetail = null; }
     detailCloseBtn.addEventListener("click", closeDetail);
     
-    detailSaveBtn.addEventListener("click", async () => {
+   detailSaveBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
       const t = findTicket(currentDetail.kind, currentDetail.id); if (!t) return;
       
@@ -2640,7 +2640,11 @@
       }
       
       const newAssignee = detailAssigneeSelect.value || null;
-      if (t.assignedTo !== newAssignee) { await assignTicket(t, newAssignee, true); }
+      let assigneeChanged = false; // เพิ่มตัวแปรเช็คการเปลี่ยนแปลงคนรับงาน
+      if (t.assignedTo !== newAssignee) { 
+        await assignTicket(t, newAssignee, true); 
+        assigneeChanged = true;
+      }
       if (t.status === "Resolved" && oldStatus !== "Resolved") {
         if(!Array.isArray(t.notes)) t.notes = [];
         t.notes.push({ text: "✅ IT Support has resolved the issue.\nWaiting for requester to confirm and close the ticket.", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
@@ -2649,11 +2653,14 @@
         if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
         if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
       }
-    t.updatedAt = new Date().toISOString();
+      t.updatedAt = new Date().toISOString();
       await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
       
+      // ตรรกะเช็คการยิงอีเมล์ดราฟต์
       if (newApprover && newApprover !== oldApprover) {
         triggerEmailDraft(t);
+      } else if (assigneeChanged && newAssignee) {
+        triggerAssignmentEmailDraft(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
       }
     });
 
@@ -2916,7 +2923,23 @@
       
       window.location.href = mailtoUrl;
     }
-    
+    // ฟังก์ชันสำหรับสลัด Draft อีเมล์แจ้งเตือนเมื่อมีการ Assign งานให้ IT Support
+function triggerAssignmentEmailDraft(t) {
+  if (!t.assignedTo) return;
+  const staffUser = getUserById(t.assignedTo);
+  if (!staffUser || !staffUser.email) return;
+
+  const to = staffUser.email;
+  const cc = t.ccEmails || "";
+  const subject = `[ITSM Ticket Assigned] Ticket ${t.id}: ${t.title}`;
+  const body = `Dear ${staffUser.name},\n\nA new ticket has been assigned to you.\n\nTicket Details:\n- Ticket ID: ${t.id}\n- Type: ${t.type}\n- System: ${t.system}\n- Subject: ${t.title}\n- Requester: ${t.requester}\n\nPlease log in to the Finance System Service Portal to process this ticket.\n\nBest regards,\nITSM Portal Automated System`;
+
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  window.location.href = mailtoUrl;
+}
     window.viewImage = function(dataUrl) {
       const newTab = window.open();
       if (newTab) {
