@@ -1491,7 +1491,7 @@
         </div>
       </div>
 
-      <div id="approver-section" class="section">
+     <div id="approver-section" class="section">
         <div class="card">
           <h2>Approver Management</h2>
           <small>Manage approver permissions (Check the box to show the name in the 'Approver' dropdown when creating a ticket)</small>
@@ -1510,8 +1510,8 @@
           </div>
         </div>
       </div>
-    </div>
-    <div id="master-section" class="section">
+
+      <div id="master-section" class="section">
         <div class="card">
           <h2>Master Data Management</h2>
           <small>Maintain master lists for System, Module, Category, and Request Type. Changes apply to all forms immediately.</small>
@@ -1562,9 +1562,9 @@
           </div>
         </div>
       </div>
-  </div>
 
-  <div class="modal-backdrop" id="detail-backdrop">
+    </div>
+  </div>
     <div class="modal detail-modal">
       <div class="modal-header">
         <div>
@@ -1945,6 +1945,19 @@
 
         const aSnap = await getDocs(collection(db, "auditLogs"));
         auditLogs = aSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        // --- ดึง Master Data และสร้างค่าเริ่มต้นถ้ายังไม่มี ---
+        const mSnap = await getDocs(collection(db, "masterData"));
+        masterDataList = mSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        if (masterDataList.length === 0) {
+          const seeds = [
+            {type:"System",name:"Oracle"},{type:"System",name:"SAP"},{type:"System",name:"TM1"},{type:"System",name:"BPC"},{type:"System",name:"Power BI"},{type:"System",name:"Network"},{type:"System",name:"Others"},
+            {type:"Category",name:"Application"},{type:"Category",name:"Infrastructure"},{type:"Category",name:"Network"},{type:"Category",name:"Access / Permission"},{type:"Category",name:"Reporting / Dashboard"},{type:"Category",name:"Others"},
+            {type:"RequestType",name:"Access Request"},{type:"RequestType",name:"Change Request"},{type:"RequestType",name:"Service Request"},{type:"RequestType",name:"Report / Dashboard"},{type:"RequestType",name:"Others"}
+          ];
+          Object.keys(MODULES_BY_SYSTEM).forEach(k => MODULES_BY_SYSTEM[k].forEach(mod => seeds.push({type:"Module",parentSystem:k,name:mod})));
+          for(let s of seeds) { await dbAdd("masterData", s); masterDataList.push(s); }
+        }
+        populateMasterDropdowns();
         auditLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
 
         initLogin();
