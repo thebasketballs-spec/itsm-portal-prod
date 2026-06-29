@@ -698,23 +698,16 @@
   <div id="login-root">
     <div class="login-card">
       <h1>ITSM Service Portal</h1>
-      <p>Select a user to test Role-Based Access (Admin / Manager / Support / User)</p>
-      <div class="login-field">
-        <label for="login-user">Select Account</label>
-        <select id="login-user"></select>
+      <p>Sign in with your Microsoft (Azure AD) account</p>
+      <button id="login-btn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:11px 12px; border-radius:999px; border:1px solid #d4dcff; background:#fff; cursor:pointer; font-size:14px; font-weight:500; color:#2a2681; box-shadow:0 2px 8px rgba(42,38,129,0.10); transition:box-shadow 0.1s;">
+        <svg width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg>
+        Sign in with Microsoft
+      </button>
+      <div class="login-note" style="margin-top:14px;">
+        Role ของคุณจะถูกกำหนดโดย Admin ตาม email address<br/>
+        หากยังไม่มีสิทธิ์เข้าระบบ กรุณาติดต่อ IT Helpdesk
       </div>
-      <div class="login-field">
-        <label for="login-password">Password</label>
-        <input type="password" id="login-password" placeholder="Enter password (Default: 12345)" />
-      </div>
-      <button id="login-btn">Login</button>
-      <div class="login-note">
-        Roles:
-        <br/>- <code>Admin</code>: Full permissions, Admin Dashboard, Bulk, SLA, Audit
-        <br/>- <code>Manager</code>: View all tickets + Assign/Re-assign
-        <br/>- <code>Support</code>: View all tickets, update status, Internal notes
-        <br/>- <code>User</code>: Create Incident/Request + view own My Tickets
-      </div>
+      <div id="login-error" style="display:none; margin-top:10px; color:#b91c1c; font-size:12px; text-align:center;"></div>
     </div>
   </div>
 
@@ -1438,10 +1431,7 @@
                   <option value="user">User</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label>Password *</label>
-                <input type="text" id="user-password" required />
-              </div>
+              <!-- Password field removed: auth managed by Azure AD / Firebase Auth -->
             </div>
             <div class="form-row">
       <div class="form-group" style="flex: 1 1 100%;">
@@ -1484,7 +1474,7 @@
                   <th style="text-align:center;">Approver?</th>
                   <th style="text-align:center;">Requester?</th>
                   <th>Supervisor</th>
-                  <th>Password</th>
+
                   <th>Action</th>
                 </tr>
               </thead>
@@ -1694,7 +1684,7 @@
         <div class="detail-block">
           <h3>Attachments</h3>
           <div class="muted">
-            Max 5 files per ticket, each up to 500KB, to avoid filling localStorage.
+            Max 5 files per ticket, each up to 10MB — stored in Firebase Storage.
           </div>
           <ul class="attachments-list" id="detail-attachments-list"></ul>
           <input type="file" id="detail-file-input" multiple />
@@ -1705,23 +1695,48 @@
         </div>
       </div>
       <div class="muted" style="margin-top:6px;">
-        * Attachments are stored as Base64 in localStorage (for Demo / small team usage).
+        * Attachments are stored in Firebase Storage (secure, supports up to 10MB per file).
       </div>
    </div>
   </div>
 </div><!-- /modal-backdrop -->
 <div id="toast-container">
   <script type="module">
-    // --- Import Firebase ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-    import { 
-      getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc 
-    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    // ============================================================
+    // CONFIGURATION — แก้ค่าเหล่านี้ก่อน deploy จริง
+    // ============================================================
+    // 1) Firebase: เปลี่ยน config ให้ตรงกับ project ของคุณ
+    //    (Firebase Console > Project Settings > Your apps)
+    // 2) Azure AD: เปลี่ยน CLIENT_ID และ TENANT_ID
+    //    (Azure Portal > App registrations > ชื่อ app ของคุณ)
+    //    - Redirect URI ต้องเพิ่มใน Azure: Authentication > Add a platform > SPA
+    //      ใส่ URL เช่น https://helpdesk.yourco.com
+    // 3) Firestore Security Rules (ตั้งใน Firebase Console > Firestore > Rules):
+    //    rules_version = '2';
+    //    service cloud.firestore {
+    //      match /databases/{database}/documents {
+    //        match /users/{uid} {
+    //          allow read: if request.auth != null;
+    //          allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    //        }
+    //        match /incidents/{id} {
+    //          allow read: if request.auth != null;
+    //          allow create: if request.auth != null;
+    //          allow update, delete: if request.auth != null;
+    //        }
+    //        match /requests/{id} {
+    //          allow read: if request.auth != null;
+    //          allow create: if request.auth != null;
+    //          allow update, delete: if request.auth != null;
+    //        }
+    //        match /auditLogs/{id} { allow read, write: if request.auth != null; }
+    //        match /masterData/{id} { allow read: if request.auth != null; allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; }
+    //      }
+    //    }
+    // ============================================================
 
-    // --- Firebase Configuration ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyA0N5TCkxRckLnynRjp-MKW-V3oxjhgIFE",
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyA0N5TCkxRckLnynRjp-MKW-V3oxjhgIFE",       // <-- เปลี่ยนเป็น key จริง
       authDomain: "test-api-2c60c.firebaseapp.com",
       projectId: "test-api-2c60c",
       storageBucket: "test-api-2c60c.firebasestorage.app",
@@ -1730,9 +1745,37 @@
       measurementId: "G-X1ZRN7FYX8"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const AZURE_CONFIG = {
+      clientId: "YOUR_AZURE_APP_CLIENT_ID",   // <-- เปลี่ยน: Azure Portal > App registrations > Application (client) ID
+      tenantId: "YOUR_AZURE_TENANT_ID",       // <-- เปลี่ยน: Azure Portal > App registrations > Directory (tenant) ID
+      redirectUri: window.location.origin,    // ปรับถ้า URL ไม่ตรง
+      scopes: ["openid", "profile", "email", "User.Read"]
+    };
+
+    const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 60 นาที
+
+    // --- Import Firebase ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+    import { getAuth, signInWithPopup, OAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { 
+      getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+    const app = initializeApp(FIREBASE_CONFIG);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Azure AD provider สำหรับ Firebase Auth
+    const msProvider = new OAuthProvider("microsoft.com");
+    msProvider.setCustomParameters({
+      tenant: AZURE_CONFIG.tenantId,
+      prompt: "select_account"
+    });
+    AZURE_CONFIG.scopes.forEach(s => msProvider.addScope(s));
 
     // ================== STATE VARIABLES ==================
     let systemUsers = [];
@@ -1749,8 +1792,8 @@
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
     const MAX_ATTACHMENTS_PER_TICKET = 5;
     
-    // Max 150KB per file to prevent Firestore Document Quota Exceeded (1MB limit)
-    const MAX_ATTACHMENT_SIZE_BYTES = 150 * 1024; 
+    // Max 10MB per file — stored in Firebase Storage, not Firestore document
+    const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 
     // ================== DOM ELEMENTS ==================
     const loginRoot = document.getElementById("login-root");
@@ -1919,6 +1962,24 @@
       await deleteDoc(doc(db, colName, id));
     }
 
+    // ================== FIREBASE STORAGE HELPERS ==================
+    async function uploadFileToStorage(file, ticketId) {
+      const path = `attachments/${ticketId}/${Date.now()}_${file.name}`;
+      const fileRef = storageRef(storage, path);
+      const snap = await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(snap.ref);
+      return { name: file.name, size: file.size, type: file.type, url, storagePath: path };
+    }
+
+    async function readFileAsDataUrl(file) {
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+    }
+
     // ================== INITIAL LOAD ==================
     async function loadDataFromFirebase() {
       try {
@@ -1926,11 +1987,13 @@
         systemUsers = uSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
         
         if (systemUsers.length === 0) {
+          // ⚠️ เปลี่ยน email ให้ตรงกับ Microsoft account จริงขององค์กร
+          // รูปแบบ: firstname.lastname@yourcompany.com
           const defaultUsers = [
-            { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
-            { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true, isSupervisor: true },
-            { id: "sup1", name: "Support 1", role: "support", department: "IT Helpdesk", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false, isRequester: true },
-            { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true, supervisorId: "mgr1" }
+            { id: "admin",  name: "Admin",     role: "admin",   department: "IT Systems",   email: "admin@yourcompany.com",    assignTo: false, isApprover: true,  isRequester: true },
+            { id: "mgr1",   name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@yourcompany.com",  assignTo: true,  isApprover: true,  isRequester: true, isSupervisor: true },
+            { id: "sup1",   name: "Support 1", role: "support", department: "IT Helpdesk",  email: "support1@yourcompany.com", assignTo: true,  isApprover: false, isRequester: true },
+            { id: "user1",  name: "User 1",    role: "user",    department: "Accounting",    email: "user1@yourcompany.com",    assignTo: false, isApprover: false, isRequester: true, supervisorId: "mgr1" }
           ];
           for (let u of defaultUsers) {
             await dbAdd("users", u);
@@ -1965,7 +2028,21 @@
         checkSLA();
         
         // Auto SLA check every 60 seconds
-        setInterval(checkSLA, 60000); 
+        setInterval(checkSLA, 60000);
+
+        // Restore session: ถ้า Firebase Auth ยังมี session อยู่ (refresh page)
+        onAuthStateChanged(auth, async (firebaseUser) => {
+          if (firebaseUser && !currentUser) {
+            const msEmail = firebaseUser.email?.toLowerCase();
+            const user = systemUsers.find(u => u.email?.toLowerCase() === msEmail);
+            if (user) {
+              setCurrentUser(user);
+              setupRealtimeListeners();
+            } else {
+              await signOut(auth);
+            }
+          }
+        });
 
         renderAll();
         renderUserTable();
@@ -2213,31 +2290,44 @@
       }
     }
 
-    // ================== LOGIN ==================
-    function initLogin() {
-      loginUserSelect.innerHTML = "";
-      systemUsers.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = u.id;
-        opt.textContent = `${u.name} (${u.role})`;
-        loginUserSelect.appendChild(opt);
-      });
-      const savedId = localStorage.getItem("itsm_current_user");
-      if (savedId) {
-        const user = getUserById(savedId);
-        if (user) { setCurrentUser(user); return; }
-      }
-      loginRoot.style.display = "flex"; appRoot.style.display = "none";
+    // ================== SESSION TIMEOUT ==================
+    let sessionTimer = null;
+    function resetSessionTimer() {
+      clearTimeout(sessionTimer);
+      sessionTimer = setTimeout(() => {
+        showToast("Session expired. Please sign in again.");
+        doLogout();
+      }, SESSION_TIMEOUT_MS);
     }
+    ["click", "keydown", "mousemove", "touchstart"].forEach(evt =>
+      document.addEventListener(evt, resetSessionTimer, { passive: true })
+    );
+
+    // ================== LOGIN / AUTH (Azure AD via Firebase) ==================
+    function initLogin() {
+      // onAuthStateChanged จัดการ session อัตโนมัติ
+      loginRoot.style.display = "flex";
+      appRoot.style.display = "none";
+    }
+
+    async function doLogout() {
+      clearTimeout(sessionTimer);
+      try { await signOut(auth); } catch(e) {}
+      currentUser = null;
+      appRoot.style.display = "none";
+      loginRoot.style.display = "flex";
+    }
+
     function setCurrentUser(user) {
       currentUser = user;
-      localStorage.setItem("itsm_current_user", user.id);
       currentUserLabel.textContent = `User: ${user.name}`;
       currentRoleLabel.textContent = user.role.toUpperCase();
-      loginRoot.style.display = "none"; appRoot.style.display = "block";
+      loginRoot.style.display = "none";
+      appRoot.style.display = "block";
+      resetSessionTimer();
       tabs.forEach(tab => {
         const roles = tab.getAttribute("data-roles");
-        if (!roles) { tab.style.display = "inline-flex"; } 
+        if (!roles) { tab.style.display = "inline-flex"; }
         else {
           const allowed = roles.split(",").map(s => s.trim());
           tab.style.display = allowed.includes(user.role) ? "inline-flex" : "none";
@@ -2245,21 +2335,57 @@
       });
       populateAssigneeDropdowns(); populateApproverDropdowns(); populateRequesterDropdowns(); applyRequesterUserLock(); renderAll();
     }
-    loginBtn.addEventListener("click", () => {
-      const id = loginUserSelect.value;
-      const passwordInput = document.getElementById("login-password");
-      const password = passwordInput.value; 
-      const user = getUserById(id);
-      if (!user) { alert("Please select a user."); return; }
-      if (user.password && user.password !== password) { alert("Incorrect password."); return; }
-      passwordInput.value = "";
-      setCurrentUser(user); showToast(`Welcome, ${user.name}`);
+
+    // Microsoft SSO sign-in
+    loginBtn.addEventListener("click", async () => {
+      const errEl = document.getElementById("login-error");
+      errEl.style.display = "none";
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Signing in...";
+      try {
+        const result = await signInWithPopup(auth, msProvider);
+        const msEmail = result.user.email?.toLowerCase();
+        // หา user ใน systemUsers โดย match email
+        const user = systemUsers.find(u => u.email?.toLowerCase() === msEmail);
+        if (!user) {
+          errEl.textContent = `ไม่พบบัญชี "${msEmail}" ในระบบ กรุณาติดต่อ IT Admin เพื่อขอสิทธิ์เข้าใช้งาน`;
+          errEl.style.display = "block";
+          await signOut(auth);
+        } else {
+          setCurrentUser(user);
+          showToast(`Welcome, ${user.name}`);
+          setupRealtimeListeners();
+        }
+      } catch (err) {
+        if (err.code !== "auth/popup-closed-by-user") {
+          errEl.textContent = "เกิดข้อผิดพลาด: " + (err.message || err.code);
+          errEl.style.display = "block";
+        }
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg> Sign in with Microsoft`;
+      }
     });
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("itsm_current_user");
-      currentUser = null;
-      appRoot.style.display = "none"; loginRoot.style.display = "flex";
+
+    logoutBtn.addEventListener("click", async () => {
+      await doLogout();
     });
+
+    // ================== REALTIME LISTENERS (Firestore onSnapshot) ==================
+    let unsubscribers = [];
+    function setupRealtimeListeners() {
+      unsubscribers.forEach(u => u());
+      unsubscribers = [];
+      const unsub1 = onSnapshot(collection(db, "incidents"), snap => {
+        incidents = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        renderAll();
+      });
+      const unsub2 = onSnapshot(collection(db, "requests"), snap => {
+        requests = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        renderAll();
+      });
+      unsubscribers.push(unsub1, unsub2);
+    }
 
     // ================== TABS ==================
     tabs.forEach(tab => {
@@ -2843,7 +2969,7 @@
         const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
         const requesterDisplay = u.isRequester !== false ? '<span style="color:purple; font-size:1.2em;">✅</span>' : '-';
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.supervisorId || '-'}</td><td>${u.password}</td>
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.supervisorId || '-'}</td>
         <td>
           <button class="btn-small btn-secondary" onclick="window.editUser('${u.id}')">Edit</button> 
           <button class="btn-small btn-danger" onclick="window.deleteUser('${u.id}')">Delete</button>
@@ -2863,19 +2989,19 @@
       const isApprover = document.getElementById("user-is-approver").checked;
       const isRequester = document.getElementById("user-is-requester").checked;
       const isSupervisor = document.getElementById("user-is-supervisor").checked;
-      const password = document.getElementById("user-password").value.trim();
+      // password removed — Azure AD handles auth
       const supervisorId = document.getElementById("user-supervisor").value.trim();
 
-      if (!id || !name || !email || !role || !password || !department) { alert("Please fill in all required fields."); return; }
+      if (!id || !name || !email || !role || !department) { alert("Please fill in all required fields."); return; }
 
       if (editingUserIndex > -1) {
         const u = systemUsers[editingUserIndex];
-        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;u.supervisorId = supervisorId;u.isSupervisor = isSupervisor;
+        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.supervisorId = supervisorId; u.isSupervisor = isSupervisor;
         await dbUpdate("users", u.firebaseId, u);
         alert("User updated successfully!"); resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("This User ID is already in use."); return; }
-        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password , supervisorId, isSupervisor };
+        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, supervisorId, isSupervisor };
         await dbAdd("users", newUser); systemUsers.push(newUser); alert("User added successfully!"); userForm.reset();
       }
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
@@ -2896,7 +3022,7 @@
       document.getElementById("user-assign-to").checked = u.assignTo === true; 
       document.getElementById("user-is-approver").checked = u.isApprover === true;
       document.getElementById("user-is-requester").checked = u.isRequester !== false;document.getElementById("user-is-supervisor").checked = u.isSupervisor === true;
-      document.getElementById("user-password").value = u.password || "";
+      // password not stored — managed by Azure AD
       document.getElementById("user-supervisor").value = u.supervisorId || "";
       document.getElementById("user-id").readOnly = true;
       userSubmitBtn.textContent = "Update User"; userCancelBtn.style.display = "inline-block";
