@@ -1562,7 +1562,23 @@
         </div>
       </div>
 
-    
+    <div id="master-section" class="section">
+        <div class="card">
+          <h2>Master Data Management</h2>
+          <small>Maintain master lists for System, Module, Category, and Request Type. Changes apply to all forms immediately.</small>
+          
+          <form id="master-form" style="margin-top: 12px; background:#f9fafb; padding:12px; border-radius:10px; border:1px solid #d9e2f2;">
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 150px;">
+                <label>Data Type *</label>
+                <select id="master-type" required>
+                  <option value="">-- Select Type --</option>
+                  <option value="System">System (ชื่อระบบ)</option>
+                  <option value="Module">Module (โมดูลย่อย)</option>
+                  <option value="Category">Category (หมวดหมู่ปัญหา)</option>
+                  <option value="RequestType">Request Type (ประเภทคำขอ)</option>
+                </select>
+              </div>
               
               <div class="form-group" id="master-parent-group" style="flex: 1 1 150px; display: none;">
                 <label>Parent System *</label>
