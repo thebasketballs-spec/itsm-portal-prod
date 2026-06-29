@@ -2817,32 +2817,88 @@
     const adminSelectAllInput = document.getElementById("admin-select-all");
     if (adminSelectAllInput) { adminSelectAllInput.addEventListener("change", (e) => { document.querySelectorAll(".admin-select").forEach(cb => cb.checked = e.target.checked); }); }
 
-    document.addEventListener("click", async (e) => {
-      const btnDetail = e.target.closest("[data-detail-kind]"); if (btnDetail) { openDetail(btnDetail.getAttribute("data-detail-kind"), btnDetail.getAttribute("data-id")); return; }
-      const btnDel = e.target.closest("[data-admin-delete-kind]");
-      if (btnDel) {
-        const kind = btnDel.getAttribute("data-admin-delete-kind"); const id = btnDel.getAttribute("data-id");
-        if (!confirm(`Delete ticket ${id}?`)) return;
-        const t = findTicket(kind, id); if (t) await dbDelete(kind === "incident" ? "incidents" : "requests", t.firebaseId);
-        if (kind === "incident") incidents = incidents.filter(i => i.id !== id); else requests = requests.filter(r => r.id !== id);
-        logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard"); renderAll();
-      }
-    });
+  document.addEventListener("click", async (e) => {
+  const btnDetail = e.target.closest("[data-detail-kind]"); 
+  if (btnDetail) { 
+      openDetail(btnDetail.getAttribute("data-detail-kind"), btnDetail.getAttribute("data-id")); 
+      return; 
+  }
+  
+  const btnDel = e.target.closest("[data-admin-delete-kind]");
+  if (btnDel) {
+    const kind = btnDel.getAttribute("data-admin-delete-kind"); 
+    const id = btnDel.getAttribute("data-id");
+    
+    // เปลี่ยนข้อความแจ้งเตือนตรงนี้ให้ชัดเจนขึ้นครับ
+    if (!confirm(`⚠️ ยืนยันการลบตั๋วหมายเลข ${id} หรือไม่?\nข้อมูลนี้จะถูกลบออกจากระบบอย่างถาวร!`)) {
+        return; // ถ้ากด Cancel ระบบจะหยุดทำงานตรงนี้
+    }
+    
+    // โค้ดส่วนการลบข้อมูล (ทำงานต่อเมื่อกด OK เท่านั้น)
+    const t = findTicket(kind, id); 
+    if (t) await dbDelete(kind === "incident" ? "incidents" : "requests", t.firebaseId);
+    
+    if (kind === "incident") {
+        incidents = incidents.filter(i => i.id !== id); 
+    } else { 
+        requests = requests.filter(r => r.id !== id); 
+    }
+    
+    logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard"); 
+    renderAll(); 
+    showToast(`ลบตั๋ว ${id} เรียบร้อยแล้ว`); // เพิ่ม Toast แจ้งเตือนหลังลบเสร็จ
+  }
+});
 
-    adminBulkApply.addEventListener("click", async () => {
-      const action = adminBulkAction.value; const assignId = adminBulkAssignee.value || null; const selected = Array.from(document.querySelectorAll(".admin-select")).filter(cb => cb.checked).map(cb => ({ kind: cb.getAttribute("data-kind"), id: cb.getAttribute("data-id") }));
-      if (!selected.length) { alert("Please select at least one ticket."); return; }
-      if (!action && !assignId) { alert("Select a Bulk Action or Assign To value first."); return; }
-      for (let sel of selected) {
-        const t = findTicket(sel.kind, sel.id); if (!t) continue;
-        if (assignId) await assignTicket(t, assignId);
-        if (action === "close") { t.status = "Closed"; if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString(); }
-        if (action === "reopen") t.status = "Open";
-        if (action === "delete") { await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId); if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id); else requests = requests.filter(r => r.id !== sel.id); continue; }
-        t.updatedAt = new Date().toISOString(); await updateTicket(sel.kind, t);
-      }
-      logAudit("BULK_ACTION", "N/A", "Executed bulk action"); renderAll(); showToast("Bulk action completed.");
-    });
+adminBulkApply.addEventListener("click", async () => {
+  const action = adminBulkAction.value; 
+  const assignId = adminBulkAssignee.value || null; 
+  const selected = Array.from(document.querySelectorAll(".admin-select"))
+    .filter(cb => cb.checked)
+    .map(cb => ({ kind: cb.getAttribute("data-kind"), id: cb.getAttribute("data-id") }));
+
+  if (!selected.length) { alert("Please select at least one ticket."); return; }
+  if (!action && !assignId) { alert("Select a Bulk Action or Assign To value first."); return; }
+
+  // --- เพิ่มส่วนการยืนยันก่อนเริ่มทำงาน ---
+  let confirmMsg = `ยืนยันการทำรายการ "${action || 'Assign'}" กับตั๋วจำนวน ${selected.length} ใบ ใช่หรือไม่?`;
+  
+  if (action === "delete") {
+    confirmMsg = `⚠️ คำเตือน: คุณกำลังจะลบตั๋วจำนวน ${selected.length} ใบ!\nข้อมูลนี้จะถูกลบถาวร ยืนยันหรือไม่?`;
+  }
+
+  if (!confirm(confirmMsg)) {
+    return; // หยุดการทำงานถ้ากด Cancel
+  }
+  // ------------------------------------
+
+  for (let sel of selected) {
+    const t = findTicket(sel.kind, sel.id); 
+    if (!t) continue;
+    
+    if (assignId) await assignTicket(t, assignId);
+    
+    if (action === "close") { 
+      t.status = "Closed"; 
+      if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString(); 
+    }
+    if (action === "reopen") t.status = "Open";
+    
+    if (action === "delete") { 
+      await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId); 
+      if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id); 
+      else requests = requests.filter(r => r.id !== sel.id); 
+      continue; 
+    }
+    
+    t.updatedAt = new Date().toISOString(); 
+    await updateTicket(sel.kind, t);
+  }
+  
+  logAudit("BULK_ACTION", "N/A", `Executed bulk action: ${action}`); 
+  renderAll(); 
+  showToast("Bulk action completed.");
+});
 
     // ================== USER MANAGEMENT ==================
     userCancelBtn.addEventListener("click", resetUserForm);
