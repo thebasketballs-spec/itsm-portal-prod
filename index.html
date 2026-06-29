@@ -1439,7 +1439,12 @@
                 <input type="text" id="user-password" required />
               </div>
             </div>
-            
+            <div class="form-row">
+      <div class="form-group" style="flex: 1 1 100%;">
+        <label>Supervisor ID (ใส่ชื่อ User ID ของหัวหน้า)</label>
+        <input type="text" id="user-supervisor" placeholder="เช่น mgr1, admin (ถ้าไม่มีปล่อยว่างได้)" />
+      </div>
+    </div>
             <div class="form-row" style="background:#f9fafb; padding:10px 14px; border-radius:8px; border:1px solid #e5e7eb; gap:18px; align-items:center;">
               <span style="font-weight:600; font-size:12px; color:#374151;">Permissions:</span>
               <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
@@ -1472,6 +1477,7 @@
                   <th style="text-align:center;">Support?</th> 
                   <th style="text-align:center;">Approver?</th>
                   <th style="text-align:center;">Requester?</th>
+                  <th>Supervisor</th>
                   <th>Password</th>
                   <th>Action</th>
                 </tr>
@@ -1867,7 +1873,7 @@
             { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
             { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true },
             { id: "sup1", name: "Support 1", role: "support", department: "IT Helpdesk", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false, isRequester: true },
-            { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true }
+            { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true, supervisorId: "mgr1" }
           ];
           for (let u of defaultUsers) {
             await dbAdd("users", u);
@@ -2084,7 +2090,7 @@
       const requesters = systemUsers.filter(u => u.isRequester !== false);
       let html = '<option value="">-- Select Requester --</option>';
       requesters.forEach(u => {
-        html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}">${u.name} (${u.department || 'No department'})</option>`;
+      html += `<option value="${u.name}" data-dept="${u.department || ''}" data-email="${u.email || ''}" data-supervisor="${u.supervisorId || ''}">${u.name} (${u.department || 'No department'})</option>`;
       });
       if (incReqSelect) incReqSelect.innerHTML = html;
       if (reqReqSelect) reqReqSelect.innerHTML = html;
@@ -2104,6 +2110,10 @@
         }
         deptEl.value = selectedOption.getAttribute("data-dept") || "N/A";
         emailEl.value = selectedOption.getAttribute("data-email") || "";
+        if (selectId === "request-requester") {
+        const appEl = document.getElementById("request-approver");
+        if (appEl) appEl.value = selectedOption.getAttribute("data-supervisor") || "";
+      }
       });
     }
     setupRequesterAutoFill("incident-requester", "incident-dept", "incident-email");
@@ -2120,7 +2130,13 @@
 
       if (currentUser.role === "user") {
         if (incReqEl) { incReqEl.value = currentUser.name; incReqEl.disabled = true; if(incDeptEl) incDeptEl.value = currentUser.department || "N/A"; if(incEmailEl) incEmailEl.value = currentUser.email || ""; }
-        if (reqReqEl) { reqReqEl.value = currentUser.name; reqReqEl.disabled = true; if(reqDeptEl) reqDeptEl.value = currentUser.department || "N/A"; if(reqEmailEl) reqEmailEl.value = currentUser.email || ""; }
+        if (reqReqEl) { 
+        reqReqEl.value = currentUser.name; reqReqEl.disabled = true; 
+        if(reqDeptEl) reqDeptEl.value = currentUser.department || "N/A"; 
+        if(reqEmailEl) reqEmailEl.value = currentUser.email || ""; 
+        const reqApp = document.getElementById("request-approver");
+        if(reqApp) reqApp.value = currentUser.supervisorId || "";
+      }
       } else {
         if (incReqEl) { incReqEl.disabled = false; incReqEl.value = ""; if(incDeptEl) incDeptEl.value = ""; if(incEmailEl) incEmailEl.value = ""; }
         if (reqReqEl) { reqReqEl.disabled = false; reqReqEl.value = ""; if(reqDeptEl) reqDeptEl.value = ""; if(reqEmailEl) reqEmailEl.value = ""; }
@@ -2720,7 +2736,7 @@
         const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
         const requesterDisplay = u.isRequester !== false ? '<span style="color:purple; font-size:1.2em;">✅</span>' : '-';
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.password}</td>
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.supervisorId || '-'}</td><td>${u.password}</td>
         <td>
           <button class="btn-small btn-secondary" onclick="window.editUser('${u.id}')">Edit</button> 
           <button class="btn-small btn-danger" onclick="window.deleteUser('${u.id}')">Delete</button>
@@ -2740,17 +2756,18 @@
       const isApprover = document.getElementById("user-is-approver").checked;
       const isRequester = document.getElementById("user-is-requester").checked;
       const password = document.getElementById("user-password").value.trim();
+      const supervisorId = document.getElementById("user-supervisor").value.trim();
 
       if (!id || !name || !email || !role || !password || !department) { alert("Please fill in all required fields."); return; }
 
       if (editingUserIndex > -1) {
         const u = systemUsers[editingUserIndex];
-        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;
+        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;u.supervisorId = supervisorId;
         await dbUpdate("users", u.firebaseId, u);
         alert("User updated successfully!"); resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("This User ID is already in use."); return; }
-        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password };
+        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password , supervisorId };
         await dbAdd("users", newUser); systemUsers.push(newUser); alert("User added successfully!"); userForm.reset();
       }
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
@@ -2772,6 +2789,7 @@
       document.getElementById("user-is-approver").checked = u.isApprover === true;
       document.getElementById("user-is-requester").checked = u.isRequester !== false;
       document.getElementById("user-password").value = u.password || "";
+      document.getElementById("user-supervisor").value = u.supervisorId || "";
       document.getElementById("user-id").readOnly = true;
       userSubmitBtn.textContent = "Update User"; userCancelBtn.style.display = "inline-block";
       userForm.scrollIntoView({ behavior: "smooth" });
