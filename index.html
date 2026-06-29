@@ -2604,8 +2604,37 @@
           t.notes.push({ text: `❌ Requester rejected closing (Re-opened)\nReason: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
           await updateTicket(kind, t); logAudit("REOPEN", t.id, "Requester re-opened resolved ticket"); renderAll(); closeDetail(); showToast("Ticket sent back to IT for investigation.");
         };
-      } else if(resConfirmBanner) { resConfirmBanner.style.display = "none"; }
-      detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderDetailAttachments(t); detailBackdrop.classList.add("active");
+   } else if(resConfirmBanner) { resConfirmBanner.style.display = "none"; }
+      
+      detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderDetailAttachments(t); 
+
+      // --- [START] บล็อกควบคุมสิทธิ์ Read-Only สำหรับ Role: User ---
+      const isStaff = currentUser && ["admin", "manager", "support"].includes(currentUser.role);
+      const isMyTicket = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
+
+      const mainInputIds = [
+        "detail-subject-input", "detail-system-input", "detail-module-input",
+        "detail-assignee-select", "detail-status-select", "detail-priority-select",
+        "detail-due-input", "detail-approver-select", "detail-description-input"
+      ];
+
+      // 1. ล็อกช่องกรอกข้อมูลหลัก และซ่อนปุ่ม Save สำหรับพนักงานทั่วไป (User)
+      mainInputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !isStaff;
+      });
+      if (detailSaveBtn) detailSaveBtn.style.display = !isStaff ? "none" : "";
+
+      // 2. ถ้าเป็นตั๋วของคนอื่น -> ล็อกห้ามพิมพ์ Note และห้ามอัปโหลดไฟล์ด้วย (Read-Only 100%)
+      const canComment = isStaff || isMyTicket;
+      if (detailNoteInput) detailNoteInput.disabled = !canComment;
+      if (detailAddNoteBtn) detailAddNoteBtn.style.display = !canComment ? "none" : "";
+      if (detailFileInput) { detailFileInput.disabled = !canComment; detailFileInput.style.display = !canComment ? "none" : ""; }
+      if (detailDropzone) detailDropzone.style.display = !canComment ? "none" : "";
+      document.querySelectorAll('input[name="note-visibility"]').forEach(r => r.disabled = !canComment);
+      // --- [END] บล็อกควบคุมสิทธิ์ Read-Only สำหรับ Role: User ---
+
+      detailBackdrop.classList.add("active");
     }
 
     function closeDetail() { detailBackdrop.classList.remove("active"); currentDetail = null; }
