@@ -1455,7 +1455,9 @@
               </label>
               <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
                 <input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> Is Requester (Can create tickets)
-              </label>
+              </label><label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" id="user-is-supervisor" style="width:16px; height:16px;" /> Is Supervisor (เป็นหัวหน้างาน)
+            </label>
             </div>
             
             <div class="form-row" style="margin-top:10px;">
@@ -1871,7 +1873,7 @@
         if (systemUsers.length === 0) {
           const defaultUsers = [
             { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
-            { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true },
+            { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true, isSupervisor: true },
             { id: "sup1", name: "Support 1", role: "support", department: "IT Helpdesk", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false, isRequester: true },
             { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true, supervisorId: "mgr1" }
           ];
@@ -2755,6 +2757,7 @@
       const assignTo = document.getElementById("user-assign-to").checked;
       const isApprover = document.getElementById("user-is-approver").checked;
       const isRequester = document.getElementById("user-is-requester").checked;
+      const isSupervisor = document.getElementById("user-is-supervisor").checked;
       const password = document.getElementById("user-password").value.trim();
       const supervisorId = document.getElementById("user-supervisor").value.trim();
 
@@ -2762,12 +2765,12 @@
 
       if (editingUserIndex > -1) {
         const u = systemUsers[editingUserIndex];
-        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;u.supervisorId = supervisorId;
+        u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;u.supervisorId = supervisorId;u.isSupervisor = isSupervisor;
         await dbUpdate("users", u.firebaseId, u);
         alert("User updated successfully!"); resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("This User ID is already in use."); return; }
-        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password , supervisorId };
+        const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password , supervisorId, isSupervisor };
         await dbAdd("users", newUser); systemUsers.push(newUser); alert("User added successfully!"); userForm.reset();
       }
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
@@ -2787,7 +2790,7 @@
       document.getElementById("user-role").value = u.role;
       document.getElementById("user-assign-to").checked = u.assignTo === true; 
       document.getElementById("user-is-approver").checked = u.isApprover === true;
-      document.getElementById("user-is-requester").checked = u.isRequester !== false;
+      document.getElementById("user-is-requester").checked = u.isRequester !== false;document.getElementById("user-is-supervisor").checked = u.isSupervisor === true;
       document.getElementById("user-password").value = u.password || "";
       document.getElementById("user-supervisor").value = u.supervisorId || "";
       document.getElementById("user-id").readOnly = true;
