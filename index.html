@@ -2546,7 +2546,7 @@
       if (statusChart) statusChart.destroy();
       statusChart = new Chart(statusCtx, { type: "bar", data: { labels: ["Open", "In Progress", "Pending User", "Closed", "Cancelled"], datasets: [{ label: "Count", data: [statusOpen, statusInProgress, statusPending, statusClosed, statusCancelled] }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, precision: 0 } } } });
       latestTableBody.innerHTML = "";
-      all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5).forEach(t => {
+      all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
           tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
           latestTableBody.appendChild(tr);
