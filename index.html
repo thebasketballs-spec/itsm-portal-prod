@@ -3149,32 +3149,67 @@ adminBulkApply.addEventListener("click", async () => {
       populateMasterDropdowns(); renderMasterTable(); showToast("Deleted Master Data.");
     };
     function triggerEmailDraft(t) {
-      if (!t.approver) return;
-      const appUser = getUserById(t.approver);
-      if (!appUser || !appUser.email) return;
-      
-      const to = appUser.email;
-      const cc = t.ccEmails || "";
-      const subject = `[ITSM Approval Request] Ticket ${t.id}: ${t.title}`;
-      const body = `Dear ${appUser.name},\n\nA new Service Request has been created that requires your approval.\n\nTicket Details:\n- Ticket ID: ${t.id}\n- System: ${t.system}\n- Subject: ${t.title}\n- Requester: ${t.requester}\n\nPlease log in to the Finance System Service Portal to Approve or Reject this request.\n\nBest regards,\nITSM Portal Automated System`;
-      
-      let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      if (cc) {
-        mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
-      }
-      
-      window.location.href = mailtoUrl;
-    }
+  if (!t.approver) return;
+  const appUser = getUserById(t.approver);
+  if (!appUser || !appUser.email) return;
+
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
+  const to = appUser.email;
+  const cc = t.ccEmails || "";
+  const subject = `[ITSM Approval Request] Ticket ${t.id}: ${t.title}`;
+  
+  // เพิ่มลิงก์ Portal เข้าไปในเนื้อหา
+  const body = `Dear ${appUser.name},
+
+A new Service Request has been created that requires your approval.
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- System: ${t.system}
+- Subject: ${t.title}
+- Requester: ${t.requester}
+
+Please log in to the Finance System Service Portal to Approve or Reject this request:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
+
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  
+  window.location.href = mailtoUrl;
+}
     // ฟังก์ชันสำหรับสลัด Draft อีเมล์แจ้งเตือนเมื่อมีการ Assign งานให้ IT Support
-function triggerAssignmentEmailDraft(t) {
+function sendAssignmentEmail(t) {
   if (!t.assignedTo) return;
   const staffUser = getUserById(t.assignedTo);
   if (!staffUser || !staffUser.email) return;
 
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
   const to = staffUser.email;
   const cc = t.ccEmails || "";
   const subject = `[ITSM Ticket Assigned] Ticket ${t.id}: ${t.title}`;
-  const body = `Dear ${staffUser.name},\n\nA new ticket has been assigned to you.\n\nTicket Details:\n- Ticket ID: ${t.id}\n- Type: ${t.type}\n- System: ${t.system}\n- Subject: ${t.title}\n- Requester: ${t.requester}\n\nPlease log in to the Finance System Service Portal to process this ticket.\n\nBest regards,\nITSM Portal Automated System`;
+  
+  // เพิ่มลิงก์ Portal เข้าไปในเนื้อหาอีเมลตรงนี้ครับ
+  const body = `Dear ${staffUser.name},
+
+A new ticket has been assigned to you.
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- Type: ${t.type}
+- System: ${t.system}
+- Subject: ${t.title}
+- Requester: ${t.requester}
+
+Please log in to the Finance System Service Portal to process this ticket:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
 
   let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   if (cc) {
