@@ -1651,7 +1651,8 @@
 
     </div>
   </div>
-    <div class="modal detail-modal">
+    <div class="modal-backdrop" id="detail-backdrop">
+  <div class="modal detail-modal">
       <div class="modal-header">
         <div>
           <div class="modal-title" id="detail-title"></div>
@@ -1793,9 +1794,10 @@
       <div class="muted" style="margin-top:6px;">
         * Attachments are stored as Base64 in localStorage (for Demo / small team usage).
       </div>
-    </div>
+   </div>
   </div>
-  <div id="toast-container"></div>
+</div><!-- /modal-backdrop -->
+<div id="toast-container">
   <script type="module">
     // --- Import Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
