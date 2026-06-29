@@ -261,9 +261,12 @@
       font-weight: 600;
       background: #eef2ff;
     }
-    .section {
+  .section {
       display: none;
       margin-top: 16px;
+    }
+    .section.active {
+      display: block !important; /* เพิ่ม !important เพื่อบังคับให้โชว์เฉพาะตัวที่ active */
     }
     .section.active {
       display: block;
@@ -3084,6 +3087,9 @@
     adminFilters.forEach(el => el.addEventListener("input", renderAdminTable));
     adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
 
+    // ปิดทุก section ให้หมดก่อนเริ่มใช้งาน
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.getElementById("dashboard-section").classList.add("active");
     loadDataFromFirebase();
     // ================== MASTER DATA MANAGEMENT & AUTO DROPDOWNS ==================
     function fillSelectOptions(selectId, items, defaultText = "-- Select --") {
