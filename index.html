@@ -2302,16 +2302,25 @@
       renderAll(); showToast(`Rejected ticket ${t.id}`);
     };
 
-    // ================== ASSIGNMENT ==================
-    async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
-      const prev = ticket.assignedTo || null;
-      if (prev === newAssigneeId) return;
-      ticket.assignedTo = newAssigneeId || null;
-      ticket.updatedAt = new Date().toISOString();
-      const newName = getUserName(newAssigneeId) || "(Unassigned)";
-      logAudit("ASSIGN", ticket.id, `Assigned to ${newName}`);
-      if (currentUser && currentUser.id === newAssigneeId) { showToast(`Ticket ${ticket.id} assigned to you.`); }
-    }
+   // ================== ASSIGNMENT ==================
+async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
+  const prev = ticket.assignedTo || null;
+  if (prev === newAssigneeId) return;
+  
+  ticket.assignedTo = newAssigneeId || null;
+  ticket.updatedAt = new Date().toISOString();
+  
+  const newName = getUserName(newAssigneeId) || "(Unassigned)";
+  logAudit("ASSIGN", ticket.id, `Assigned to ${newName}`);
+  
+  if (currentUser && currentUser.id === newAssigneeId) { 
+    showToast(`Ticket ${ticket.id} assigned to you.`); 
+  }
+
+  // --- เพิ่มบรรทัดนี้เข้าไปครับ ---
+  sendAssignmentEmail(ticket); 
+  // ------------------------------
+}
 
     // ================== ATTACHMENTS (INCIDENT) ==================
     let incidentStagedAttachments = [];
