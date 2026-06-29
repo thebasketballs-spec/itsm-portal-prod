@@ -1020,6 +1020,7 @@
                     <th>SLA</th>
                     <th>Action</th>
                     <th>Requester</th>
+                    <th>Due</th>
                   </tr>
                 </thead>
                 <tbody id="incident-table-body"></tbody>
@@ -2564,7 +2565,17 @@
       incidentTableBody.innerHTML = "";
       incidents.filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
           const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
-          tr.innerHTML = `<td>${i.id}</td><td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td><td>${i.system}</td><td>${formatPriority(i.priority)}</td><td>${getUserName(i.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${i.status}</span></td><td>${slaLabel(i)}</td><td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td><td>${formatRequesterObo(i.requester, i.createdBy)}</td>`;
+          // เพิ่ม <td>${formatDateOnly(i.dueDate)}</td> ไว้ต่อท้ายสุดก่อนปิดเครื่องหมายแบ็กทิก
+       tr.innerHTML = `<td>${i.id}</td>
+                <td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td>
+                <td>${i.system}</td>
+                <td>${formatPriority(i.priority)}</td>
+                <td>${getUserName(i.assignedTo) || "-"}</td>
+                <td><span class="status-pill ${cls}">${i.status}</span></td>
+                <td>${slaLabel(i)}</td>
+                <td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td>
+                <td>${formatRequesterObo(i.requester, i.createdBy)}</td>
+                <td>${formatDateOnly(i.dueDate)}</td>`; // <--- ตรงนี้คือส่วนที่เพิ่มเข้าไป
           incidentTableBody.appendChild(tr);
         });
     }
