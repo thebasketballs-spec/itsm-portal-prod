@@ -1715,7 +1715,7 @@
               <input type="radio" name="note-visibility" value="public" checked /> Public
             </label>
             <label style="font-size:11px;">
-              <input type="radio" name="note-visibility" value="internal" /> Internal (visible only to Support/Admin/Manager)
+              <input type="radio" name="note-visibility" value="internal" /> Internal (visible only to Support/Admin/Manager and the ticket owner)
             </label>
            </div>
           <button class="btn btn-small" id="detail-add-note-btn" style="margin-top:4px;">Add Note</button>
@@ -2751,7 +2751,9 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
 
     function renderDetailNotes(t) {
       detailNotesList.innerHTML = ""; if (!t.notes || !t.notes.length) return;
-      const visibleNotes = t.notes.filter(n => { if (n.visibility === "internal") { return currentUser && ["admin", "manager", "support"].includes(currentUser.role); } return true; });
+      const isStaff = currentUser && ["admin", "manager", "support"].includes(currentUser.role);
+      const isMyTicket = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
+      const visibleNotes = t.notes.filter(n => { if (n.visibility === "internal") { return isStaff || isMyTicket; } return true; });
       visibleNotes.forEach(n => {
         const li = document.createElement("li"); const isInternal = n.visibility === "internal"; const tag = isInternal ? `<span class="note-tag note-tag-internal">Internal</span>` : `<span class="note-tag note-tag-public">Public</span>`;
         let attachHtml = "";
