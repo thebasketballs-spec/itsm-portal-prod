@@ -2913,6 +2913,66 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       }
     });
 
+    // ================== ATTACHMENTS IN DETAIL ==================
+    // The file input + dropzone in the "Attachments" block of the detail
+    // modal had no listeners wired up at all (file picker, drag&drop, and
+    // the "Ctrl+V" paste it advertises all silently did nothing). This adds
+    // new files straight onto the ticket's existing attachments and saves.
+    async function addDetailAttachmentFiles(files) {
+      if (!currentDetail) return;
+      const t = findTicket(currentDetail.kind, currentDetail.id); if (!t) return;
+      if (!Array.isArray(t.attachments)) t.attachments = [];
+      const fileList = Array.from(files || []);
+      for (const file of fileList) {
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max ${Math.round(MAX_ATTACHMENT_SIZE_BYTES/1024)}KB per file)`); continue; }
+        if (t.attachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files per ticket`); break; }
+        if (getStagedAttachmentsTotalSize(t.attachments) + file.size > MAX_TOTAL_ATTACHMENTS_BYTES) { showToast(`Total attachments would exceed ${Math.round(MAX_TOTAL_ATTACHMENTS_BYTES/1024)}KB limit for this ticket`); continue; }
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (evt) => resolve(evt.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        t.attachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name || `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl });
+      }
+      t.updatedAt = new Date().toISOString();
+      try {
+        await updateTicket(currentDetail.kind, t);
+        logAudit("ADD_ATTACHMENT", t.id, "Added attachment via detail modal");
+        renderDetailAttachments(t); renderAll();
+      } catch (error) {
+        console.error("failed to save detail attachment:", error);
+      }
+    }
+
+    if (detailFileInput) {
+      detailFileInput.addEventListener("change", (e) => {
+        const files = e.target.files; if (!files || files.length === 0) return;
+        addDetailAttachmentFiles(files);
+        detailFileInput.value = "";
+      });
+    }
+
+    if (detailDropzone) {
+      detailDropzone.setAttribute("tabindex", "0");
+      detailDropzone.addEventListener("click", () => { if (detailFileInput && !detailFileInput.disabled) detailFileInput.click(); });
+      detailDropzone.addEventListener("dragover", (e) => { e.preventDefault(); detailDropzone.classList.add("focused"); });
+      detailDropzone.addEventListener("dragleave", () => { detailDropzone.classList.remove("focused"); });
+      detailDropzone.addEventListener("drop", (e) => {
+        e.preventDefault(); detailDropzone.classList.remove("focused");
+        if (detailFileInput && detailFileInput.disabled) return;
+        const files = e.dataTransfer && e.dataTransfer.files; if (!files || files.length === 0) return;
+        addDetailAttachmentFiles(files);
+      });
+      detailDropzone.addEventListener("paste", (e) => {
+        if (detailFileInput && detailFileInput.disabled) return;
+        const items = e.clipboardData && e.clipboardData.items; if (!items) return;
+        const images = []; for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
+        if (!images.length) return;
+        addDetailAttachmentFiles(images);
+      });
+    }
+
     // ================== NOTES IN DETAIL ==================
     detailNoteInput.addEventListener("paste", (e) => {
       const items = e.clipboardData && e.clipboardData.items; if (!items) return;
