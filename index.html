@@ -2767,12 +2767,31 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
 
     function renderDetailAttachments(t) {
       detailAttachmentsList.innerHTML = ""; if (!t.attachments || !t.attachments.length) return;
-      t.attachments.forEach(a => {
+      const isStaff = currentUser && ["admin", "manager", "support"].includes(currentUser.role);
+      const isMyTicket = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
+      const canDelete = isStaff || isMyTicket;
+      t.attachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${esc(a.name)}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><a href="${a.dataUrl}" download="${esc(a.name)}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>`;
+        const deleteBtn = canDelete ? `<button type="button" class="btn-danger btn-small" onclick="window.removeDetailAttachment(${index})">X</button>` : "";
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${esc(a.name)}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><a href="${a.dataUrl}" download="${esc(a.name)}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>${deleteBtn}`;
         detailAttachmentsList.appendChild(li);
       });
     }
+
+    window.removeDetailAttachment = async function(index) {
+      if (!currentDetail) return;
+      const t = findTicket(currentDetail.kind, currentDetail.id); if (!t || !Array.isArray(t.attachments)) return;
+      if (!confirm("Remove this attachment?")) return;
+      t.attachments.splice(index, 1);
+      t.updatedAt = new Date().toISOString();
+      try {
+        await updateTicket(currentDetail.kind, t);
+        logAudit("REMOVE_ATTACHMENT", t.id, "Removed attachment via detail modal");
+        renderDetailAttachments(t); renderAll();
+      } catch (error) {
+        console.error("failed to remove detail attachment:", error);
+      }
+    };
 
     function openDetail(kind, id) {
       const t = findTicket(kind, id); if (!t) return;
