@@ -1941,9 +1941,6 @@
         if (systemUsers.length === 0) {
           const defaultUsers = [
             { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
-            { id: "mgr1", name: "Manager A", role: "manager", department: "Finance & Acc", email: "manager@example.com", password: "12345", assignTo: true, isApprover: true, isRequester: true, isSupervisor: true },
-            { id: "sup1", name: "Support 1", role: "support", department: "IT Helpdesk", email: "support1@example.com", password: "12345", assignTo: true, isApprover: false, isRequester: true },
-            { id: "user1", name: "User 1", role: "user", department: "Accounting", email: "user1@example.com", password: "12345", assignTo: false, isApprover: false, isRequester: true, supervisorId: "mgr1" }
           ];
           for (let u of defaultUsers) {
             await dbAdd("users", u);
