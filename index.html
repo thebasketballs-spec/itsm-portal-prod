@@ -693,6 +693,14 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+
+  
 </head>
 <body>
   <div id="login-root">
@@ -1417,8 +1425,19 @@
       </div>
       <div id="user-section" class="section">
         <div class="card">
-          <h2>User Management</h2>
-          <small>Create / Delete / Edit User and manage individual permissions</small>
+<div class="flex-between">
+            <div>
+              <h2>User Management</h2>
+              <small>Create / Delete / Edit User and manage individual permissions</small>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" class="btn-secondary btn-small" id="btn-export-users">📥 Export Excel</button>
+              <label for="import-users-file" class="btn-secondary btn-small" style="cursor:pointer; margin:0;">📤 Import Excel</label>
+              <input type="file" id="import-users-file" accept=".xlsx, .xls" style="display:none;" />
+            </div>
+          </div>
+
+          
           <form id="user-form" style="margin-top: 10px;">
             <div class="form-row">
               <div class="form-group">
@@ -3114,6 +3133,105 @@ adminBulkApply.addEventListener("click", async () => {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById("dashboard-section").classList.add("active");
     loadDataFromFirebase();
+// ================== USER IMPORT / EXPORT (EXCEL) ==================
+    const btnExportUsers = document.getElementById("btn-export-users");
+    const importUsersFile = document.getElementById("import-users-file");
+
+    if (btnExportUsers) {
+      btnExportUsers.addEventListener("click", () => {
+        if (systemUsers.length === 0) {
+          alert("ไม่มีข้อมูลผู้ใช้งานสำหรับ Export");
+          return;
+        }
+        
+        const exportData = systemUsers.map(u => ({
+          "User ID": u.id,
+          "Name": u.name,
+          "Department": u.department || "",
+          "Email": u.email,
+          "Role (admin/manager/support/user)": u.role,
+          "Supervisor ID": u.supervisorId || "",
+          "Password": u.password,
+          "Is IT Support": u.assignTo ? "Yes" : "No",
+          "Is Approver": u.isApprover ? "Yes" : "No",
+          "Is Requester": u.isRequester !== false ? "Yes" : "No",
+          "Is Supervisor": u.isSupervisor ? "Yes" : "No"
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+        XLSX.writeFile(workbook, "User_Management_Export.xlsx");
+      });
+    }
+
+    if (importUsersFile) {
+      importUsersFile.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          try {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: "binary" });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            let addedCount = 0;
+            let updatedCount = 0;
+
+            for (let row of jsonData) {
+              const id = row["User ID"]?.toString().trim();
+              const name = row["Name"]?.toString().trim();
+              const email = row["Email"]?.toString().trim();
+              const role = row["Role (admin/manager/support/user)"]?.toString().trim().toLowerCase();
+              const department = row["Department"]?.toString().trim() || "";
+              const password = row["Password"]?.toString().trim() || "12345";
+              const supervisorId = row["Supervisor ID"]?.toString().trim() || "";
+              
+              if (!id || !name || !email || !role) continue; 
+
+              const assignTo = row["Is IT Support"]?.toString().trim().toLowerCase() === "yes";
+              const isApprover = row["Is Approver"]?.toString().trim().toLowerCase() === "yes";
+              const isRequester = row["Is Requester"]?.toString().trim().toLowerCase() !== "no";
+              const isSupervisor = row["Is Supervisor"]?.toString().trim().toLowerCase() === "yes";
+
+              const existingUserIndex = systemUsers.findIndex(u => u.id === id);
+              
+              if (existingUserIndex > -1) {
+                const u = systemUsers[existingUserIndex];
+                u.name = name; u.email = email; u.department = department; 
+                u.role = role; u.password = password; u.supervisorId = supervisorId;
+                u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.isSupervisor = isSupervisor;
+                await dbUpdate("users", u.firebaseId, u);
+                updatedCount++;
+              } else {
+                const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, isSupervisor, password, supervisorId };
+                await dbAdd("users", newUser);
+                systemUsers.push(newUser);
+                addedCount++;
+              }
+            }
+
+            populateApproverDropdowns(); 
+            populateRequesterDropdowns(); 
+            renderAll(); 
+            
+            alert(`Import สำเร็จ!\nเพิ่ม User ใหม่: ${addedCount} คน\nอัปเดต User เดิม: ${updatedCount} คน`);
+          } catch (error) {
+            console.error(error);
+            alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel ตรวจสอบฟอร์แมตให้ตรงกับไฟล์ที่ Export ออกมา");
+          } finally {
+            importUsersFile.value = ""; 
+          }
+        };
+        reader.readAsBinaryString(file);
+      });
+    }
+
+    
     // ================== MASTER DATA MANAGEMENT & AUTO DROPDOWNS ==================
     function fillSelectOptions(selectId, items, defaultText = "-- Select --") {
       const el = document.getElementById(selectId); if (!el) return;
