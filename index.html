@@ -2544,7 +2544,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         sla: computeSlaForTicket(priority, now), createdBy: currentUser ? currentUser.id : null
       };
 
-      await dbAdd("incidents", incident); incidents.unshift(incident);
+      await dbAdd("incidents", incident);
       incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
       triggerIncidentAdminEmailDraft(incident);
@@ -2585,7 +2585,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         sla: computeSlaForTicket("P3 - Medium (24h)", now), createdBy: currentUser ? currentUser.id : null
       };
 
-     await dbAdd("requests", req); requests.unshift(req);
+     await dbAdd("requests", req);
       requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
       
