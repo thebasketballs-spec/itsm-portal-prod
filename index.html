@@ -2802,10 +2802,14 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
       
       // ตรรกะเช็คการยิงอีเมล์ดราฟต์
+      const statusChanged = t.status !== oldStatus;
+      const notifyStatuses = ["Resolved", "Closed", "Cancelled"];
       if (newApprover && newApprover !== oldApprover) {
         triggerEmailDraft(t);
       } else if (assigneeChanged && newAssignee) {
-        triggerAssignmentEmailDraft(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
+        sendAssignmentEmail(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
+      } else if (statusChanged && notifyStatuses.includes(t.status)) {
+        triggerStatusEmailDraft(t); // ถ้าเปลี่ยน status เป็น Resolved/Closed/Cancelled ให้เด้งหน้าต่างเมลแจ้งผู้เปิด Ticket
       }
     });
 
@@ -3242,6 +3246,44 @@ Ticket Details:
 - Requester: ${t.requester}
 
 Please log in to the Finance System Service Portal to process this ticket:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
+
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  window.location.href = mailtoUrl;
+}
+    // ฟังก์ชันสำหรับสลัด Draft อีเมล์แจ้งผู้เปิด Ticket เมื่อ Status เปลี่ยนเป็น Resolved / Closed / Cancelled
+function triggerStatusEmailDraft(t) {
+  if (!t.email) return;
+
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
+  const to = t.email;
+  const cc = t.ccEmails || "";
+  const subject = `[ITSM Ticket Update] Ticket ${t.id}: ${t.title} - Status: ${t.status}`;
+
+  const statusMessages = {
+    "Resolved": "has been resolved by IT Support. Please review the resolution and confirm closure via the portal.",
+    "Closed": "has been closed.",
+    "Cancelled": "has been cancelled."
+  };
+  const statusMsg = statusMessages[t.status] || `status has been updated to "${t.status}".`;
+
+  const body = `Dear ${t.requester},
+
+Your ${t.type} ticket ${statusMsg}
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- System: ${t.system}
+- Subject: ${t.title}
+- Status: ${t.status}
+
+Please log in to the Finance System Service Portal for more details:
 ${portalUrl}
 
 Best regards,
