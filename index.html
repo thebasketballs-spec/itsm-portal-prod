@@ -2805,12 +2805,14 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       // ตรรกะเช็คการยิงอีเมล์ดราฟต์
       const statusChanged = t.status !== oldStatus;
       const notifyStatuses = ["Resolved", "Closed", "Cancelled"];
+      const isRequesterSelf = currentUser && t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase();
+      const skipSelfNotify = isRequesterSelf && ["Closed", "Cancelled"].includes(t.status);
       if (newApprover && newApprover !== oldApprover) {
         triggerEmailDraft(t);
       } else if (assigneeChanged && newAssignee) {
         sendAssignmentEmail(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
-      } else if (statusChanged && notifyStatuses.includes(t.status)) {
-        triggerStatusEmailDraft(t); // ถ้าเปลี่ยน status เป็น Resolved/Closed/Cancelled ให้เด้งหน้าต่างเมลแจ้งผู้เปิด Ticket
+      } else if (statusChanged && notifyStatuses.includes(t.status) && !skipSelfNotify) {
+        triggerStatusEmailDraft(t); // ถ้าเปลี่ยน status เป็น Resolved/Closed/Cancelled ให้เด้งหน้าต่างเมลแจ้งผู้เปิด Ticket (ยกเว้น requester ปิด/ยกเลิกเองไม่ต้องส่งเมลถึงตัวเอง)
       }
     });
 
