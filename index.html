@@ -2469,6 +2469,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       await dbAdd("incidents", incident); incidents.unshift(incident);
       incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
+      triggerIncidentAdminEmailDraft(incident);
     });
 
     requestForm.addEventListener("submit", async (e) => {
@@ -3293,6 +3294,35 @@ ITSM Portal Automated System`;
   if (cc) {
     mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
   }
+  window.location.href = mailtoUrl;
+}
+    // ฟังก์ชันสำหรับดราฟต์อีเมล์แจ้ง Admin ทุกคนเมื่อมีการ Submit Incident ใหม่
+function triggerIncidentAdminEmailDraft(t) {
+  const adminEmails = systemUsers.filter(u => u.role === "admin" && u.email).map(u => u.email);
+  if (adminEmails.length === 0) return;
+
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
+  const to = adminEmails.join(",");
+  const subject = `[ITSM New Incident] Ticket ${t.id}: ${t.title}`;
+
+  const body = `Dear Admin,
+
+A new Incident has been submitted and requires attention.
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- System: ${t.system}
+- Subject: ${t.title}
+- Priority: ${t.priority}
+- Requester: ${t.requester}
+
+Please log in to the Finance System Service Portal to review and assign this ticket:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
+
+  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoUrl;
 }
     window.viewImage = function(dataUrl) {
