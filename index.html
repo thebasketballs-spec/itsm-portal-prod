@@ -1742,8 +1742,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
     import { 
-      getFirestore, collection, addDoc, doc, updateDoc, deleteDoc,
-      runTransaction, onSnapshot
+      getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc 
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // --- Firebase Configuration ---
@@ -1775,16 +1774,9 @@
     // Constants
     const SLA_TEMPLATES = { P1: { responseHours: 1, resolutionHours: 4 }, P2: { responseHours: 2, resolutionHours: 8 }, P3: { responseHours: 4, resolutionHours: 24 }, P4: { responseHours: 8, resolutionHours: 48 }};
     const MAX_ATTACHMENTS_PER_TICKET = 5;
-
-    // Firestore caps a document at 1,048,576 bytes and Base64 inflates raw
-    // bytes by ~33%. Budget attachments to leave room for the rest of the
-    // ticket fields (notes, history, etc.) so a save never silently fails.
-    const MAX_ATTACHMENT_SIZE_BYTES = 100 * 1024;       // 100KB per file (raw)
-    const MAX_TOTAL_ATTACHMENTS_BYTES = 400 * 1024;     // 400KB total per ticket (raw, before Base64 inflation)
-
-    function getStagedAttachmentsTotalSize(list) {
-      return list.reduce((sum, a) => sum + (a.size || 0), 0);
-    }
+    
+    // Max 150KB per file to prevent Firestore Document Quota Exceeded (1MB limit)
+   const MAX_ATTACHMENT_SIZE_BYTES = 500 * 1024;
 
     // ================== DOM ELEMENTS ==================
     const loginRoot = document.getElementById("login-root");
@@ -1914,167 +1906,105 @@
   
 
     // ================== FIREBASE HELPERS ==================
-    // All three helpers catch and surface errors via a toast, then re-throw
-    // so the calling handler's try/catch can decide how to react (e.g. skip
-    // resetting a form, restore a button, or avoid closing a modal) instead
-    // of failing silently while the UI shows changes that were never saved.
     async function dbAdd(colName, data) {
-      try {
-        const ref = await addDoc(collection(db, colName), data);
-        data.firebaseId = ref.id;
-        return data;
-      } catch (error) {
-        console.error(`dbAdd(${colName}) failed:`, error);
-        showToast(`❌ Save failed: could not create record in "${colName}". Please check your connection and try again.`);
-        throw error;
-      }
+      const ref = await addDoc(collection(db, colName), data);
+      data.firebaseId = ref.id;
+      return data;
     }
 
     async function dbUpdate(colName, id, data) {
       if (!id) return;
-      try {
-        await updateDoc(doc(db, colName, id), data);
-      } catch (error) {
-        console.error(`dbUpdate(${colName}/${id}) failed:`, error);
-        showToast(`❌ Save failed: could not update record. Your changes were NOT saved — please try again.`);
-        throw error;
-      }
+      await updateDoc(doc(db, colName, id), data);
     }
 
     async function dbDelete(colName, id) {
       if (!id) return;
+      await deleteDoc(doc(db, colName, id));
+    }
+
+    // ================== INITIAL LOAD ==================
+    async function loadDataFromFirebase() {
       try {
-        await deleteDoc(doc(db, colName, id));
-      } catch (error) {
-        console.error(`dbDelete(${colName}/${id}) failed:`, error);
-        showToast(`❌ Delete failed. Please try again.`);
-        throw error;
-      }
-    }
-
-    // ================== RENDER SCHEDULING (debounced) ==================
-    // Multiple realtime snapshot updates (e.g. several collections syncing
-    // back-to-back on first load, or a bulk action touching many tickets)
-    // used to each trigger a full renderAll() synchronously. Coalescing
-    // them into a single animation-frame pass avoids redundant full-table
-    // rebuilds and keeps the UI responsive as data grows.
-    let renderAllScheduled = false;
-    function scheduleRenderAll() {
-      if (renderAllScheduled) return;
-      renderAllScheduled = true;
-      requestAnimationFrame(() => { renderAllScheduled = false; renderAll(); });
-    }
-
-    // ================== REALTIME DATA SYNC ==================
-    // Tracks whether each collection has produced its first snapshot, so we
-    // only run one-time setup (login init, SLA timer, default seeding) once
-    // all collections have loaded at least once.
-    const initialLoadDone = { users: false, incidents: false, requests: false, auditLogs: false, masterData: false };
-    let appBootstrapped = false;
-    let masterDataSeeded = false;
-
-    function maybeBootstrapApp() {
-      if (appBootstrapped) return;
-      if (!Object.values(initialLoadDone).every(Boolean)) return;
-      appBootstrapped = true;
-      initLogin();
-      checkSLA();
-      setInterval(checkSLA, 60000); // Auto SLA check every 60 seconds
-      renderAll();
-      renderUserTable();
-    }
-
-    function setupRealtimeListeners() {
-      onSnapshot(collection(db, "users"), async (snap) => {
-        systemUsers = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        if (!initialLoadDone.users && systemUsers.length === 0) {
+        const uSnap = await getDocs(collection(db, "users"));
+        systemUsers = uSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        
+        if (systemUsers.length === 0) {
           const defaultUsers = [
             { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
           ];
-          for (let u of defaultUsers) { await dbAdd("users", u); }
-          // onSnapshot will fire again automatically once these writes land.
+          for (let u of defaultUsers) {
+            await dbAdd("users", u);
+            systemUsers.push(u);
+          }
         }
-        initialLoadDone.users = true;
-        if (appBootstrapped) { scheduleRenderAll(); renderUserTable(); } else { maybeBootstrapApp(); }
-      }, (error) => { console.error("users sync error:", error); showToast("Error connecting to Database."); });
 
-      onSnapshot(collection(db, "incidents"), (snap) => {
-        incidents = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        initialLoadDone.incidents = true;
-        if (appBootstrapped) scheduleRenderAll(); else maybeBootstrapApp();
-      }, (error) => { console.error("incidents sync error:", error); showToast("Error connecting to Database."); });
+        const iSnap = await getDocs(collection(db, "incidents"));
+        incidents = iSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
 
-      onSnapshot(collection(db, "requests"), (snap) => {
-        requests = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        initialLoadDone.requests = true;
-        if (appBootstrapped) scheduleRenderAll(); else maybeBootstrapApp();
-      }, (error) => { console.error("requests sync error:", error); showToast("Error connecting to Database."); });
+        const rSnap = await getDocs(collection(db, "requests"));
+        requests = rSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
 
-      onSnapshot(collection(db, "auditLogs"), (snap) => {
-        auditLogs = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        auditLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
-        initialLoadDone.auditLogs = true;
-        if (appBootstrapped) scheduleRenderAll(); else maybeBootstrapApp();
-      }, (error) => { console.error("auditLogs sync error:", error); showToast("Error connecting to Database."); });
-
-      onSnapshot(collection(db, "masterData"), async (snap) => {
-        masterDataList = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        if (!masterDataSeeded && masterDataList.length === 0) {
-          masterDataSeeded = true;
+        const aSnap = await getDocs(collection(db, "auditLogs"));
+        auditLogs = aSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        // --- ดึง Master Data และสร้างค่าเริ่มต้นถ้ายังไม่มี ---
+        const mSnap = await getDocs(collection(db, "masterData"));
+        masterDataList = mSnap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
+        if (masterDataList.length === 0) {
           const seeds = [
             {type:"System",name:"Oracle"},{type:"System",name:"SAP"},{type:"System",name:"TM1"},{type:"System",name:"BPC"},{type:"System",name:"Power BI"},{type:"System",name:"Network"},{type:"System",name:"Others"},
             {type:"Category",name:"Application"},{type:"Category",name:"Infrastructure"},{type:"Category",name:"Network"},{type:"Category",name:"Access / Permission"},{type:"Category",name:"Reporting / Dashboard"},{type:"Category",name:"Others"},
             {type:"RequestType",name:"Access Request"},{type:"RequestType",name:"Change Request"},{type:"RequestType",name:"Service Request"},{type:"RequestType",name:"Report / Dashboard"},{type:"RequestType",name:"Others"}
           ];
           Object.keys(MODULES_BY_SYSTEM).forEach(k => MODULES_BY_SYSTEM[k].forEach(mod => seeds.push({type:"Module",parentSystem:k,name:mod})));
-          for (let s of seeds) { await dbAdd("masterData", s); }
-          // onSnapshot will fire again automatically once these writes land.
+          for(let s of seeds) { await dbAdd("masterData", s); masterDataList.push(s); }
         }
         populateMasterDropdowns();
-        initialLoadDone.masterData = true;
-        if (appBootstrapped) { scheduleRenderAll(); renderMasterTable(); } else { maybeBootstrapApp(); }
-      }, (error) => { console.error("masterData sync error:", error); showToast("Error connecting to Database."); });
+        auditLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        initLogin();
+        checkSLA();
+        
+        // Auto SLA check every 60 seconds
+        setInterval(checkSLA, 60000); 
+
+        renderAll();
+        renderUserTable();
+
+      } catch (error) {
+        console.error("Error loading data:", error);
+        showToast("Error connecting to Database.");
+      }
     }
 
-
     // ================== HELPER FUNCTIONS ==================
-    // Generates a ticket ID like "INC-2606-0001" using an atomic Firestore
-    // transaction-backed counter (one counter doc per prefix+year-month), so
-    // two users submitting tickets at the same moment can never collide on
-    // the same number — unlike scanning the locally-cached array for max().
-    async function generateId(prefix) {
+    function generateId(prefix, existingTickets) {
       const now = new Date();
       const yy = String(now.getFullYear()).slice(-2);
       const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const ymPrefix = `${prefix}-${yy}${mm}-`;
-      const counterRef = doc(db, "counters", `${prefix}-${yy}${mm}`);
-      const nextNum = await runTransaction(db, async (tx) => {
-        const snap = await tx.get(counterRef);
-        const current = snap.exists() ? (snap.data().value || 0) : 0;
-        const next = current + 1;
-        tx.set(counterRef, { value: next }, { merge: true });
-        return next;
-      });
+      const ymPrefix = `${prefix}-${yy}${mm}-`; 
+      const monthTickets = existingTickets.filter(t => t.id && t.id.startsWith(ymPrefix));
+      let nextNum = 1;
+      if (monthTickets.length > 0) {
+        const nums = monthTickets.map(t => {
+          const parts = t.id.split("-");
+          const val = parseInt(parts[parts.length - 1], 10);
+          return isNaN(val) ? 0 : val;
+        });
+        nextNum = Math.max(...nums) + 1;
+      }
       return `${ymPrefix}${String(nextNum).padStart(4, "0")}`;
     }
 
     function getUserById(id) { return systemUsers.find(u => u.id === id) || null; }
     function getUserName(id) { const u = getUserById(id); return u ? u.name : ""; }
-
-    // Escapes free-text values before they are injected into innerHTML, to
-    // prevent stored XSS from ticket titles, notes, names, etc.
-    const HTML_ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-    function esc(value) {
-      return String(value ?? "").replace(/[&<>"']/g, ch => HTML_ESCAPE_MAP[ch]);
-    }
-
+    
     function formatRequesterObo(requesterName, createdById) {
       if (!requesterName) return "-";
       const creatorName = getUserName(createdById);
       if (creatorName && creatorName.toLowerCase() !== requesterName.toLowerCase() && createdById !== "unknown" && createdById !== null) {
-        return `${esc(requesterName)} <span title="Opened on behalf by: ${esc(creatorName)}" style="font-size:10px; background:#f3e8ff; color:#4338ca; padding:1px 6px; border-radius:4px; border:1px solid #c7d2fe; margin-left:4px; display:inline-block; line-height:1;">🏷️ OBO</span>`;
+        return `${requesterName} <span title="Opened on behalf by: ${creatorName}" style="font-size:10px; background:#f3e8ff; color:#4338ca; padding:1px 6px; border-radius:4px; border:1px solid #c7d2fe; margin-left:4px; display:inline-block; line-height:1;">🏷️ OBO</span>`;
       }
-      return esc(requesterName);
+      return requesterName;
     }
 
     function formatPriority(p) {
@@ -2207,7 +2137,7 @@
       systemUsers.forEach((u, i) => {
         const tr = document.createElement("tr");
         const checked = u.isApprover ? "checked" : "";
-        tr.innerHTML = `<td>${esc(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.role)}</td>
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.role}</td>
         <td style="text-align:center;">
           <input type="checkbox" onchange="window.toggleApprover(${i}, this.checked)" ${checked} style="width:18px;height:18px; cursor:pointer;" />
         </td>`;
@@ -2321,11 +2251,7 @@
       const password = passwordInput.value; 
       const user = getUserById(id);
       if (!user) { alert("Please select a user."); return; }
-      if (!password) { alert("Please enter your password."); return; }
-      // Always compare against the stored password (falling back to "" if
-      // unset) so an account created without a password can't be logged
-      // into by leaving the password field blank.
-      if ((user.password || "") !== password) { alert("Incorrect password."); return; }
+      if (user.password && user.password !== password) { alert("Incorrect password."); return; }
       passwordInput.value = "";
       setCurrentUser(user); showToast(`Welcome, ${user.name}`);
     });
@@ -2356,35 +2282,23 @@
     window.approveTicket = async function(kind, id) {
       if (!confirm(`Are you sure you want to approve ticket ${id}?`)) return;
       const t = findTicket(kind, id); if (!t) return;
-      const snapshot = JSON.parse(JSON.stringify(t));
       t.status = "Open"; t.updatedAt = new Date().toISOString();
       if (!Array.isArray(t.notes)) t.notes = [];
       t.notes.push({ text: "✅ Approved", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
-      try {
-        await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
-        renderAll(); showToast(`Approved ticket ${t.id}`);
-      } catch (error) {
-        Object.keys(t).forEach(k => delete t[k]); Object.assign(t, snapshot);
-        console.error("approveTicket failed, rolled back:", error);
-      }
+      await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
+      renderAll(); showToast(`Approved ticket ${t.id}`);
     };
 
     window.rejectTicket = async function(kind, id) {
       const reason = prompt(`Please provide a reason for rejecting ticket ${id}:`);
       if (!reason || reason.trim() === "") { alert("⚠️ Required: You must provide a reason for rejection."); return; }
       const t = findTicket(kind, id); if (!t) return;
-      const snapshot = JSON.parse(JSON.stringify(t));
       t.status = "Cancelled"; t.updatedAt = new Date().toISOString();
       if (!Array.isArray(t.notes)) t.notes = [];
       t.notes.push({ text: `❌ Rejected\nReason: ${reason}`, createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
       if (t.sla && !t.sla.resolvedAt) { t.sla.resolvedAt = new Date().toISOString(); }
-      try {
-        await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
-        renderAll(); showToast(`Rejected ticket ${t.id}`);
-      } catch (error) {
-        Object.keys(t).forEach(k => delete t[k]); Object.assign(t, snapshot);
-        console.error("rejectTicket failed, rolled back:", error);
-      }
+      await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
+      renderAll(); showToast(`Rejected ticket ${t.id}`);
     };
 
    // ================== ASSIGNMENT ==================
@@ -2418,9 +2332,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image too large (Max ${Math.round(MAX_ATTACHMENT_SIZE_BYTES/1024)}KB per file)`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image size is too large (Max 150KB)`); return; }
         if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files`); return; }
-        if (getStagedAttachmentsTotalSize(incidentStagedAttachments) + file.size > MAX_TOTAL_ATTACHMENTS_BYTES) { showToast(`Total attachments would exceed ${Math.round(MAX_TOTAL_ATTACHMENTS_BYTES/1024)}KB limit for this ticket`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2434,7 +2347,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       incidentStagedList.innerHTML = "";
       incidentStagedAttachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${esc(a.name)}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${index})">X</button>`;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeIncidentStaged(${index})">X</button>`;
         incidentStagedList.appendChild(li);
       });
     }
@@ -2445,9 +2358,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     incidentFileInput.addEventListener("change", (e) => {
       const files = e.target.files; if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max ${Math.round(MAX_ATTACHMENT_SIZE_BYTES/1024)}KB per file)`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max 150KB)`); return; }
         if (incidentStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files per ticket`); return; }
-        if (getStagedAttachmentsTotalSize(incidentStagedAttachments) + file.size > MAX_TOTAL_ATTACHMENTS_BYTES) { showToast(`Total attachments would exceed ${Math.round(MAX_TOTAL_ATTACHMENTS_BYTES/1024)}KB limit for this ticket`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           incidentStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2469,9 +2381,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image too large (Max ${Math.round(MAX_ATTACHMENT_SIZE_BYTES/1024)}KB per file)`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image size is too large (Max 150KB)`); return; }
         if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files`); return; }
-        if (getStagedAttachmentsTotalSize(requestStagedAttachments) + file.size > MAX_TOTAL_ATTACHMENTS_BYTES) { showToast(`Total attachments would exceed ${Math.round(MAX_TOTAL_ATTACHMENTS_BYTES/1024)}KB limit for this ticket`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `pasted-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2485,7 +2396,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       requestStagedList.innerHTML = "";
       requestStagedAttachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${esc(a.name)}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${index})">X</button>`;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeRequestStaged(${index})">X</button>`;
         requestStagedList.appendChild(li);
       });
     }
@@ -2496,9 +2407,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     requestFileInput.addEventListener("change", (e) => {
       const files = e.target.files; if (!files || files.length === 0) return;
       Array.from(files).forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max ${Math.round(MAX_ATTACHMENT_SIZE_BYTES/1024)}KB per file)`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`File ${file.name} is too large (Max 150KB)`); return; }
         if (requestStagedAttachments.length >= MAX_ATTACHMENTS_PER_TICKET) { showToast(`You can attach up to ${MAX_ATTACHMENTS_PER_TICKET} files per ticket`); return; }
-        if (getStagedAttachmentsTotalSize(requestStagedAttachments) + file.size > MAX_TOTAL_ATTACHMENTS_BYTES) { showToast(`Total attachments would exceed ${Math.round(MAX_TOTAL_ATTACHMENTS_BYTES/1024)}KB limit for this ticket`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           requestStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: file.name, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2536,7 +2446,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const initialStatus = approver ? "Pending Approval" : "Open";
 
       const incident = {
-        id: await generateId("INC"),
+        id: generateId("INC", incidents),
         type: "Incident", requester, dept, phone, email, system, module, title,
         category, impact, priority, dueDate: due || null, approver, ccEmails, reference, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
@@ -2577,7 +2487,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const initialStatus = approver ? "Pending Approval" : "Open";
 
       const req = {
-        id: await generateId("REQ"),
+        id: generateId("REQ", requests),
         type: "Request", requester, dept, phone, email, system, module, title,
         requestType: type, category, impact, dueDate: due, approver, ccEmails, reference, remark, description,
         status: initialStatus, createdAt: now, updatedAt: now, assignedTo: null, notes: [], 
@@ -2629,7 +2539,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       else { badgePendingApprove.style.display = "none"; }
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
         const tr = document.createElement("tr"); const kind = t.type === "Incident" ? "incident" : "request";
-        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${esc(t.description)}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
+        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
         approveTasksBody.appendChild(tr);
       });
     }
@@ -2659,7 +2569,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       latestTableBody.innerHTML = "";
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${esc(t.description)}">${esc(t.title)}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
+          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
           latestTableBody.appendChild(tr);
         });
     }
@@ -2682,10 +2592,10 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
           // เพิ่ม <td>${formatDateOnly(i.dueDate)}</td> ไว้ต่อท้ายสุดก่อนปิดเครื่องหมายแบ็กทิก
        tr.innerHTML = `<td>${i.id}</td>
-                <td title="${esc(i.description)}">${esc(i.title)}</td>
-                <td>${esc(i.system)}</td>
+                <td title="${(i.description || "").replace(/"/g, "&quot;")}">${i.title}</td>
+                <td>${i.system}</td>
                 <td>${formatPriority(i.priority)}</td>
-                <td>${esc(getUserName(i.assignedTo)) || "-"}</td>
+                <td>${getUserName(i.assignedTo) || "-"}</td>
                 <td><span class="status-pill ${cls}">${i.status}</span></td>
                 <td>${slaLabel(i)}</td>
                 <td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td>
@@ -2700,7 +2610,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       requestTableBody.innerHTML = "";
       requests.filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
           const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
-          tr.innerHTML = `<td>${r.id}</td><td title="${esc(r.description)}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td>`;
+          tr.innerHTML = `<td>${r.id}</td><td title="${(r.description || "").replace(/"/g, "&quot;")}"><strong style="color:var(--banpu-primary);">${r.title}</strong></td><td>${r.system}</td><td>${formatPriority(r.priority)}</td><td>${r.requestType}</td><td>${getUserName(r.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td>`;
           requestTableBody.appendChild(tr);
         });
     }
@@ -2710,7 +2620,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
+          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
           myTicketsBody.appendChild(tr);
         });
     }
@@ -2721,7 +2631,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       adminTableBody.innerHTML = "";
       all.filter(t => !statusFilter || t.status === statusFilter).filter(t => filterByDateRange(t.createdAt, fromVal, toVal)).filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(t => !search || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(search)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated); const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-"; const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-"); const kind = t.type === "Incident" ? "incident" : "request";
-          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${esc(t.description)}">${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
+          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${(t.description || "").replace(/"/g, "&quot;")}">${t.title} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${getUserName(t.assignedTo) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
         });
       const adminSelectAllCb = document.getElementById("admin-select-all"); if (adminSelectAllCb) adminSelectAllCb.checked = false;
@@ -2731,7 +2641,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       auditTableBody.innerHTML = "";
       auditLogs.forEach(a => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${formatDateTime(a.time)}</td><td>${esc(a.userName)}</td><td>${esc(a.role)}</td><td>${esc(a.action)}</td><td>${esc(a.ticketId) || "-"}</td><td>${esc(a.message)}</td>`;
+        tr.innerHTML = `<td>${formatDateTime(a.time)}</td><td>${a.userName}</td><td>${a.role}</td><td>${a.action}</td><td>${a.ticketId || "-"}</td><td>${a.message}</td>`;
         auditTableBody.appendChild(tr);
       });
     }
@@ -2756,7 +2666,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           n.attachments.forEach(a => { attachHtml += `<img src="${a.dataUrl}" title="Click to view full size" style="max-height:80px; border-radius:4px; border:1px solid #d9e2f2; cursor:pointer;" onclick="window.viewImage(this.src)" />`; });
           attachHtml += `</div>`;
         }
-        li.innerHTML = `<div style="margin-bottom:4px;">${tag} <strong>${esc(n.authorName)}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${esc(n.text)}</div>${attachHtml}`;
+        li.innerHTML = `<div style="margin-bottom:4px;">${tag} <strong>${n.authorName}</strong> <span class="note-meta">${formatDateTime(n.createdAt)}</span></div><div style="line-height:1.4; word-break:break-word; white-space:pre-wrap;">${n.text}</div>${attachHtml}`;
         detailNotesList.appendChild(li);
       });
     }
@@ -2765,7 +2675,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       detailAttachmentsList.innerHTML = ""; if (!t.attachments || !t.attachments.length) return;
       t.attachments.forEach(a => {
         const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${esc(a.name)}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><a href="${a.dataUrl}" download="${esc(a.name)}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>`;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><a href="${a.dataUrl}" download="${a.name}" class="btn-secondary btn-small" style="text-decoration:none;">Load</a>`;
         detailAttachmentsList.appendChild(li);
       });
     }
@@ -2775,9 +2685,9 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       currentDetail = { kind, id };
       detailTitle.textContent = `${t.type} Detail`; detailSubtitle.textContent = `${t.id} • ${t.title}`;
       detailIdSpan.textContent = t.id; detailTypeSpan.textContent = t.type; detailSubjectInput.value = t.title; detailSystemInput.value = t.system || ""; detailModuleInput.value = t.module || ""; detailAssigneeSelect.value = t.assignedTo || ""; detailStatusSelect.value = t.status; detailPrioritySelect.value = t.priority || "P3 - Medium (24h)"; detailDueInput.value = t.dueDate ? t.dueDate.slice(0, 10) : "";
-      const reqName = t.requester || "-"; const deptName = t.dept ? ` / ${esc(t.dept)}` : ""; const creatorName = getUserName(t.createdBy); let oboText = "";
-      if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) { oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${esc(creatorName)}</strong></div>`; }
-      document.getElementById("detail-requester-dept").innerHTML = `<strong>${esc(reqName)}</strong>${deptName}<br/>${oboText}`;
+      const reqName = t.requester || "-"; const deptName = t.dept ? ` / ${t.dept}` : ""; const creatorName = getUserName(t.createdBy); let oboText = "";
+      if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) { oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${creatorName}</strong></div>`; }
+      document.getElementById("detail-requester-dept").innerHTML = `<strong>${reqName}</strong>${deptName}<br/>${oboText}`;
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
       const detailApproverSelect = document.getElementById("detail-approver-select");
       if (detailApproverSelect) detailApproverSelect.value = t.approver || "";  
@@ -2838,72 +2748,59 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
    detailSaveBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
       const t = findTicket(currentDetail.kind, currentDetail.id); if (!t) return;
-
-      // Snapshot before mutating, so we can roll back in-memory state if the
-      // Firestore write fails — otherwise the UI would keep showing changes
-      // that were never actually saved.
-      const snapshot = JSON.parse(JSON.stringify(t));
+      
       const oldStatus = t.status;
       const oldPriority = t.priority || "P3 - Medium (24h)"; 
       const oldApprover = t.approver || null; 
 
-      try {
-        t.title = detailSubjectInput.value.trim() || t.title; 
-        t.system = detailSystemInput.value.trim(); 
-        t.module = detailModuleInput.value.trim(); 
-        t.priority = detailPrioritySelect.value; 
-        t.dueDate = detailDueInput.value || null; 
-        t.description = detailDescriptionInput.value.trim();
-        
-        const newApprover = document.getElementById("detail-approver-select").value || null;
-        t.approver = newApprover;
+      t.title = detailSubjectInput.value.trim() || t.title; 
+      t.system = detailSystemInput.value.trim(); 
+      t.module = detailModuleInput.value.trim(); 
+      t.priority = detailPrioritySelect.value; 
+      t.dueDate = detailDueInput.value || null; 
+      t.description = detailDescriptionInput.value.trim();
+      
+      const newApprover = document.getElementById("detail-approver-select").value || null;
+      t.approver = newApprover;
 
-        if (newApprover && newApprover !== oldApprover) {
-          t.status = "Pending Approval";
-        } else {
-          t.status = detailStatusSelect.value; 
-        }
-        
-        if (t.priority !== oldPriority) {
-          t.sla = computeSlaForTicket(t.priority, t.createdAt);
-        }
-        
-        const newAssignee = detailAssigneeSelect.value || null;
-        let assigneeChanged = false; // เพิ่มตัวแปรเช็คการเปลี่ยนแปลงคนรับงาน
-        if (t.assignedTo !== newAssignee) { 
-          await assignTicket(t, newAssignee, true); 
-          assigneeChanged = true;
-        }
-        if (t.status === "Resolved" && oldStatus !== "Resolved") {
-          if(!Array.isArray(t.notes)) t.notes = [];
-          t.notes.push({ text: "✅ IT Support has resolved the issue.\nWaiting for requester to confirm and close the ticket.", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
-        }
-        if (t.sla) {
-          if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
-          if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
-        }
-        t.updatedAt = new Date().toISOString();
-        await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
-        
-        // ตรรกะเช็คการยิงอีเมล์ดราฟต์
-        const statusChanged = t.status !== oldStatus;
-        const notifyStatuses = ["Resolved", "Closed", "Cancelled"];
-        const isRequesterSelf = currentUser && t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase();
-        const skipSelfNotify = isRequesterSelf && ["Closed", "Cancelled"].includes(t.status);
-        if (newApprover && newApprover !== oldApprover) {
-          triggerEmailDraft(t);
-        } else if (assigneeChanged && newAssignee) {
-          sendAssignmentEmail(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
-        } else if (statusChanged && notifyStatuses.includes(t.status) && !skipSelfNotify) {
-          triggerStatusEmailDraft(t); // ถ้าเปลี่ยน status เป็น Resolved/Closed/Cancelled ให้เด้งหน้าต่างเมลแจ้งผู้เปิด Ticket (ยกเว้น requester ปิด/ยกเลิกเองไม่ต้องส่งเมลถึงตัวเอง)
-        }
-      } catch (error) {
-        // Roll back the in-memory ticket to match what's actually saved in
-        // Firestore (the dbUpdate/dbAdd helper already showed an error toast).
-        Object.keys(t).forEach(k => delete t[k]);
-        Object.assign(t, snapshot);
-        console.error("detail save failed, rolled back local state:", error);
-        renderDetailNotes(t); renderDetailAttachments(t);
+      if (newApprover && newApprover !== oldApprover) {
+        t.status = "Pending Approval";
+      } else {
+        t.status = detailStatusSelect.value; 
+      }
+      
+      if (t.priority !== oldPriority) {
+        t.sla = computeSlaForTicket(t.priority, t.createdAt);
+      }
+      
+      const newAssignee = detailAssigneeSelect.value || null;
+      let assigneeChanged = false; // เพิ่มตัวแปรเช็คการเปลี่ยนแปลงคนรับงาน
+      if (t.assignedTo !== newAssignee) { 
+        await assignTicket(t, newAssignee, true); 
+        assigneeChanged = true;
+      }
+      if (t.status === "Resolved" && oldStatus !== "Resolved") {
+        if(!Array.isArray(t.notes)) t.notes = [];
+        t.notes.push({ text: "✅ IT Support has resolved the issue.\nWaiting for requester to confirm and close the ticket.", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+      }
+      if (t.sla) {
+        if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
+        if ((t.status === "Closed" || t.status === "Cancelled") && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
+      }
+      t.updatedAt = new Date().toISOString();
+      await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
+      
+      // ตรรกะเช็คการยิงอีเมล์ดราฟต์
+      const statusChanged = t.status !== oldStatus;
+      const notifyStatuses = ["Resolved", "Closed", "Cancelled"];
+      const isRequesterSelf = currentUser && t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase();
+      const skipSelfNotify = isRequesterSelf && ["Closed", "Cancelled"].includes(t.status);
+      if (newApprover && newApprover !== oldApprover) {
+        triggerEmailDraft(t);
+      } else if (assigneeChanged && newAssignee) {
+        sendAssignmentEmail(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
+      } else if (statusChanged && notifyStatuses.includes(t.status) && !skipSelfNotify) {
+        triggerStatusEmailDraft(t); // ถ้าเปลี่ยน status เป็น Resolved/Closed/Cancelled ให้เด้งหน้าต่างเมลแจ้งผู้เปิด Ticket (ยกเว้น requester ปิด/ยกเลิกเองไม่ต้องส่งเมลถึงตัวเอง)
       }
     });
 
@@ -2913,9 +2810,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const images = []; for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) images.push(items[i].getAsFile()); }
       if (!images.length) return; 
       images.forEach(file => {
-        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image too large (Max ${Math.round(MAX_ATTACHMENT_SIZE_BYTES/1024)}KB per file)`); return; }
+        if (file.size > MAX_ATTACHMENT_SIZE_BYTES) { showToast(`Image size is too large (Max 150KB)`); return; }
         if (detailNoteStagedAttachments.length >= 3) { showToast(`You can attach up to 3 images per note.`); return; }
-        if (getStagedAttachmentsTotalSize(detailNoteStagedAttachments) + file.size > MAX_TOTAL_ATTACHMENTS_BYTES) { showToast(`Total attachments would exceed ${Math.round(MAX_TOTAL_ATTACHMENTS_BYTES/1024)}KB limit`); return; }
         const reader = new FileReader();
         reader.onload = (evt) => {
           detailNoteStagedAttachments.push({ id: `${Date.now()}-${Math.random()}`, name: `note-image-${Date.now()}.png`, type: file.type, size: file.size, dataUrl: evt.target.result });
@@ -2929,7 +2825,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       detailNoteStagedList.innerHTML = "";
       detailNoteStagedAttachments.forEach((a, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${esc(a.name)}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeDetailNoteStaged(${index})">X</button>`;
+        li.innerHTML = `<img src="${a.dataUrl}" class="attachment-preview" /><div style="flex:1;"><div><strong>${a.name}</strong></div><div class="note-meta">${(a.size / 1024).toFixed(1)} KB</div></div><button type="button" class="btn-danger btn-small" onclick="window.removeDetailNoteStaged(${index})">X</button>`;
         detailNoteStagedList.appendChild(li);
       });
     }
@@ -3007,46 +2903,32 @@ adminBulkApply.addEventListener("click", async () => {
   }
   // ------------------------------------
 
-  let successCount = 0; let failCount = 0;
   for (let sel of selected) {
-    const t = findTicket(sel.kind, sel.id);
+    const t = findTicket(sel.kind, sel.id); 
     if (!t) continue;
-
-    try {
-      if (assignId) await assignTicket(t, assignId);
-
-      if (action === "close") {
-        t.status = "Closed";
-        if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString();
-      }
-      if (action === "reopen") t.status = "Open";
-
-      if (action === "delete") {
-        await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId);
-        if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id);
-        else requests = requests.filter(r => r.id !== sel.id);
-        successCount++;
-        continue;
-      }
-
-      t.updatedAt = new Date().toISOString();
-      await updateTicket(sel.kind, t);
-      successCount++;
-    } catch (error) {
-      // dbAdd/dbUpdate/dbDelete already toasted the underlying error; here we
-      // just keep going so one failed ticket doesn't abort the whole batch.
-      console.error(`Bulk action failed for ${sel.id}:`, error);
-      failCount++;
+    
+    if (assignId) await assignTicket(t, assignId);
+    
+    if (action === "close") { 
+      t.status = "Closed"; 
+      if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = new Date().toISOString(); 
     }
+    if (action === "reopen") t.status = "Open";
+    
+    if (action === "delete") { 
+      await dbDelete(sel.kind === "incident" ? "incidents" : "requests", t.firebaseId); 
+      if (sel.kind === "incident") incidents = incidents.filter(i => i.id !== sel.id); 
+      else requests = requests.filter(r => r.id !== sel.id); 
+      continue; 
+    }
+    
+    t.updatedAt = new Date().toISOString(); 
+    await updateTicket(sel.kind, t);
   }
-
-  logAudit("BULK_ACTION", "N/A", `Executed bulk action: ${action} (${successCount} succeeded, ${failCount} failed)`);
-  renderAll();
-  if (failCount > 0) {
-    showToast(`⚠️ Bulk action: ${successCount} succeeded, ${failCount} failed. Check your connection and retry the failed ones.`);
-  } else {
-    showToast("Bulk action completed.");
-  }
+  
+  logAudit("BULK_ACTION", "N/A", `Executed bulk action: ${action}`); 
+  renderAll(); 
+  showToast("Bulk action completed.");
 });
 
     // ================== USER MANAGEMENT ==================
@@ -3059,7 +2941,7 @@ adminBulkApply.addEventListener("click", async () => {
         const approverDisplay = u.isApprover ? '<span style="color:blue; font-size:1.2em;">✅</span>' : '-';
         const requesterDisplay = u.isRequester !== false ? '<span style="color:purple; font-size:1.2em;">✅</span>' : '-';
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${esc(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.department) || '-'}</td><td>${esc(u.email)}</td><td>${esc(u.role)}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${esc(u.supervisorId) || '-'}</td><td><span class="masked-password" data-pw="${esc(u.password)}" style="cursor:pointer; letter-spacing:2px;" title="Click to reveal" onclick="window.togglePasswordCell(this)">••••••••</span></td>
+        tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.department || '-'}</td><td>${u.email}</td><td>${u.role}</td><td style="text-align:center;">${assignDisplay}</td><td style="text-align:center;">${approverDisplay}</td><td style="text-align:center;">${requesterDisplay}</td><td>${u.supervisorId || '-'}</td><td>${u.password}</td>
         <td>
           <button class="btn-small btn-secondary" onclick="window.editUser('${u.id}')">Edit</button> 
           <button class="btn-small btn-danger" onclick="window.deleteUser('${u.id}')">Delete</button>
@@ -3216,7 +3098,7 @@ adminBulkApply.addEventListener("click", async () => {
     // ปิดทุก section ให้หมดก่อนเริ่มใช้งาน
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById("dashboard-section").classList.add("active");
-    setupRealtimeListeners();
+    loadDataFromFirebase();
 // ================== USER IMPORT / EXPORT (EXCEL) ==================
     const btnExportUsers = document.getElementById("btn-export-users");
     const importUsersFile = document.getElementById("import-users-file");
@@ -3227,7 +3109,6 @@ adminBulkApply.addEventListener("click", async () => {
           alert("ไม่มีข้อมูลผู้ใช้งานสำหรับ Export");
           return;
         }
-        if (!confirm("⚠️ ไฟล์ Export นี้จะมีรหัสผ่าน (Password) ของผู้ใช้ทุกคนอยู่ในรูปแบบข้อความล้วน กรุณาเก็บไฟล์นี้อย่างปลอดภัยและอย่าส่งต่อโดยไม่จำเป็น\n\nยืนยันการ Export หรือไม่?")) return;
         
         const exportData = systemUsers.map(u => ({
           "User ID": u.id,
@@ -3381,7 +3262,7 @@ adminBulkApply.addEventListener("click", async () => {
       masterDataList.slice().sort((a,b) => a.type.localeCompare(b.type) || (a.parentSystem||"").localeCompare(b.parentSystem||"") || a.name.localeCompare(b.name)).forEach(m => {
         const tr = document.createElement("tr");
         const bCol = m.type === "System" ? "badge-primary" : m.type === "Module" ? "badge-amber" : m.type === "Category" ? "badge-green" : "badge";
-        tr.innerHTML = `<td><span class="badge ${bCol}">${esc(m.type)}</span></td><td>${esc(m.parentSystem) || "-"}</td><td><strong>${esc(m.name)}</strong></td><td style="text-align:center;"><button type="button" class="btn-danger btn-small" onclick="window.delMaster('${m.firebaseId}')">Delete</button></td>`;
+        tr.innerHTML = `<td><span class="badge ${bCol}">${m.type}</span></td><td>${m.parentSystem || "-"}</td><td><strong>${m.name}</strong></td><td style="text-align:center;"><button type="button" class="btn-danger btn-small" onclick="window.delMaster('${m.firebaseId}')">Delete</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -3612,10 +3493,6 @@ ITSM Portal Automated System`;
   const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoUrl;
 }
-    window.togglePasswordCell = function(span) {
-      const isMasked = span.textContent === "••••••••";
-      span.textContent = isMasked ? span.getAttribute("data-pw") : "••••••••";
-    };
     window.viewImage = function(dataUrl) {
       const newTab = window.open();
       if (newTab) {
