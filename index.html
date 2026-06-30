@@ -1545,8 +1545,17 @@
       </div>
       <div id="master-section" class="section">
         <div class="card">
-          <h2>Master Data Management</h2>
-          <small>Maintain master lists for System, Module, Category, and Request Type.</small>
+         <div class="flex-between">
+            <div>
+              <h2>Master Data Management</h2>
+              <small>Maintain master lists for System, Module, Category, and Request Type.</small>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" class="btn-secondary btn-small" id="btn-export-master">📥 Export Excel</button>
+              <label for="import-master-file" class="btn-secondary btn-small" style="cursor:pointer; margin:0;">📤 Import Excel</label>
+              <input type="file" id="import-master-file" accept=".xlsx, .xls" style="display:none;" />
+            </div>
+          </div>
           
           <form id="master-form" style="margin-top: 12px; background:#f9fafb; padding:12px; border-radius:10px; border:1px solid #d9e2f2;">
             <div class="form-row">
@@ -3307,6 +3316,90 @@ adminBulkApply.addEventListener("click", async () => {
       await dbDelete("masterData", fbId); masterDataList.splice(idx, 1);
       populateMasterDropdowns(); renderMasterTable(); showToast("Deleted Master Data.");
     };
+// ================== MASTER DATA IMPORT / EXPORT (EXCEL) ==================
+    const btnExportMaster = document.getElementById("btn-export-master");
+    const importMasterFile = document.getElementById("import-master-file");
+
+    if (btnExportMaster) {
+      btnExportMaster.addEventListener("click", () => {
+        if (masterDataList.length === 0) {
+          alert("ไม่มีข้อมูล Master Data สำหรับ Export");
+          return;
+        }
+        
+        const exportData = masterDataList.map(m => ({
+          "Type": m.type,
+          "Parent System": m.parentSystem || "",
+          "Name": m.name
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "MasterData");
+        XLSX.writeFile(workbook, "MasterData_Export.xlsx");
+      });
+    }
+
+    if (importMasterFile) {
+      importMasterFile.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          try {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: "binary" });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            let addedCount = 0;
+
+            for (let row of jsonData) {
+              const type = row["Type"]?.toString().trim();
+              const name = row["Name"]?.toString().trim();
+              const parentSystem = row["Parent System"]?.toString().trim() || null;
+
+              if (!type || !name) continue; 
+              if (type === "Module" && !parentSystem) continue; 
+
+              // ตรวจสอบว่ามีข้อมูลนี้ซ้ำในระบบอยู่แล้วหรือไม่
+              const isDuplicate = masterDataList.some(m => 
+                m.type === type && 
+                m.name.toLowerCase() === name.toLowerCase() && 
+                m.parentSystem === parentSystem
+              );
+
+              // ถ้ายังไม่มีถึงจะเพิ่มเข้าไป
+              if (!isDuplicate) {
+                const newItem = { type, parentSystem, name };
+                await dbAdd("masterData", newItem);
+                masterDataList.push(newItem);
+                addedCount++;
+              }
+            }
+
+            populateMasterDropdowns(); 
+            renderMasterTable(); 
+            
+            alert(`Import สำเร็จ!\nเพิ่ม Master Data ใหม่: ${addedCount} รายการ (ระบบได้ข้ามรายการที่มีอยู่แล้วเพื่อป้องกันข้อมูลซ้ำ)`);
+          } catch (error) {
+            console.error(error);
+            alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel ตรวจสอบฟอร์แมตให้ตรงกับไฟล์ที่ Export ออกมา");
+          } finally {
+            importMasterFile.value = ""; 
+          }
+        };
+        reader.readAsBinaryString(file);
+      });
+    }
+
+
+
+
+
+    
     function triggerEmailDraft(t) {
   if (!t.approver) return;
   const appUser = getUserById(t.approver);
