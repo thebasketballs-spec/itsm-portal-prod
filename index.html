@@ -1691,6 +1691,10 @@
 
           
           <div class="detail-row" style="margin-top:4px;">
+            <div class="detail-label">Reference</div>
+            <div class="detail-value" id="detail-reference"></div>
+          </div>
+          <div class="detail-row" style="margin-top:4px;">
             <div class="detail-label">Description</div>
           </div>
           <div class="detail-edit-field">
@@ -2779,6 +2783,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       if (creatorName && creatorName.toLowerCase() !== reqName.toLowerCase() && t.createdBy !== "unknown" && t.createdBy !== null) { oboText = `<div style="font-size:11px; color:#4338ca; background:#e0e7ff; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:4px;">🏷️ Opened on behalf by: <strong>${esc(creatorName)}</strong></div>`; }
       document.getElementById("detail-requester-dept").innerHTML = `<strong>${esc(reqName)}</strong>${deptName}<br/>${oboText}`;
       detailCreatedSpan.textContent = formatDateTime(t.createdAt);
+      const detailReferenceSpan = document.getElementById("detail-reference");
+      if (detailReferenceSpan) detailReferenceSpan.textContent = t.reference || "-";
       const detailApproverSelect = document.getElementById("detail-approver-select");
       if (detailApproverSelect) detailApproverSelect.value = t.approver || "";  
       const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
