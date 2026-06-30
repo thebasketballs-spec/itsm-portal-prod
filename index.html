@@ -1890,10 +1890,36 @@
     const kbSearch = document.getElementById("kb-search");
     const kbList = document.getElementById("kb-list");
     const KB_ENTRIES = [
-      { q: "TM1 login error invalid credential", a: "Ensure AD account is not locked and password is correct." },
-      { q: "BPC report is slow", a: "Try clearing cache or log out and log in again." },
-      { q: "Request new TM1 user", a: "Use the menu Service Request > Access Request and specify the required Role." },
-      { q: "SAP BPC cannot login", a: "Check if your VPN / FortiClient connection is active." }
+      // === หมวดหมู่ TM1 ===
+      { q: "TM1 login error invalid credential", a: "Ensure your AD (Windows) account is not locked and password is correct." },
+      { q: "Request new TM1 user", a: "Use the menu Service Request > Access Request and specify the required Role and Department." },
+      { q: "TM1 Excel add-in missing or disabled", a: "Go to Excel Options > Add-ins > Manage COM Add-ins, and check the box for 'IBM Cognos TM1'." },
+      { q: "TM1 Web showing blank page", a: "Try clearing your web browser cache (Ctrl+Shift+Delete) or use Google Chrome in Incognito mode." },
+
+      // === หมวดหมู่ BPC ===
+      { q: "BPC report is slow", a: "Try clearing cache or log out and log in again. Avoid running reports with too many blank columns/rows." },
+      { q: "SAP BPC cannot login", a: "Check if your VPN / FortiClient connection is active and stable." },
+      { q: "BPC EPM Add-in ribbon missing in Excel", a: "Go to Excel > File > Options > Add-ins > Disabled Items. Enable 'EPM add-in' if it's listed there." },
+
+      // === หมวดหมู่ SAP ===
+      { q: "SAP GUI shortcut missing from Desktop", a: "You can search for 'SAP Logon' in the Windows Start Menu. If not found, request IT to reinstall it." },
+      { q: "How to reset SAP password", a: "Please create a Service Request > Access Request > SAP, and select 'Password Reset' in the description." },
+      { q: "Cannot print from SAP", a: "Ensure your default Windows printer is correctly set. Try restarting the SAP GUI program." },
+
+      // === หมวดหมู่ Oracle ===
+      { q: "Oracle ERP slow performance at month-end", a: "During month-end closing, the system might experience heavy load. Please wait a few minutes and try again." },
+      { q: "Oracle account locked out", a: "Account will auto-unlock after 30 minutes. For immediate unlock, please submit an Incident." },
+
+      // === หมวดหมู่ Power BI ===
+      { q: "Power BI dataset refresh failed", a: "Check if the underlying data source (e.g., Excel on SharePoint) was renamed or deleted. If it still fails, submit an Incident." },
+      { q: "Cannot view Power BI dashboard", a: "Ensure you have been granted access to the Workspace. If you need access, submit an Access Request." },
+      { q: "Request Power BI Pro license", a: "Submit a Service Request > Access Request > Power BI, and make sure to attach your manager's approval email." },
+
+      // === หมวดหมู่ Network / ระบบพื้นฐาน (General IT) ===
+      { q: "VPN FortiClient disconnects frequently", a: "Check your home Wi-Fi stability. Try switching from Wi-Fi to a LAN cable for a more stable connection." },
+      { q: "Cannot access Finance Shared Drive", a: "Submit an Access Request. You must specify the exact folder path (e.g., //server/Finance/2026)." },
+      { q: "How to clear web browser cache", a: "Press Ctrl + Shift + Delete on your keyboard, select 'All time', and click 'Clear data'." },
+      { q: "Email not receiving or sending", a: "Check if your mailbox is full (Quota exceeded). If yes, please delete old emails or empty the 'Deleted Items' folder." }
     ];
 
     const exportIncBtn = document.getElementById("btn-export-inc");
