@@ -1738,8 +1738,6 @@
 </div><!-- /modal-backdrop -->
 <div id="toast-container">
   <script type="module">
-
-    
     // --- Import Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
@@ -1978,10 +1976,6 @@
     function maybeBootstrapApp() {
       if (appBootstrapped) return;
       if (!Object.values(initialLoadDone).every(Boolean)) return;
-      // --- วางไว้ตรงนี้ครับ (หลังจากเช็คว่าโหลดข้อมูลครบแล้ว) ---
-      await seedCounterIfNeeded("INC");
-      await seedCounterIfNeeded("REQ");
-      // ---------------------------------------------------
       appBootstrapped = true;
       initLogin();
       checkSLA();
@@ -2048,36 +2042,6 @@
     // transaction-backed counter (one counter doc per prefix+year-month), so
     // two users submitting tickets at the same moment can never collide on
     // the same number — unlike scanning the locally-cached array for max().
-async function seedCounterIfNeeded(prefix) {
-      const now = new Date();
-      const yy = String(now.getFullYear()).slice(-2);
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const counterId = `${prefix}-${yy}${mm}`;
-      const counterRef = doc(db, "counters", counterId);
-      
-      await runTransaction(db, async (tx) => {
-        const snap = await tx.get(counterRef);
-        if (snap.exists()) return null; 
-
-        const allTickets = [...incidents, ...requests];
-        let maxNum = 0;
-        
-        allTickets.forEach(t => {
-          if (t.id.startsWith(counterId)) {
-            const numPart = parseInt(t.id.split("-").pop(), 10);
-            if (!isNaN(numPart) && numPart > maxNum) maxNum = numPart;
-          }
-        });
-
-        tx.set(counterRef, { value: maxNum });
-        console.log(`Seeded ${counterId} with max value: ${maxNum}`);
-        return maxNum;
-      });
-    }
-
-
-
-    
     async function generateId(prefix) {
       const now = new Date();
       const yy = String(now.getFullYear()).slice(-2);
