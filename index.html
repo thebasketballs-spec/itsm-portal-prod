@@ -776,6 +776,15 @@
               <span class="badge badge-green" id="badge-sla-ok"></span>
               <span class="badge badge-amber" id="badge-sla-breach"></span>
             </small>
+            <div class="form-row" style="margin-top:10px; align-items:center;">
+              <div class="form-group" style="max-width:220px;">
+                <label>Filter Month *</label>
+                <input type="month" id="dashboard-month-filter" />
+              </div>
+              <div class="form-group" style="max-width:160px; align-self:flex-end;">
+                <button type="button" class="btn-secondary btn-small" id="dashboard-clear-month">All Time</button>
+              </div>
+            </div>
             <div style="display:flex; flex-direction:column; gap:12px;">
               <div>
                 <strong>Incident vs Request</strong>
@@ -1794,6 +1803,8 @@
     const detailDropzone = document.getElementById("detail-dropzone");
 
     const latestTableBody = document.getElementById("latest-table-body");
+    const dashboardMonthFilter = document.getElementById("dashboard-month-filter");
+    const dashboardClearMonth = document.getElementById("dashboard-clear-month");
     const badgeTotal = document.getElementById("badge-total");
     const badgeSlaOk = document.getElementById("badge-sla-ok");
     const badgeSlaBreach = document.getElementById("badge-sla-breach");
@@ -2545,7 +2556,18 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     }
 
     function renderDashboard() {
-      const incidentCount = incidents.length; const requestCount = requests.length; const total = incidentCount + requestCount; const all = [...incidents, ...requests];
+      if (dashboardMonthFilter && !dashboardMonthFilter.value && !dashboardMonthFilter.dataset.cleared) {
+        const now = new Date();
+        dashboardMonthFilter.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      }
+      const monthVal = dashboardMonthFilter ? dashboardMonthFilter.value : "";
+      const allRaw = [...incidents, ...requests];
+      const all = monthVal ? allRaw.filter(t => {
+        const dt = new Date(t.createdAt); if (isNaN(dt.getTime())) return false;
+        const ticketMonth = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+        return ticketMonth === monthVal;
+      }) : allRaw;
+      const incidentCount = all.filter(t => t.type === "Incident").length; const requestCount = all.filter(t => t.type === "Request").length; const total = incidentCount + requestCount;
       const slaOk = all.filter(t => t.sla && t.sla.resolvedAt && !t.sla.resolutionBreached).length; const slaBreach = all.filter(t => t.sla && (t.sla.resolutionBreached || t.sla.responseBreached)).length;
       badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`; badgeSlaOk.textContent = `SLA Met: ${slaOk}`; badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
       const statusOpen = all.filter(t => t.status === "Open").length; const statusInProgress = all.filter(t => t.status === "In Progress").length; const statusPending = all.filter(t => t.status === "Pending User").length; const statusClosed = all.filter(t => t.status === "Closed").length; const statusCancelled = all.filter(t => t.status === "Cancelled").length;
@@ -2562,6 +2584,11 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           latestTableBody.appendChild(tr);
         });
     }
+
+    if (dashboardMonthFilter) dashboardMonthFilter.addEventListener("input", renderDashboard);
+    if (dashboardClearMonth) dashboardClearMonth.addEventListener("click", () => {
+      dashboardMonthFilter.value = ""; dashboardMonthFilter.dataset.cleared = "1"; renderDashboard();
+    });
 
     function filterByDateRange(createdISO, fromVal, toVal) {
       const dt = new Date(createdISO); if (isNaN(dt.getTime())) return false;
