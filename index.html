@@ -1703,10 +1703,10 @@
             <div class="detail-label">Created At</div>
             <div class="detail-value" id="detail-created"></div>
            </div>
-                <div class="detail-row">
+                <div class="detail-row" id="detail-approver-row">
             <div class="detail-label">Approver</div>
           </div>
-          <div class="detail-edit-field">
+          <div class="detail-edit-field" id="detail-approver-editfield">
             <select id="detail-approver-select">
               <option value="">-- No Approver --</option>
             </select>
@@ -1724,6 +1724,7 @@
             <textarea id="detail-description-input"></textarea>
           </div>
           <button class="btn btn-small" id="detail-save-btn" style="margin-top:6px;">Save Changes</button>
+          <button class="btn btn-small" id="detail-convert-btn" style="margin-top:6px; margin-left:6px; display:none; background:#6d28d9;">🔁 Convert</button>
         </div>
         
         <div class="detail-block">
@@ -2217,12 +2218,10 @@
     }
 
    function populateApproverDropdowns() {
-      const incidentApp = document.getElementById("incident-approver");
       const requestApp = document.getElementById("request-approver");
       const approvers = systemUsers.filter(u => u.isApprover === true);
       let html = '<option value="">-- Select Approver --</option>';
       approvers.forEach(u => { html += `<option value="${u.id}">${u.name} (${u.role})</option>`; });
-      if(incidentApp) incidentApp.innerHTML = html;
       if(requestApp) requestApp.innerHTML = html;
       
       const detailApp = document.getElementById("detail-approver-select");
@@ -2831,6 +2830,22 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       if (detailReferenceSpan) detailReferenceSpan.textContent = t.reference || "-";
       const detailApproverSelect = document.getElementById("detail-approver-select");
       if (detailApproverSelect) detailApproverSelect.value = t.approver || "";  
+      // Approver is only applicable to Service Requests. Hide the field for Incidents.
+      const _isIncidentDetail = (t.type === "Incident");
+      const _apprRow = document.getElementById("detail-approver-row");
+      const _apprEdit = document.getElementById("detail-approver-editfield");
+      if (_apprRow) _apprRow.style.display = _isIncidentDetail ? "none" : "";
+      if (_apprEdit) _apprEdit.style.display = _isIncidentDetail ? "none" : "";
+      // Convert Incident <-> Request is available to Admin only.
+      const _convBtn = document.getElementById("detail-convert-btn");
+      if (_convBtn) {
+        if (currentUser && currentUser.role === "admin") {
+          _convBtn.style.display = "inline-block";
+          _convBtn.textContent = (kind === "incident") ? "🔁 Convert to Request" : "🔁 Convert to Incident";
+        } else {
+          _convBtn.style.display = "none";
+        }
+      }
       const resConfirmBanner = document.getElementById("detail-resolved-confirm-banner");
       const isOwner = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()) || currentUser.role === "admin");
       
@@ -2885,6 +2900,61 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
 
     function closeDetail() { detailBackdrop.classList.remove("active"); currentDetail = null; }
     detailCloseBtn.addEventListener("click", closeDetail);
+
+    // ===== Convert Incident <-> Request (Admin only) =====
+    // Carries over ONLY fields whose names are identical on both ticket types.
+    async function convertTicket() {
+      if (!currentDetail) return;
+      if (!currentUser || currentUser.role !== "admin") { alert("Only Admin can convert tickets."); return; }
+      const srcKind = currentDetail.kind;
+      const t = findTicket(srcKind, currentDetail.id);
+      if (!t) return;
+      const toRequest = (srcKind === "incident");
+      const targetType = toRequest ? "Request" : "Incident";
+      const targetCol  = toRequest ? "requests" : "incidents";
+      const srcCol     = toRequest ? "incidents" : "requests";
+      const newPrefix  = toRequest ? "REQ" : "INC";
+      if (!confirm(`Convert ${t.id} (${t.type}) to a ${targetType}?\nOnly fields with the same name will be carried over.`)) return;
+
+      // Fields common to both Incident and Request (identical field names)
+      const commonFields = ["requester","dept","phone","email","system","module","title",
+        "category","impact","dueDate","approver","ccEmails","reference","description",
+        "status","createdAt","assignedTo","notes","attachments","sla","createdBy"];
+      try {
+        const now = new Date().toISOString();
+        const newId = await generateId(newPrefix);
+        const converted = { id: newId, type: targetType };
+        commonFields.forEach(f => { if (t[f] !== undefined) converted[f] = t[f]; });
+        converted.updatedAt = now;
+        if (toRequest) {
+          // Request-only required fields (Incident has no equivalent) -> defaults
+          converted.requestType = t.requestType || "Others";
+          converted.remark = t.remark || "";
+          // 'priority' exists only on Incidents and is intentionally dropped.
+        } else {
+          // Incident-only required field (Request has no equivalent) -> default
+          converted.priority = t.priority || "P3 - Medium (24h)";
+          // 'requestType' / 'remark' exist only on Requests and are intentionally dropped.
+        }
+        await dbAdd(targetCol, converted);       // create in target collection
+        await dbDelete(srcCol, t.firebaseId);    // remove original from source collection
+        // reflect immediately in local arrays (onSnapshot will reconcile shortly)
+        if (toRequest) {
+          requests.push(converted);
+          const i = incidents.findIndex(x => x.id === t.id); if (i >= 0) incidents.splice(i, 1);
+        } else {
+          incidents.push(converted);
+          const i = requests.findIndex(x => x.id === t.id); if (i >= 0) requests.splice(i, 1);
+        }
+        logAudit("CONVERT_TICKET", newId, `Converted ${t.id} (${t.type}) -> ${newId} (${targetType})`);
+        renderAll(); closeDetail(); showToast(`Converted ${t.id} -> ${newId} (${targetType})`);
+      } catch (err) {
+        console.error("convertTicket failed:", err);
+        showToast("❌ Convert failed. Please try again.");
+      }
+    }
+    const detailConvertBtn = document.getElementById("detail-convert-btn");
+    if (detailConvertBtn) detailConvertBtn.addEventListener("click", convertTicket);
     
    detailSaveBtn.addEventListener("click", async () => {
       if (!currentDetail) return;
@@ -2906,7 +2976,10 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         t.dueDate = detailDueInput.value || null; 
         t.description = detailDescriptionInput.value.trim();
         
-        const newApprover = document.getElementById("detail-approver-select").value || null;
+        // Incidents do not use the approval workflow; keep their approver untouched.
+        const newApprover = (t.type === "Incident")
+          ? (t.approver || null)
+          : (document.getElementById("detail-approver-select").value || null);
         t.approver = newApprover;
 
         if (newApprover && newApprover !== oldApprover) {
