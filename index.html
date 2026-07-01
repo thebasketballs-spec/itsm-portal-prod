@@ -2943,11 +2943,12 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         const skipSelfNotify = isRequesterSelf && ["Closed", "Cancelled"].includes(t.status);
         if (newApprover && newApprover !== oldApprover) {
           triggerEmailDraft(t);
-        } else if (assigneeChanged && newAssignee) {
-          sendAssignmentEmail(t); // If a new assignee was selected, pop up an email draft to that IT staff member
         } else if (statusChanged && notifyStatuses.includes(t.status) && !skipSelfNotify) {
           triggerStatusEmailDraft(t); // If status changes to Resolved/Closed/Cancelled, pop up an email draft notifying the ticket requester (unless the requester closed/cancelled it themselves, no need to email themselves)
         }
+        // Note: the assignment-notification email is already sent inside
+        // assignTicket() itself, so it is intentionally NOT re-triggered here
+        // (doing so previously caused two Outlook Web tabs to pop open).
       } catch (error) {
         // Roll back the in-memory ticket to match what's actually saved in
         // Firestore (the dbUpdate/dbAdd helper already showed an error toast).
@@ -3621,7 +3622,24 @@ adminBulkApply.addEventListener("click", async () => {
         let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         if (cc) mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
         window.location.href = mailtoUrl;
+        return;
       }
+
+      // Edge (with Outlook installed as a PWA/app) sometimes hands the
+      // outlook.office.com link off to the Outlook app and leaves the freshly
+      // opened browser tab sitting empty at about:blank — which looks like
+      // two windows popped up. After a short delay, check whether our tab
+      // is still blank and, if so, close it automatically.
+      setTimeout(() => {
+        try {
+          if (!newTab.closed && newTab.location.href === "about:blank") {
+            newTab.close();
+          }
+        } catch (e) {
+          // Reading .location threw because the tab already navigated to
+          // outlook.office.com (cross-origin) — it loaded normally, leave it.
+        }
+      }, 1200);
     }
 
     function triggerEmailDraft(t) {
