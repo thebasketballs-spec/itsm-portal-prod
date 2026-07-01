@@ -3668,24 +3668,41 @@ adminBulkApply.addEventListener("click", async () => {
 
             const keyOf = (m) => `${m.type}||${m.parentSystem || ""}||${(m.name || "").toLowerCase()}`;
             const fileKeys = new Set(parsedMaster.map(keyOf));
-            const masterToDelete = masterDataList.filter(m => !fileKeys.has(keyOf(m)));
 
-            if (!confirm(`This import makes Master Data match the file EXACTLY.\n\n- Rows in file: ${parsedMaster.length}\n- Items to be DELETED (not in file): ${masterToDelete.length}\n\nContinue?`)) {
+            // Reconcile stored Master Data to match the file EXACTLY:
+            //  - delete items whose key is not in the file
+            //  - collapse duplicates: keep only ONE stored item per key, delete the rest
+            const seenKeys = new Set();
+            const masterToDelete = [];
+            for (const m of masterDataList) {
+              const k = keyOf(m);
+              if (!fileKeys.has(k) || seenKeys.has(k)) {
+                masterToDelete.push(m);   // not in file, OR a duplicate copy of a kept key
+              } else {
+                seenKeys.add(k);          // keep the first occurrence of this key
+              }
+            }
+            // Items present in the file but not yet stored (deduped by key).
+            const addKeys = new Set();
+            const masterToAdd = [];
+            for (const pm of parsedMaster) {
+              const k = keyOf(pm);
+              if (!seenKeys.has(k) && !addKeys.has(k)) { addKeys.add(k); masterToAdd.push(pm); }
+            }
+
+            if (!confirm(`This import makes Master Data match the file EXACTLY.\n\n- Rows in file: ${parsedMaster.length}\n- Items to ADD: ${masterToAdd.length}\n- Items to DELETE (not in file / duplicates): ${masterToDelete.length}\n\nContinue?`)) {
               return;
             }
 
-            // Add items that are in the file but not yet stored.
-            for (let pm of parsedMaster) {
-              const exists = masterDataList.some(m => keyOf(m) === keyOf(pm));
-              if (!exists) {
-                const newItem = { type: pm.type, parentSystem: pm.parentSystem, name: pm.name };
-                await dbAdd("masterData", newItem);
-                masterDataList.push(newItem);
-                addedCount++;
-              }
+            // Add missing items.
+            for (let pm of masterToAdd) {
+              const newItem = { type: pm.type, parentSystem: pm.parentSystem, name: pm.name };
+              await dbAdd("masterData", newItem);
+              masterDataList.push(newItem);
+              addedCount++;
             }
 
-            // Delete stored items that are NOT in the file (file is the single source of truth).
+            // Delete items not in the file, plus duplicate copies (file is the single source of truth).
             for (let m of masterToDelete) {
               await dbDelete("masterData", m.firebaseId);
               const idx = masterDataList.findIndex(x => x.firebaseId === m.firebaseId);
