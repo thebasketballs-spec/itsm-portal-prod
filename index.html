@@ -2047,8 +2047,11 @@
 
       onSnapshot(collection(db, "masterData"), async (snap) => {
         masterDataList = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        if (!masterDataSeeded && masterDataList.length === 0) {
-          masterDataSeeded = true;
+        // Seed default Master Data ONLY on the very first load of an empty DB.
+        // Using initialLoadDone (not masterDataSeeded) prevents re-seeding the
+        // defaults later when an Excel import legitimately removes items and the
+        // list becomes empty — otherwise deleted items would "reappear".
+        if (!initialLoadDone.masterData && masterDataList.length === 0) {
           const seeds = [
             {type:"System",name:"Oracle"},{type:"System",name:"SAP"},{type:"System",name:"TM1"},{type:"System",name:"BPC"},{type:"System",name:"Power BI"},{type:"System",name:"Network"},{type:"System",name:"Others"},
             {type:"Category",name:"Application"},{type:"Category",name:"Infrastructure"},{type:"Category",name:"Network"},{type:"Category",name:"Access / Permission"},{type:"Category",name:"Reporting / Dashboard"},{type:"Category",name:"Others"},
