@@ -776,7 +776,6 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -3743,143 +3742,8 @@ ITSM Portal Automated System`;
   
   window.location.href = mailtoUrl;
 }
-    // ================== OUTLOOK 365 (MICROSOFT GRAPH) EMAIL DRAFTS ==================
-    // Creates a REAL draft in the signed-in user's Outlook mailbox with an HTML body,
-    // so the portal link renders as an actual clickable hyperlink (not plain text).
-    // Falls back automatically to the old mailto: behaviour if this isn't configured
-    // yet, or if sign-in/Graph fails for any reason, so the app never breaks.
-    //
-    // SETUP REQUIRED (one-time, by your Microsoft 365 / Azure AD admin):
-    //   1. Go to Azure Portal > Azure Active Directory > App registrations > New registration.
-    //   2. Name it e.g. "ITSM Portal Outlook Integration". Supported account types:
-    //      "Accounts in this organizational directory only" (single tenant) is fine.
-    //   3. Under Authentication > Add a platform > Single-page application (SPA), add this
-    //      exact redirect URI: https://thebasketballs-spec.github.io/itsm-portal-prod/
-    //   4. Under API permissions > Add a permission > Microsoft Graph > Delegated
-    //      permissions > add "Mail.ReadWrite" > Grant admin consent.
-    //   5. Copy the "Application (client) ID" and "Directory (tenant) ID" from the
-    //      Overview page and paste them into OUTLOOK_365_CONFIG below.
-    const OUTLOOK_365_CONFIG = {
-      clientId: "PASTE-YOUR-AZURE-APP-CLIENT-ID-HERE",
-      tenantId: "PASTE-YOUR-AZURE-TENANT-ID-HERE" // or "common" for multi-tenant
-    };
-
-    let msalInstance = null;
-    function getMsalInstance() {
-      if (msalInstance) return msalInstance;
-      if (typeof msal === "undefined") return null;
-      if (OUTLOOK_365_CONFIG.clientId.startsWith("PASTE-")) return null; // not configured yet
-      try {
-        msalInstance = new msal.PublicClientApplication({
-          auth: {
-            clientId: OUTLOOK_365_CONFIG.clientId,
-            authority: `https://login.microsoftonline.com/${OUTLOOK_365_CONFIG.tenantId}`,
-            redirectUri: window.location.origin + window.location.pathname
-          },
-          cache: { cacheLocation: "sessionStorage" }
-        });
-        return msalInstance;
-      } catch (e) {
-        console.warn("MSAL init failed:", e);
-        return null;
-      }
-    }
-
-    async function getGraphAccessToken() {
-      const instance = getMsalInstance();
-      if (!instance) throw new Error("Outlook 365 integration is not configured yet.");
-      const scopes = ["Mail.ReadWrite"];
-      let account = instance.getAllAccounts()[0];
-      if (!account) {
-        const loginResp = await instance.loginPopup({ scopes });
-        account = loginResp.account;
-      }
-      try {
-        const tokenResp = await instance.acquireTokenSilent({ scopes, account });
-        return tokenResp.accessToken;
-      } catch (e) {
-        const tokenResp = await instance.acquireTokenPopup({ scopes, account });
-        return tokenResp.accessToken;
-      }
-    }
-
-    // Creates a draft with a real clickable link in Outlook (Microsoft Graph),
-    // then opens it in Outlook on the web for the user to review and click Send.
-    async function createOutlookDraftAndOpen(toEmails, ccEmails, subject, htmlBody) {
-      const token = await getGraphAccessToken();
-      const message = {
-        subject: subject,
-        body: { contentType: "HTML", content: htmlBody },
-        toRecipients: toEmails.filter(Boolean).map(addr => ({ emailAddress: { address: addr.trim() } })),
-        ccRecipients: (ccEmails || []).filter(Boolean).map(addr => ({ emailAddress: { address: addr.trim() } }))
-      };
-      const resp = await fetch("https://graph.microsoft.com/v1.0/me/messages", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(message)
-      });
-      if (!resp.ok) {
-        const errText = await resp.text().catch(() => "");
-        throw new Error(`Microsoft Graph error ${resp.status}: ${errText}`);
-      }
-      const data = await resp.json();
-      const owaUrl = `https://outlook.office.com/mail/deeplink/compose?itemid=${encodeURIComponent(data.id)}&exvsurl=1`;
-      window.open(owaUrl, "_blank");
-    }
-
-    function openMailtoFallback(to, cc, subject, plainBody) {
-      let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(plainBody)}`;
-      if (cc) mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
-      window.location.href = mailtoUrl;
-    }
-
-    function isOutlook365Configured() {
-      return typeof msal !== "undefined" && !OUTLOOK_365_CONFIG.clientId.startsWith("PASTE-");
-    }
-
-    // Opens Outlook on the web with the compose window pre-filled. Needs NO Azure
-    // app registration and NO admin approval — it's just a normal link to
-    // outlook.office.com. Works as long as the person is already signed in to
-    // Outlook on the web in their browser (true for basically every M365 user).
-    // A trailing blank line right after the URL makes Outlook's own auto-linker
-    // turn it into a real clickable link once the draft opens / is sent.
-    function openOutlookWebCompose(to, cc, subject, plainBody) {
-      try {
-        const toStr = Array.isArray(to) ? to.join(",") : to;
-        let url = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(toStr)}`;
-        if (cc) url += `&cc=${encodeURIComponent(cc)}`;
-        url += `&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(plainBody)}`;
-        const win = window.open(url, "_blank");
-        return !!win; // false/null if the browser blocked the pop-up
-      } catch (e) {
-        return false;
-      }
-    }
-
-    // Three tiers, best available option used automatically, no manual choice needed:
-    //  1) Outlook 365 via Microsoft Graph — real HTML link, needs one-time Admin setup
-    //     (OUTLOOK_365_CONFIG below). Skipped entirely until an admin configures it.
-    //  2) Outlook on the web compose link — auto-linked URL, needs ZERO admin setup,
-    //     just requires the person to already be signed in to Outlook on the web.
-    //  3) Plain mailto: — always works everywhere as the final safety net.
-    async function draftEmail(to, cc, subject, htmlBody, plainBody) {
-      if (isOutlook365Configured()) {
-        try {
-          await createOutlookDraftAndOpen(Array.isArray(to) ? to : [to], cc ? cc.split(",") : [], subject, htmlBody);
-          return;
-        } catch (err) {
-          console.warn("Outlook 365 (Graph) draft failed, trying Outlook on the web:", err);
-        }
-      }
-      if (openOutlookWebCompose(to, cc, subject, plainBody)) return;
-      openMailtoFallback(Array.isArray(to) ? to.join(",") : to, cc, subject, plainBody);
-    }
-
     // Function to draft a notification email when a ticket is assigned to IT Support
-async function sendAssignmentEmail(t) {
+function sendAssignmentEmail(t) {
   if (!t.assignedTo) return;
   const staffUser = getUserById(t.assignedTo);
   if (!staffUser || !staffUser.email) return;
@@ -3888,8 +3752,9 @@ async function sendAssignmentEmail(t) {
   const to = staffUser.email;
   const cc = t.ccEmails || "";
   const subject = `[ITSM Ticket Assigned] Ticket ${t.id}: ${t.title}`;
-
-  const plainBody = `Dear ${staffUser.name},
+  
+  // Add the portal link into the email body here
+  const body = `Dear ${staffUser.name},
 
 A new ticket has been assigned to you.
 
@@ -3906,22 +3771,14 @@ ${portalUrl}
 Best regards,
 ITSM Portal Automated System`;
 
-  const htmlBody = `<p>Dear ${esc(staffUser.name)},</p>
-<p>A new ticket has been assigned to you.</p>
-<p><strong>Ticket Details:</strong><br>
-- Ticket ID: ${esc(t.id)}<br>
-- Type: ${esc(t.type)}<br>
-- System: ${esc(t.system)}<br>
-- Subject: ${esc(t.title)}<br>
-- Requester: ${esc(t.requester)}</p>
-<p>Please log in to the Finance System Service Portal to process this ticket:<br>
-<a href="${portalUrl}">${portalUrl}</a></p>
-<p>Best regards,<br>ITSM Portal Automated System</p>`;
-
-  await draftEmail(to, cc, subject, htmlBody, plainBody);
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  window.location.href = mailtoUrl;
 }
     // Function to draft an email notifying the assigned IT staff when the requester re-opens a resolved ticket
-async function triggerReopenEmailDraft(t, reason) {
+function triggerReopenEmailDraft(t, reason) {
   const staffUser = t.assignedTo ? getUserById(t.assignedTo) : null;
   if (!staffUser || !staffUser.email) return;
 
@@ -3930,7 +3787,7 @@ async function triggerReopenEmailDraft(t, reason) {
   const cc = t.ccEmails || "";
   const subject = `[ITSM Ticket Re-opened] Ticket ${t.id}: ${t.title}`;
 
-  const plainBody = `Dear ${staffUser.name},
+  const body = `Dear ${staffUser.name},
 
 The requester has re-opened ticket ${t.id} because the issue has not been fully resolved.
 
@@ -3948,23 +3805,14 @@ ${portalUrl}
 Best regards,
 ITSM Portal Automated System`;
 
-  const htmlBody = `<p>Dear ${esc(staffUser.name)},</p>
-<p>The requester has re-opened ticket ${esc(t.id)} because the issue has not been fully resolved.</p>
-<p><strong>Ticket Details:</strong><br>
-- Ticket ID: ${esc(t.id)}<br>
-- Type: ${esc(t.type)}<br>
-- System: ${esc(t.system)}<br>
-- Subject: ${esc(t.title)}<br>
-- Requester: ${esc(t.requester)}<br>
-- Reason for re-opening: ${esc(reason)}</p>
-<p>Please log in to the Finance System Service Portal to continue investigating this ticket:<br>
-<a href="${portalUrl}">${portalUrl}</a></p>
-<p>Best regards,<br>ITSM Portal Automated System</p>`;
-
-  await draftEmail(to, cc, subject, htmlBody, plainBody);
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  window.location.href = mailtoUrl;
 }
     // Function to draft an email notifying the ticket requester when status changes to Resolved / Closed / Cancelled
-async function triggerStatusEmailDraft(t) {
+function triggerStatusEmailDraft(t) {
   if (!t.email) return;
 
   const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
@@ -3979,7 +3827,7 @@ async function triggerStatusEmailDraft(t) {
   };
   const statusMsg = statusMessages[t.status] || `status has been updated to "${t.status}".`;
 
-  const plainBody = `Dear ${t.requester},
+  const body = `Dear ${t.requester},
 
 Your ${t.type} ticket ${statusMsg}
 
@@ -3995,21 +3843,14 @@ ${portalUrl}
 Best regards,
 ITSM Portal Automated System`;
 
-  const htmlBody = `<p>Dear ${esc(t.requester)},</p>
-<p>Your ${esc(t.type)} ticket ${esc(statusMsg)}</p>
-<p><strong>Ticket Details:</strong><br>
-- Ticket ID: ${esc(t.id)}<br>
-- System: ${esc(t.system)}<br>
-- Subject: ${esc(t.title)}<br>
-- Status: ${esc(t.status)}</p>
-<p>Please log in to the Finance System Service Portal for more details:<br>
-<a href="${portalUrl}">${portalUrl}</a></p>
-<p>Best regards,<br>ITSM Portal Automated System</p>`;
-
-  await draftEmail(to, cc, subject, htmlBody, plainBody);
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  window.location.href = mailtoUrl;
 }
     // Function to draft an email notifying all Admins when a new Incident is submitted
-async function triggerIncidentAdminEmailDraft(t) {
+function triggerIncidentAdminEmailDraft(t) {
   const adminEmails = systemUsers.filter(u => u.role === "admin" && u.email).map(u => u.email);
   if (adminEmails.length === 0) return;
 
@@ -4017,7 +3858,7 @@ async function triggerIncidentAdminEmailDraft(t) {
   const to = adminEmails.join(",");
   const subject = `[ITSM New Incident] Ticket ${t.id}: ${t.title}`;
 
-  const plainBody = `Dear Admin,
+  const body = `Dear Admin,
 
 A new Incident has been submitted and requires attention.
 
@@ -4034,19 +3875,8 @@ ${portalUrl}
 Best regards,
 ITSM Portal Automated System`;
 
-  const htmlBody = `<p>Dear Admin,</p>
-<p>A new Incident has been submitted and requires attention.</p>
-<p><strong>Ticket Details:</strong><br>
-- Ticket ID: ${esc(t.id)}<br>
-- System: ${esc(t.system)}<br>
-- Subject: ${esc(t.title)}<br>
-- Priority: ${esc(t.priority)}<br>
-- Requester: ${esc(t.requester)}</p>
-<p>Please log in to the Finance System Service Portal to review and assign this ticket:<br>
-<a href="${portalUrl}">${portalUrl}</a></p>
-<p>Best regards,<br>ITSM Portal Automated System</p>`;
-
-  await draftEmail(adminEmails, "", subject, htmlBody, plainBody);
+  const mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoUrl;
 }
     window.togglePasswordCell = function(span) {
       const isMasked = span.textContent === "••••••••";
