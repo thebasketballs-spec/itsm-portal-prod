@@ -379,6 +379,33 @@
     tr:last-child td {
       border-bottom: none;
     }
+    th.sortable-th {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      padding-right: 16px;
+      transition: background 0.12s;
+    }
+    th.sortable-th:hover {
+      background: #e5e9ff;
+    }
+    th.sortable-th::after {
+      content: "\21C5";
+      position: absolute;
+      right: 5px;
+      font-size: 9px;
+      opacity: 0.35;
+    }
+    th.sortable-th.sort-asc::after {
+      content: "\25B2";
+      opacity: 0.9;
+      color: var(--banpu-primary);
+    }
+    th.sortable-th.sort-desc::after {
+      content: "\25BC";
+      opacity: 0.9;
+      color: var(--banpu-primary);
+    }
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -3719,6 +3746,95 @@ ITSM Portal Automated System`;
         alert("Pop-up blocked. Please allow pop-ups for this site.");
       }
     };
+
+    // ================== CLICK-TO-SORT TABLE COLUMNS ==================
+    // Tap any column header to sort that table by that column (tap again to reverse).
+    // Works generically on every data table, and automatically re-applies the
+    // chosen sort whenever the table's rows are re-rendered (filters, search,
+    // real-time updates, tab switches, etc.).
+    (function () {
+      const tableSortState = {}; // tbodyId -> { colIndex, dir }
+
+      function sortTableRows(tbody, colIndex, dir) {
+        const rows = Array.from(tbody.children).filter((r) => r.tagName === "TR");
+        if (rows.length < 2) return;
+        const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+        const numRe = /^-?[\d,]+(\.\d+)?$/;
+        const dateRe = /^\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|^\d{4}-\d{2}-\d{2}/;
+        rows.sort((a, b) => {
+          const aCell = a.children[colIndex];
+          const bCell = b.children[colIndex];
+          if (!aCell || !bCell) return 0;
+          const aText = aCell.textContent.trim();
+          const bText = bCell.textContent.trim();
+          if (aText === "" && bText === "") return 0;
+          if (aText === "") return 1;
+          if (bText === "") return -1;
+          if (numRe.test(aText) && numRe.test(bText)) {
+            const cmp = parseFloat(aText.replace(/,/g, "")) - parseFloat(bText.replace(/,/g, ""));
+            return dir === "asc" ? cmp : -cmp;
+          }
+          if (dateRe.test(aText) && dateRe.test(bText)) {
+            const aDate = Date.parse(aText);
+            const bDate = Date.parse(bText);
+            if (!isNaN(aDate) && !isNaN(bDate)) {
+              return dir === "asc" ? aDate - bDate : bDate - aDate;
+            }
+          }
+          const cmp = collator.compare(aText, bText);
+          return dir === "asc" ? cmp : -cmp;
+        });
+        rows.forEach((r) => tbody.appendChild(r));
+      }
+
+      function applySort(tbody, observer, colIndex, dir) {
+        observer.disconnect();
+        sortTableRows(tbody, colIndex, dir);
+        observer.observe(tbody, { childList: true });
+      }
+
+      function updateSortIndicators(ths, activeIndex, dir) {
+        ths.forEach((th, i) => {
+          th.classList.remove("sort-asc", "sort-desc");
+          if (i === activeIndex) th.classList.add(dir === "asc" ? "sort-asc" : "sort-desc");
+        });
+      }
+
+      function initColumnSort() {
+        document.querySelectorAll("table").forEach((table) => {
+          const thead = table.querySelector("thead");
+          const tbody = table.querySelector("tbody");
+          if (!thead || !tbody || !tbody.id) return;
+          const ths = Array.from(thead.querySelectorAll("th"));
+
+          const observer = new MutationObserver(() => {
+            const state = tableSortState[tbody.id];
+            if (state) applySort(tbody, observer, state.colIndex, state.dir);
+          });
+          observer.observe(tbody, { childList: true });
+
+          ths.forEach((th, colIndex) => {
+            const label = th.textContent.trim();
+            // Skip columns that aren't meaningful to sort (checkboxes, Action buttons, blank headers)
+            if (th.querySelector("input") || label === "" || label.toLowerCase() === "action") return;
+            th.classList.add("sortable-th");
+            th.addEventListener("click", () => {
+              const state = tableSortState[tbody.id];
+              const dir = state && state.colIndex === colIndex && state.dir === "asc" ? "desc" : "asc";
+              tableSortState[tbody.id] = { colIndex, dir };
+              updateSortIndicators(ths, colIndex, dir);
+              applySort(tbody, observer, colIndex, dir);
+            });
+          });
+        });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initColumnSort);
+      } else {
+        initColumnSort();
+      }
+    })();
   </script>
 </body>
 </html>
