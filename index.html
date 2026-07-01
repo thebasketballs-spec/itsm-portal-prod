@@ -718,6 +718,59 @@
       color: #92400e;
       line-height: 1.4;
     }
+
+    /* ================== LANGUAGE TOGGLE (EN / TH) ================== */
+    #lang-toggle {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      z-index: 99999;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid var(--banpu-border);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    }
+    #lang-toggle button {
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: transparent;
+      color: var(--banpu-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    #lang-toggle button.lang-active {
+      background: linear-gradient(135deg, var(--banpu-primary), var(--banpu-accent));
+      color: #ffffff;
+    }
+    #lang-toggle button:hover:not(.lang-active) {
+      background: #eef2ff;
+      color: var(--banpu-primary);
+    }
+    /* Hide Google Translate's injected banner, iframe, and highlighting so the
+       page keeps its own look while translation still runs underneath. */
+    body {
+      top: 0 !important;
+    }
+    .goog-te-banner-frame,
+    .skiptranslate > iframe {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+    }
+    #google_translate_element {
+      display: none !important;
+    }
+    .goog-text-highlight {
+      background: none !important;
+      box-shadow: none !important;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </style>
@@ -730,6 +783,70 @@
   
 </head>
 <body>
+  <!-- ================== LANGUAGE TOGGLE (EN / TH) ================== -->
+  <div id="lang-toggle">
+    <button type="button" id="lang-btn-en" class="lang-active" onclick="setAppLanguage('en')">EN</button>
+    <button type="button" id="lang-btn-th" onclick="setAppLanguage('th')">ไทย</button>
+  </div>
+  <script>
+    // Reflect saved language preference on the buttons immediately (before
+    // Google Translate finishes loading) so the UI doesn't flicker.
+    (function () {
+      var saved = localStorage.getItem('appLang');
+      if (saved === 'th') {
+        document.getElementById('lang-btn-en').classList.remove('lang-active');
+        document.getElementById('lang-btn-th').classList.add('lang-active');
+      }
+    })();
+  </script>
+  <div id="google_translate_element"></div>
+  <script>
+    // ================== EN / TH TRANSLATION ENGINE ==================
+    // Uses Google Website Translator under the hood so the ENTIRE app
+    // (including tables, dynamically-rendered ticket data, modals, etc.)
+    // gets translated, not just a fixed set of labels.
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        { pageLanguage: 'en', includedLanguages: 'en,th', autoDisplay: false },
+        'google_translate_element'
+      );
+      // Re-apply whatever language the user last picked (if any) once the
+      // widget has finished initializing.
+      var saved = localStorage.getItem('appLang');
+      if (saved === 'th') {
+        setTimeout(function () { setAppLanguage('th', true); }, 300);
+      }
+    }
+
+    function findGoogleCombo(callback, attemptsLeft) {
+      attemptsLeft = attemptsLeft === undefined ? 40 : attemptsLeft;
+      var combo = document.querySelector('select.goog-te-combo');
+      if (combo) { callback(combo); return; }
+      if (attemptsLeft <= 0) return;
+      setTimeout(function () { findGoogleCombo(callback, attemptsLeft - 1); }, 250);
+    }
+
+    window.setAppLanguage = function (lang, skipButtonUpdate) {
+      localStorage.setItem('appLang', lang);
+      if (!skipButtonUpdate) {
+        document.getElementById('lang-btn-en').classList.toggle('lang-active', lang === 'en');
+        document.getElementById('lang-btn-th').classList.toggle('lang-active', lang === 'th');
+      }
+      findGoogleCombo(function (combo) {
+        if (lang === 'en') {
+          // Google Translate's combo has no real "en" option once translated;
+          // selecting the original entry (empty value) reverts the page.
+          combo.value = '';
+          combo.dispatchEvent(new Event('change'));
+        } else {
+          combo.value = 'th';
+          combo.dispatchEvent(new Event('change'));
+        }
+      });
+    };
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <div id="login-root">
     <div class="login-card">
       <h1>Service GU RU</h1>
