@@ -2852,6 +2852,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           t.status = "In Progress"; t.updatedAt = new Date().toISOString(); if(!Array.isArray(t.notes)) t.notes = [];
           t.notes.push({ text: `❌ Requester rejected closing (Re-opened)\nReason: ${rsn}`, createdAt: new Date().toISOString(), visibility:"public", authorId: currentUser.id, authorName: currentUser.name });
           await updateTicket(kind, t); logAudit("REOPEN", t.id, "Requester re-opened resolved ticket"); renderAll(); closeDetail(); showToast("Ticket sent back to IT for investigation.");
+          triggerReopenEmailDraft(t, rsn);
         };
    } else if(resConfirmBanner) { resConfirmBanner.style.display = "none"; }
       
@@ -3648,6 +3649,40 @@ Ticket Details:
 - Requester: ${t.requester}
 
 Please log in to the Finance System Service Portal to process this ticket:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
+
+  let mailtoUrl = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) {
+    mailtoUrl += `&cc=${encodeURIComponent(cc)}`;
+  }
+  window.location.href = mailtoUrl;
+}
+    // Function to draft an email notifying the assigned IT staff when the requester re-opens a resolved ticket
+function triggerReopenEmailDraft(t, reason) {
+  const staffUser = t.assignedTo ? getUserById(t.assignedTo) : null;
+  if (!staffUser || !staffUser.email) return;
+
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
+  const to = staffUser.email;
+  const cc = t.ccEmails || "";
+  const subject = `[ITSM Ticket Re-opened] Ticket ${t.id}: ${t.title}`;
+
+  const body = `Dear ${staffUser.name},
+
+The requester has re-opened ticket ${t.id} because the issue has not been fully resolved.
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- Type: ${t.type}
+- System: ${t.system}
+- Subject: ${t.title}
+- Requester: ${t.requester}
+- Reason for re-opening: ${reason}
+
+Please log in to the Finance System Service Portal to continue investigating this ticket:
 ${portalUrl}
 
 Best regards,
