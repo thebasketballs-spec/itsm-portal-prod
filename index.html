@@ -6,13 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --banpu-primary: #2a2681;
-      --banpu-primary-dark: #1d1a5e;
-      --banpu-accent: #2fbf8f;
-      --banpu-bg: #f4f6fb;
+      --banpu-primary: #482f92;      /* Banpu deep purple */
+      --banpu-primary-dark: #34216e;
+      --banpu-accent: #00aeef;       /* Banpu cyan */
+      --banpu-accent-soft: #eef6fb;
+      --banpu-bg: #f5f4fc;
       --banpu-card-bg: #ffffff;
-      --banpu-border: #d9e2f2;
-      --banpu-text: #111827;
+      --banpu-border: #e6e2f5;       /* lavender-tinted */
+      --banpu-text: #1b1630;
       --banpu-muted: #6b7280;
     }
     * {
@@ -277,6 +278,11 @@
       grid-template-columns: 1.1fr 1.4fr;
       gap: 14px;
     }
+    /* Allow grid columns to shrink so wide tables scroll inside their own
+       container instead of forcing the whole page to overflow horizontally
+       (which left the sticky header not covering the full width). */
+    .grid > * { min-width: 0; }
+    .card { min-width: 0; }
     @media (max-width: 980px) {
       .grid {
         grid-template-columns: 1fr;
@@ -352,6 +358,7 @@
     .table-container {
       margin-top: 8px;
       overflow-x: auto;
+      max-width: 100%;
     }
     table {
       width: 100%;
@@ -719,6 +726,127 @@
       line-height: 1.4;
     }
 
+    /* ==========================================================
+       MODERN BANPU THEME REFRESH (brand: #482F92 purple + #00AEEF cyan)
+       CSS-only polish layer — overrides base styles via cascade order.
+       ========================================================== */
+    body{
+      background: linear-gradient(160deg,#f4f1ff 0%, #eef7fb 100%) fixed;
+    }
+    .app-container{
+      border-radius: 22px;
+      border: 1px solid var(--banpu-border);
+      box-shadow: 0 24px 60px rgba(72,47,146,.14);
+    }
+    /* Brand gradient wordmark for main headings */
+    h1, .login-card h1{
+      background: linear-gradient(90deg,var(--banpu-primary),var(--banpu-accent));
+      -webkit-background-clip: text; background-clip: text;
+      color: transparent; -webkit-text-fill-color: transparent;
+    }
+    /* Frosted sticky header */
+    .sticky-header-container{
+      background: rgba(255,255,255,.9);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--banpu-border);
+    }
+    /* Tabs: pill + brand gradient when active */
+    .nav-tab{ border-radius: 10px; color:#4b4763; font-weight:500; }
+    .nav-tab:hover{ background:#f1ecfc; }
+    .nav-tab.active{
+      color:#fff;
+      background: linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent));
+      border-bottom-color: transparent;
+      box-shadow: 0 8px 18px rgba(72,47,146,.28);
+    }
+    .nav-tab.active .badge{ background:#fff !important; color:var(--banpu-primary) !important; }
+    /* Buttons */
+    .btn{ box-shadow: 0 8px 20px rgba(72,47,146,.26); }
+    .btn-secondary{ background:#f2effb; color:var(--banpu-primary); border:1px solid var(--banpu-border); box-shadow:none; }
+    .btn-secondary:hover{ background:#e8e1fb; }
+    #login-btn{ box-shadow: 0 14px 26px rgba(72,47,146,.42); }
+    /* Cards */
+    .card{
+      background:#fbfaff;
+      border:1px solid var(--banpu-border);
+      border-radius:16px;
+      box-shadow: 0 2px 12px rgba(72,47,146,.05);
+    }
+    .card h2{ color:var(--banpu-primary); }
+    .login-card{ border-radius:20px; box-shadow:0 22px 55px rgba(72,47,146,.20); }
+    /* Inputs: brand focus ring */
+    input:focus, select:focus, textarea:focus{
+      border-color: var(--banpu-accent) !important;
+      box-shadow: 0 0 0 3px rgba(0,174,239,.16) !important;
+      background:#fff;
+    }
+    /* Pills / badges */
+    .user-pill{ background:#f2effb; border:1px solid var(--banpu-border); color:var(--banpu-primary); }
+    .role-badge{ background: linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent)); }
+    /* Tables: soft rounded, zebra rows, brand header, row hover */
+    .table-container{ border:1px solid var(--banpu-border); border-radius:14px; }
+    table{ border:none; }
+    thead{ background: linear-gradient(180deg,#f3efff,#ece6fb); }
+    thead th{ color:var(--banpu-primary); font-weight:600; letter-spacing:.01em; }
+    th, td{ border-bottom:1px solid #efeafb; }
+    tbody tr{ transition: background .12s; }
+    tbody tr:nth-child(even){ background:#faf9ff; }
+    tbody tr:hover{ background:#f1ecfc; }
+    /* Login accent bar */
+    #login-btn{ background: linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent)); }
+    /* Rounder form controls (pill for single-line, soft-rounded for textareas)
+       so nothing looks boxy next to the pill buttons */
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"],
+    input[type="number"], input[type="search"], select{
+      border-radius: 999px !important;
+    }
+    textarea{ border-radius: 16px !important; }
+    /* Modern rounded checkboxes (brand gradient when checked) */
+    input[type="checkbox"]{
+      -webkit-appearance:none; appearance:none;
+      width:18px; height:18px; border-radius:6px;
+      border:1.5px solid var(--banpu-border); background:#fff;
+      cursor:pointer; position:relative; vertical-align:middle;
+      flex-shrink:0; transition:border-color .15s, background .15s, box-shadow .15s;
+    }
+    input[type="checkbox"]:hover{ border-color:var(--banpu-accent); }
+    input[type="checkbox"]:checked{
+      background:linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent));
+      border-color:transparent;
+    }
+    input[type="checkbox"]:checked::after{
+      content:""; position:absolute; left:5px; top:1px;
+      width:5px; height:10px; border:solid #fff; border-width:0 2px 2px 0;
+      transform:rotate(45deg);
+    }
+    input[type="checkbox"]:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,174,239,.22); }
+    /* Radios: brand-tinted */
+    input[type="radio"]{
+      -webkit-appearance:none; appearance:none;
+      width:18px; height:18px; border-radius:999px;
+      border:1.5px solid var(--banpu-border); background:#fff;
+      cursor:pointer; position:relative; vertical-align:middle;
+      flex-shrink:0; transition:border-color .15s, box-shadow .15s;
+    }
+    input[type="radio"]:hover{ border-color:var(--banpu-accent); }
+    input[type="radio"]:checked{ border-color:var(--banpu-primary); }
+    input[type="radio"]:checked::after{
+      content:""; position:absolute; left:50%; top:50%; width:10px; height:10px;
+      border-radius:999px; transform:translate(-50%,-50%);
+      background:linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent));
+    }
+    input[type="radio"]:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,174,239,.22); }
+    /* Dashboard nested-doughnut custom legend */
+    .chart-legend{ display:flex; flex-direction:column; gap:5px; margin-top:10px; font-size:11px; color:#4b4763; }
+    .chart-legend .legend-group{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; }
+    .chart-legend .legend-title{ font-weight:600; color:var(--banpu-primary); }
+    .chart-legend .legend-item{ display:inline-flex; align-items:center; gap:5px; }
+    .chart-legend .legend-item i{ width:11px; height:11px; border-radius:3px; display:inline-block; flex-shrink:0; }
+    /* any remaining small buttons/labels styled as buttons stay fully rounded */
+    button, .btn, .btn-small, .btn-secondary, .btn-danger, label.btn-secondary{
+      border-radius: 999px;
+    }
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </style>
@@ -755,7 +883,7 @@
       <div class="sticky-header-container">
         <div class="top-bar">
           <div>
-            <h1>Service GU RU (Finance System Service Portal – Incident & Request</h1>
+            <h1>Service GU RU (Finance System Service Portal – Incident & Request)</h1>
            <div class="subtitle">
               Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Firebase Integration).
            </div>
@@ -817,8 +945,9 @@
             </div>
             <div style="display:flex; flex-direction:column; gap:12px;">
               <div>
-                <strong>Incident vs Request</strong>
-                <canvas id="typeChart" height="130"></canvas>
+                <strong>Incident vs Request (by Status)</strong>
+                <canvas id="typeChart" height="180"></canvas>
+                <div id="typeChartLegend" class="chart-legend"></div>
               </div>
               <div>
                 <strong>Tickets by Status</strong>
@@ -2679,12 +2808,74 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const slaOk = all.filter(t => t.sla && t.sla.resolvedAt && !t.sla.resolutionBreached).length; const slaBreach = all.filter(t => t.sla && (t.sla.resolutionBreached || t.sla.responseBreached)).length;
       badgeTotal.textContent = `Total: ${total} (Inc: ${incidentCount}, Req: ${requestCount})`; badgeSlaOk.textContent = `SLA Met: ${slaOk}`; badgeSlaBreach.textContent = `SLA Breach: ${slaBreach}`;
       const statusOpen = all.filter(t => t.status === "Open").length; const statusInProgress = all.filter(t => t.status === "In Progress").length; const statusPending = all.filter(t => t.status === "Pending User").length; const statusClosed = all.filter(t => t.status === "Closed").length; const statusCancelled = all.filter(t => t.status === "Cancelled").length;
+      // Nested doughnut: INNER ring = Incident vs Request, OUTER ring = status breakdown within each type.
+      const STATUS_ORDER = ["Pending Approval","Open","In Progress","Resolved","Pending User","Closed","Cancelled"];
+      const STATUS_COLORS = { "Pending Approval":"#a78bfa","Open":"#60a5fa","In Progress":"#f59e0b","Resolved":"#34d399","Pending User":"#f472b6","Closed":"#9ca3af","Cancelled":"#ef4444" };
+      const TYPE_COLORS = { Incident:"#482f92", Request:"#00aeef" };
+      // include any status present that is not in the default order (so the rings always sum to the total and stay aligned)
+      const presentStatuses = [...new Set(all.map(t => t.status))];
+      const orderedStatuses = STATUS_ORDER.filter(st => presentStatuses.includes(st))
+        .concat(presentStatuses.filter(st => !STATUS_ORDER.includes(st)));
+      const outerData = [], outerColors = [], outerLabels = [];
+      ["Incident","Request"].forEach(tp => {
+        orderedStatuses.forEach(st => {
+          const c = all.filter(t => t.type === tp && t.status === st).length;
+          if (c > 0) { outerData.push(c); outerColors.push(STATUS_COLORS[st] || "#c4b5fd"); outerLabels.push(`${tp} \u00b7 ${st}`); }
+        });
+      });
       const typeCtx = document.getElementById("typeChart").getContext("2d");
       if (typeChart) typeChart.destroy();
-      typeChart = new Chart(typeCtx, { type: "doughnut", data: { labels: ["Incident", "Request"], datasets: [{ data: [incidentCount, requestCount] }] }, options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" } });
+      typeChart = new Chart(typeCtx, {
+        type: "doughnut",
+        data: {
+          datasets: [
+            { data: [incidentCount, requestCount], backgroundColor: [TYPE_COLORS.Incident, TYPE_COLORS.Request], borderColor: "#fff", borderWidth: 2, _labels: ["Incident","Request"], weight: 0.55 },
+            { data: outerData, backgroundColor: outerColors, borderColor: "#fff", borderWidth: 2, _labels: outerLabels, weight: 1 }
+          ]
+        },
+        options: {
+          cutout: "35%",
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => { const arr = ctx.dataset._labels || []; const l = arr[ctx.dataIndex] != null ? arr[ctx.dataIndex] : (ctx.label || ""); return `${l}: ${ctx.parsed}`; } } }
+          }
+        }
+      });
+      const legendEl = document.getElementById("typeChartLegend");
+      if (legendEl) {
+        const usedStatuses = orderedStatuses.filter(st => all.some(t => t.status === st));
+        legendEl.innerHTML =
+          `<div class="legend-group"><span class="legend-title">Type:</span>` +
+          `<span class="legend-item"><i style="background:${TYPE_COLORS.Incident}"></i>Incident (inner)</span>` +
+          `<span class="legend-item"><i style="background:${TYPE_COLORS.Request}"></i>Request (inner)</span></div>` +
+          `<div class="legend-group"><span class="legend-title">Status:</span>` +
+          usedStatuses.map(st => `<span class="legend-item"><i style="background:${STATUS_COLORS[st] || '#c4b5fd'}"></i>${st}</span>`).join("") +
+          `</div>`;
+      }
       const statusCtx = document.getElementById("statusChart").getContext("2d");
       if (statusChart) statusChart.destroy();
-      statusChart = new Chart(statusCtx, { type: "bar", data: { labels: ["Open", "In Progress", "Pending User", "Closed", "Cancelled"], datasets: [{ label: "Count", data: [statusOpen, statusInProgress, statusPending, statusClosed, statusCancelled] }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, precision: 0 } } } });
+      // Stacked bars: ONE bar per status, split by colour into Incident (bottom) + Request (top),
+      // so each bar's height = total for that status. Always show ALL statuses.
+      const barStatuses = STATUS_ORDER;
+      const incBar = barStatuses.map(st => all.filter(t => t.type === "Incident" && t.status === st).length);
+      const reqBar = barStatuses.map(st => all.filter(t => t.type === "Request"  && t.status === st).length);
+      statusChart = new Chart(statusCtx, {
+        type: "bar",
+        data: { labels: barStatuses, datasets: [
+          { label: "Incident", data: incBar, backgroundColor: TYPE_COLORS.Incident, borderRadius: 4, maxBarThickness: 42 },
+          { label: "Request",  data: reqBar, backgroundColor: TYPE_COLORS.Request,  borderRadius: 4, maxBarThickness: 42 }
+        ] },
+        options: {
+          plugins: {
+            legend: { display: true, position: "bottom" },
+            tooltip: { callbacks: { footer: (items) => "Total: " + items.reduce((a, b) => a + (b.parsed.y || 0), 0) } }
+          },
+          scales: {
+            x: { stacked: true, ticks: { autoSkip: false, font: { size: 10 } } },
+            y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
       latestTableBody.innerHTML = "";
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
