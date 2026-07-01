@@ -3590,6 +3590,11 @@ adminBulkApply.addEventListener("click", async () => {
     // Opens a new email draft directly in Outlook Web (OWA) instead of relying
     // on the system's default mailto: handler. Falls back to mailto: if the
     // OWA tab is blocked by a pop-up blocker.
+    //
+    // Guard against the same draft firing twice in quick succession (e.g. a
+    // save/submit handler that ends up bound more than once on a re-rendered
+    // modal), which would otherwise pop open two identical OWA tabs.
+    let _lastOwaCompose = { url: "", time: 0 };
     function openOutlookWebCompose(to, subject, body, cc) {
       const params = new URLSearchParams();
       if (to) params.set('to', to);
@@ -3597,6 +3602,14 @@ adminBulkApply.addEventListener("click", async () => {
       if (subject) params.set('subject', subject);
       if (body) params.set('body', body);
       const owaUrl = `https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
+
+      const now = Date.now();
+      if (_lastOwaCompose.url === owaUrl && (now - _lastOwaCompose.time) < 1500) {
+        // Same draft was just opened a moment ago — skip the duplicate.
+        return;
+      }
+      _lastOwaCompose = { url: owaUrl, time: now };
+
       const newTab = window.open(owaUrl, '_blank');
       if (!newTab) {
         // Pop-up blocked — fall back to the default mail client.
