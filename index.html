@@ -3280,7 +3280,7 @@ adminBulkApply.addEventListener("click", async () => {
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("This User ID is already in use."); return; }
         const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password , supervisorId, isSupervisor };
-        await dbAdd("users", newUser); systemUsers.push(newUser); alert("User added successfully!"); userForm.reset();
+        await dbAdd("users", newUser); alert("User added successfully!"); userForm.reset();
       }
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     });
@@ -3502,7 +3502,6 @@ adminBulkApply.addEventListener("click", async () => {
               } else {
                 const newUser = { id: pu.id, name: pu.name, department: pu.department, email: pu.email, role: pu.role, assignTo: pu.assignTo, isApprover: pu.isApprover, isRequester: pu.isRequester, isSupervisor: pu.isSupervisor, password: pu.password, supervisorId: pu.supervisorId };
                 await dbAdd("users", newUser);
-                systemUsers.push(newUser);
                 addedCount++;
               }
             }
@@ -3510,8 +3509,6 @@ adminBulkApply.addEventListener("click", async () => {
             // Delete stored users that are NOT in the file (file is the single source of truth).
             for (let u of usersToDelete) {
               await dbDelete("users", u.firebaseId);
-              const idx = systemUsers.findIndex(x => x.firebaseId === u.firebaseId);
-              if (idx > -1) systemUsers.splice(idx, 1);
               logAudit("DELETE_USER", u.id, `Deleted user via import sync: ${u.name}`);
               deletedCount++;
             }
@@ -3585,7 +3582,7 @@ adminBulkApply.addEventListener("click", async () => {
         }
 
         const item = { type, parentSystem, name };
-        await dbAdd("masterData", item); masterDataList.push(item);
+        await dbAdd("masterData", item);
         masterForm.reset(); masterParentGrp.style.display = "none";
         populateMasterDropdowns(); renderMasterTable(); showToast(`Added Master: ${name}`);
       });
@@ -3698,15 +3695,12 @@ adminBulkApply.addEventListener("click", async () => {
             for (let pm of masterToAdd) {
               const newItem = { type: pm.type, parentSystem: pm.parentSystem, name: pm.name };
               await dbAdd("masterData", newItem);
-              masterDataList.push(newItem);
               addedCount++;
             }
 
             // Delete items not in the file, plus duplicate copies (file is the single source of truth).
             for (let m of masterToDelete) {
               await dbDelete("masterData", m.firebaseId);
-              const idx = masterDataList.findIndex(x => x.firebaseId === m.firebaseId);
-              if (idx > -1) masterDataList.splice(idx, 1);
               deletedCount++;
             }
 
