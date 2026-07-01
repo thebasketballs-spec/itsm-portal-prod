@@ -3451,7 +3451,10 @@ adminBulkApply.addEventListener("click", async () => {
 
             let addedCount = 0;
             let updatedCount = 0;
+            let deletedCount = 0;
 
+            // Parse & validate every row first so we can mirror the file exactly.
+            const parsedUsers = [];
             for (let row of jsonData) {
               const id = row["User ID"]?.toString().trim();
               const name = row["Name"]?.toString().trim();
@@ -3460,36 +3463,61 @@ adminBulkApply.addEventListener("click", async () => {
               const department = row["Department"]?.toString().trim() || "";
               const password = row["Password"]?.toString().trim() || "12345";
               const supervisorId = row["Supervisor ID"]?.toString().trim() || "";
-              
-              if (!id || !name || !email || !role) continue; 
-
+              if (!id || !name || !email || !role) continue;
               const assignTo = row["Is IT Support"]?.toString().trim().toLowerCase() === "yes";
               const isApprover = row["Is Approver"]?.toString().trim().toLowerCase() === "yes";
               const isRequester = row["Is Requester"]?.toString().trim().toLowerCase() !== "no";
               const isSupervisor = row["Is Supervisor"]?.toString().trim().toLowerCase() === "yes";
+              parsedUsers.push({ id, name, email, role, department, password, supervisorId, assignTo, isApprover, isRequester, isSupervisor });
+            }
 
-              const existingUserIndex = systemUsers.findIndex(u => u.id === id);
-              
+            // Safety: never wipe everything from an empty / wrong-format file.
+            if (parsedUsers.length === 0) {
+              alert("No valid user rows were found in the file. Import cancelled (nothing was changed).");
+              return;
+            }
+
+            const fileIds = new Set(parsedUsers.map(u => u.id));
+            // Users to delete = stored users not present in the file (keep own account to avoid self-lockout).
+            const usersToDelete = systemUsers.filter(u => !fileIds.has(u.id) && !(currentUser && u.id === currentUser.id));
+            const protectedSelf = systemUsers.some(u => !fileIds.has(u.id) && currentUser && u.id === currentUser.id);
+
+            if (!confirm(`This import makes the User list match the file EXACTLY.\n\n- Rows in file: ${parsedUsers.length}\n- Users to be DELETED (not in file): ${usersToDelete.length}\n\nContinue?`)) {
+              return;
+            }
+
+            // Upsert every row from the file.
+            for (let pu of parsedUsers) {
+              const existingUserIndex = systemUsers.findIndex(u => u.id === pu.id);
               if (existingUserIndex > -1) {
                 const u = systemUsers[existingUserIndex];
-                u.name = name; u.email = email; u.department = department; 
-                u.role = role; u.password = password; u.supervisorId = supervisorId;
-                u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.isSupervisor = isSupervisor;
+                u.name = pu.name; u.email = pu.email; u.department = pu.department;
+                u.role = pu.role; u.password = pu.password; u.supervisorId = pu.supervisorId;
+                u.assignTo = pu.assignTo; u.isApprover = pu.isApprover; u.isRequester = pu.isRequester; u.isSupervisor = pu.isSupervisor;
                 await dbUpdate("users", u.firebaseId, u);
                 updatedCount++;
               } else {
-                const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, isSupervisor, password, supervisorId };
+                const newUser = { id: pu.id, name: pu.name, department: pu.department, email: pu.email, role: pu.role, assignTo: pu.assignTo, isApprover: pu.isApprover, isRequester: pu.isRequester, isSupervisor: pu.isSupervisor, password: pu.password, supervisorId: pu.supervisorId };
                 await dbAdd("users", newUser);
                 systemUsers.push(newUser);
                 addedCount++;
               }
             }
 
-            populateApproverDropdowns(); 
-            populateRequesterDropdowns(); 
-            renderAll(); 
-            
-            alert(`Import successful!\nNew users added: ${addedCount}\nExisting users updated: ${updatedCount}`);
+            // Delete stored users that are NOT in the file (file is the single source of truth).
+            for (let u of usersToDelete) {
+              await dbDelete("users", u.firebaseId);
+              const idx = systemUsers.findIndex(x => x.firebaseId === u.firebaseId);
+              if (idx > -1) systemUsers.splice(idx, 1);
+              logAudit("DELETE_USER", u.id, `Deleted user via import sync: ${u.name}`);
+              deletedCount++;
+            }
+
+            populateApproverDropdowns();
+            populateRequesterDropdowns();
+            renderAll();
+
+            alert(`Import complete (file is the source of truth).\nAdded: ${addedCount}\nUpdated: ${updatedCount}\nDeleted: ${deletedCount}` + (protectedSelf ? `\n\nNote: your own account was not in the file but was kept to avoid locking you out.` : ``));
           } catch (error) {
             console.error(error);
             alert("An error occurred while reading the Excel file. Please check that the format matches the exported file.");
@@ -3616,35 +3644,56 @@ adminBulkApply.addEventListener("click", async () => {
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
             let addedCount = 0;
+            let deletedCount = 0;
 
+            // Parse & validate every row first so we can mirror the file exactly.
+            const parsedMaster = [];
             for (let row of jsonData) {
               const type = row["Type"]?.toString().trim();
               const name = row["Name"]?.toString().trim();
               const parentSystem = row["Parent System"]?.toString().trim() || null;
+              if (!type || !name) continue;
+              if (type === "Module" && !parentSystem) continue;
+              parsedMaster.push({ type, parentSystem, name });
+            }
 
-              if (!type || !name) continue; 
-              if (type === "Module" && !parentSystem) continue; 
+            // Safety: never wipe everything from an empty / wrong-format file.
+            if (parsedMaster.length === 0) {
+              alert("No valid Master Data rows were found in the file. Import cancelled (nothing was changed).");
+              return;
+            }
 
-              // Check whether this item already exists in the system
-              const isDuplicate = masterDataList.some(m => 
-                m.type === type && 
-                m.name.toLowerCase() === name.toLowerCase() && 
-                m.parentSystem === parentSystem
-              );
+            const keyOf = (m) => `${m.type}||${m.parentSystem || ""}||${(m.name || "").toLowerCase()}`;
+            const fileKeys = new Set(parsedMaster.map(keyOf));
+            const masterToDelete = masterDataList.filter(m => !fileKeys.has(keyOf(m)));
 
-              // Only add it if it doesn't already exist
-              if (!isDuplicate) {
-                const newItem = { type, parentSystem, name };
+            if (!confirm(`This import makes Master Data match the file EXACTLY.\n\n- Rows in file: ${parsedMaster.length}\n- Items to be DELETED (not in file): ${masterToDelete.length}\n\nContinue?`)) {
+              return;
+            }
+
+            // Add items that are in the file but not yet stored.
+            for (let pm of parsedMaster) {
+              const exists = masterDataList.some(m => keyOf(m) === keyOf(pm));
+              if (!exists) {
+                const newItem = { type: pm.type, parentSystem: pm.parentSystem, name: pm.name };
                 await dbAdd("masterData", newItem);
                 masterDataList.push(newItem);
                 addedCount++;
               }
             }
 
-            populateMasterDropdowns(); 
-            renderMasterTable(); 
-            
-            alert(`Import successful!\nNew Master Data added: ${addedCount} item(s) (existing items were skipped to prevent duplicates)`);
+            // Delete stored items that are NOT in the file (file is the single source of truth).
+            for (let m of masterToDelete) {
+              await dbDelete("masterData", m.firebaseId);
+              const idx = masterDataList.findIndex(x => x.firebaseId === m.firebaseId);
+              if (idx > -1) masterDataList.splice(idx, 1);
+              deletedCount++;
+            }
+
+            populateMasterDropdowns();
+            renderMasterTable();
+
+            alert(`Import complete (file is the source of truth).\nAdded: ${addedCount}\nDeleted: ${deletedCount}`);
           } catch (error) {
             console.error(error);
             alert("An error occurred while reading the Excel file. Please check that the format matches the exported file.");
