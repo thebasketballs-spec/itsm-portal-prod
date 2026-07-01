@@ -266,7 +266,7 @@
       margin-top: 16px;
     }
     .section.active {
-      display: block !important; /* เพิ่ม !important เพื่อบังคับให้โชว์เฉพาะตัวที่ active */
+      display: block !important; /* add !important to force only the active one to show */
     }
     .section.active {
       display: block;
@@ -1489,8 +1489,8 @@
             </div>
             <div class="form-row">
       <div class="form-group" style="flex: 1 1 100%;">
-        <label>Supervisor ID (ใส่ชื่อ User ID ของหัวหน้า)</label>
-        <input type="text" id="user-supervisor" placeholder="เช่น mgr1, admin (ถ้าไม่มีปล่อยว่างได้)" />
+        <label>Supervisor ID (enter the supervisor's User ID)</label>
+        <input type="text" id="user-supervisor" placeholder="e.g. mgr1, admin (leave blank if none)" />
       </div>
     </div>
             <div class="form-row" style="background:#f9fafb; padding:10px 14px; border-radius:8px; border:1px solid #e5e7eb; gap:18px; align-items:center;">
@@ -1504,7 +1504,7 @@
               <label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
                 <input type="checkbox" id="user-is-requester" style="width:16px; height:16px;" checked /> Is Requester (Can create tickets)
               </label><label style="display:inline-flex; align-items:center; gap:4px; font-size:12px; cursor:pointer;">
-              <input type="checkbox" id="user-is-supervisor" style="width:16px; height:16px;" /> Is Supervisor (เป็นหัวหน้างาน)
+              <input type="checkbox" id="user-is-supervisor" style="width:16px; height:16px;" /> Is Supervisor
             </label>
             </div>
             
@@ -1577,10 +1577,10 @@
                 <label>Data Type *</label>
                 <select id="master-type" required>
                   <option value="">-- Select Type --</option>
-                  <option value="System">System (ชื่อระบบ)</option>
-                  <option value="Module">Module (โมดูลย่อย)</option>
-                  <option value="Category">Category (หมวดหมู่ปัญหา)</option>
-                  <option value="RequestType">Request Type (ประเภทคำขอ)</option>
+                  <option value="System">System (system name)</option>
+                  <option value="Module">Module (sub-module)</option>
+                  <option value="Category">Category (issue category)</option>
+                  <option value="RequestType">Request Type (request type)</option>
                 </select>
               </div>
               <div class="form-group" id="master-parent-group" style="flex: 1 1 150px; display: none;">
@@ -1591,7 +1591,7 @@
               </div>
               <div class="form-group" style="flex: 2 1 250px;">
                 <label>Name / Value *</label>
-                <input type="text" id="master-name" required placeholder="ชื่อรายการ..." />
+                <input type="text" id="master-name" required placeholder="Item name..." />
               </div>
               <div class="form-group" style="flex: 0 0 auto; justify-content: flex-end;">
                 <button type="submit" class="btn btn-small" style="height: 31px;">+ Add</button>
@@ -1934,7 +1934,7 @@
    if(!sysEl || !listEl) return;
    sysEl.addEventListener("change", e => {
      listEl.innerHTML = "";
-     // ดึงโมดูลจากฐานข้อมูล masterDataList ตามชื่อ System ที่เลือก
+     // Fetch modules from masterDataList based on the selected System name
      const mods = masterDataList.filter(m => m.type === "Module" && m.parentSystem === e.target.value).map(m => m.name);
      mods.forEach(m => { const opt = document.createElement("option"); opt.value = m; listEl.appendChild(opt); });
    });
@@ -2433,7 +2433,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     showToast(`Ticket ${ticket.id} assigned to you.`); 
   }
 
-  // --- เพิ่มบรรทัดนี้เข้าไปครับ ---
+  // --- Added this line ---
   sendAssignmentEmail(ticket); 
   // ------------------------------
 }
@@ -2711,7 +2711,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       incidentTableBody.innerHTML = "";
       incidents.filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
           const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
-          // เพิ่ม <td>${formatDateOnly(i.dueDate)}</td> ไว้ต่อท้ายสุดก่อนปิดเครื่องหมายแบ็กทิก
+          // Add <td>${formatDateOnly(i.dueDate)}</td> at the very end before closing the backtick
        tr.innerHTML = `<td>${i.id}</td>
                 <td title="${esc(i.description)}">${esc(i.title)}</td>
                 <td>${esc(i.system)}</td>
@@ -2721,7 +2721,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
                 <td>${slaLabel(i)}</td>
                 <td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td>
                 <td>${formatRequesterObo(i.requester, i.createdBy)}</td>
-                <td>${formatDateOnly(i.dueDate)}</td>`; // <--- ตรงนี้คือส่วนที่เพิ่มเข้าไป
+                <td>${formatDateOnly(i.dueDate)}</td>`; // <--- this part was added
           incidentTableBody.appendChild(tr);
         });
     }
@@ -2857,7 +2857,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       
       detailNoteStagedAttachments = []; renderDetailNoteStagedAttachments(); renderDetailNotes(t); renderDetailAttachments(t); 
 
-      // --- [START] บล็อกควบคุมสิทธิ์ Read-Only สำหรับ Role: User ---
+      // --- [START] Read-Only permission block for Role: User ---
       const isStaff = currentUser && ["admin", "manager", "support"].includes(currentUser.role);
       const isMyTicket = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
 
@@ -2867,21 +2867,21 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         "detail-due-input", "detail-approver-select", "detail-description-input"
       ];
 
-      // 1. ล็อกช่องกรอกข้อมูลหลัก และซ่อนปุ่ม Save สำหรับพนักงานทั่วไป (User)
+      // 1. Lock the main input fields and hide the Save button for regular employees (User)
       mainInputIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.disabled = !isStaff;
       });
       if (detailSaveBtn) detailSaveBtn.style.display = !isStaff ? "none" : "";
 
-      // 2. ถ้าเป็นตั๋วของคนอื่น -> ล็อกห้ามพิมพ์ Note และห้ามอัปโหลดไฟล์ด้วย (Read-Only 100%)
+      // 2. If it's someone else's ticket -> lock Note input and disallow file uploads too (100% Read-Only)
       const canComment = isStaff || isMyTicket;
       if (detailNoteInput) detailNoteInput.disabled = !canComment;
       if (detailAddNoteBtn) detailAddNoteBtn.style.display = !canComment ? "none" : "";
       if (detailFileInput) { detailFileInput.disabled = !canComment; detailFileInput.style.display = !canComment ? "none" : ""; }
       if (detailDropzone) detailDropzone.style.display = !canComment ? "none" : "";
       document.querySelectorAll('input[name="note-visibility"]').forEach(r => r.disabled = !canComment);
-      // --- [END] บล็อกควบคุมสิทธิ์ Read-Only สำหรับ Role: User ---
+      // --- [END] Read-Only permission block for Role: User ---
 
       detailBackdrop.classList.add("active");
     }
@@ -2923,7 +2923,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         }
         
         const newAssignee = detailAssigneeSelect.value || null;
-        let assigneeChanged = false; // เพิ่มตัวแปรเช็คการเปลี่ยนแปลงคนรับงาน
+        let assigneeChanged = false; // Add a variable to check for assignee changes
         if (t.assignedTo !== newAssignee) { 
           await assignTicket(t, newAssignee, true); 
           assigneeChanged = true;
@@ -2939,7 +2939,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         t.updatedAt = new Date().toISOString();
         await updateTicket(currentDetail.kind, t); logAudit("EDIT_TICKET", t.id, "Edited ticket via detail modal"); renderAll(); showToast("Changes saved.");
         
-        // ตรรกะเช็คการยิงอีเมล์ดราฟต์
+        // Logic to check whether to fire the draft email
         const statusChanged = t.status !== oldStatus;
         const notifyStatuses = ["Resolved", "Closed", "Cancelled"];
         const isRequesterSelf = currentUser && t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase();
@@ -2947,9 +2947,9 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         if (newApprover && newApprover !== oldApprover) {
           triggerEmailDraft(t);
         } else if (assigneeChanged && newAssignee) {
-          sendAssignmentEmail(t); // ถ้ามีการเลือกคนรับงานใหม่ ให้เด้งหน้าต่างเมลหาไอทีคนนั้น
+          sendAssignmentEmail(t); // If a new assignee was selected, pop up an email draft to that IT staff member
         } else if (statusChanged && notifyStatuses.includes(t.status) && !skipSelfNotify) {
-          triggerStatusEmailDraft(t); // ถ้าเปลี่ยน status เป็น Resolved/Closed/Cancelled ให้เด้งหน้าต่างเมลแจ้งผู้เปิด Ticket (ยกเว้น requester ปิด/ยกเลิกเองไม่ต้องส่งเมลถึงตัวเอง)
+          triggerStatusEmailDraft(t); // If status changes to Resolved/Closed/Cancelled, pop up an email draft notifying the ticket requester (unless the requester closed/cancelled it themselves, no need to email themselves)
         }
       } catch (error) {
         // Roll back the in-memory ticket to match what's actually saved in
@@ -3078,12 +3078,12 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     const kind = btnDel.getAttribute("data-admin-delete-kind"); 
     const id = btnDel.getAttribute("data-id");
     
-    // เปลี่ยนข้อความแจ้งเตือนตรงนี้ให้ชัดเจนขึ้นครับ
-    if (!confirm(`⚠️ ยืนยันการลบตั๋วหมายเลข ${id} หรือไม่?\nข้อมูลนี้จะถูกลบออกจากระบบอย่างถาวร!`)) {
-        return; // ถ้ากด Cancel ระบบจะหยุดทำงานตรงนี้
+    // Made this alert message clearer
+    if (!confirm(`⚠️ Confirm deletion of ticket ${id}?\nThis data will be permanently removed from the system!`)) {
+        return; // If Cancel is clicked, stop here
     }
     
-    // โค้ดส่วนการลบข้อมูล (ทำงานต่อเมื่อกด OK เท่านั้น)
+    // Deletion logic (only runs if OK is clicked)
     const t = findTicket(kind, id); 
     if (t) await dbDelete(kind === "incident" ? "incidents" : "requests", t.firebaseId);
     
@@ -3095,7 +3095,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     
     logAudit("DELETE_TICKET", id, "Deleted ticket from Admin dashboard"); 
     renderAll(); 
-    showToast(`ลบตั๋ว ${id} เรียบร้อยแล้ว`); // เพิ่ม Toast แจ้งเตือนหลังลบเสร็จ
+    showToast(`Ticket ${id} deleted successfully`); // Show a toast notification after deletion
   }
 });
 
@@ -3109,15 +3109,15 @@ adminBulkApply.addEventListener("click", async () => {
   if (!selected.length) { alert("Please select at least one ticket."); return; }
   if (!action && !assignId) { alert("Select a Bulk Action or Assign To value first."); return; }
 
-  // --- เพิ่มส่วนการยืนยันก่อนเริ่มทำงาน ---
-  let confirmMsg = `ยืนยันการทำรายการ "${action || 'Assign'}" กับตั๋วจำนวน ${selected.length} ใบ ใช่หรือไม่?`;
+  // --- Added confirmation before proceeding ---
+  let confirmMsg = `Confirm performing "${action || 'Assign'}" on ${selected.length} ticket(s)?`;
   
   if (action === "delete") {
-    confirmMsg = `⚠️ คำเตือน: คุณกำลังจะลบตั๋วจำนวน ${selected.length} ใบ!\nข้อมูลนี้จะถูกลบถาวร ยืนยันหรือไม่?`;
+    confirmMsg = `⚠️ Warning: You are about to delete ${selected.length} ticket(s)!\nThis data will be permanently deleted. Confirm?`;
   }
 
   if (!confirm(confirmMsg)) {
-    return; // หยุดการทำงานถ้ากด Cancel
+    return; // Stop if Cancel is clicked
   }
   // ------------------------------------
 
@@ -3327,7 +3327,7 @@ adminBulkApply.addEventListener("click", async () => {
     adminFilters.forEach(el => el.addEventListener("input", renderAdminTable));
     adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
 
-    // ปิดทุก section ให้หมดก่อนเริ่มใช้งาน
+    // Close all sections before starting
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById("dashboard-section").classList.add("active");
     setupRealtimeListeners();
@@ -3338,10 +3338,10 @@ adminBulkApply.addEventListener("click", async () => {
     if (btnExportUsers) {
       btnExportUsers.addEventListener("click", () => {
         if (systemUsers.length === 0) {
-          alert("ไม่มีข้อมูลผู้ใช้งานสำหรับ Export");
+          alert("No user data available to export");
           return;
         }
-        if (!confirm("⚠️ ไฟล์ Export นี้จะมีรหัสผ่าน (Password) ของผู้ใช้ทุกคนอยู่ในรูปแบบข้อความล้วน กรุณาเก็บไฟล์นี้อย่างปลอดภัยและอย่าส่งต่อโดยไม่จำเป็น\n\nยืนยันการ Export หรือไม่?")) return;
+        if (!confirm("⚠️ This export file will contain every user's password in plain text. Please keep this file secure and do not share it unnecessarily.\n\nConfirm export?")) return;
         
         const exportData = systemUsers.map(u => ({
           "User ID": u.id,
@@ -3418,10 +3418,10 @@ adminBulkApply.addEventListener("click", async () => {
             populateRequesterDropdowns(); 
             renderAll(); 
             
-            alert(`Import สำเร็จ!\nเพิ่ม User ใหม่: ${addedCount} คน\nอัปเดต User เดิม: ${updatedCount} คน`);
+            alert(`Import successful!\nNew users added: ${addedCount}\nExisting users updated: ${updatedCount}`);
           } catch (error) {
             console.error(error);
-            alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel ตรวจสอบฟอร์แมตให้ตรงกับไฟล์ที่ Export ออกมา");
+            alert("An error occurred while reading the Excel file. Please check that the format matches the exported file.");
           } finally {
             importUsersFile.value = ""; 
           }
@@ -3479,7 +3479,7 @@ adminBulkApply.addEventListener("click", async () => {
         if (!type || !name || (type === "Module" && !parentSystem)) return;
 
         if (masterDataList.some(m => m.type === type && m.name.toLowerCase() === name.toLowerCase() && m.parentSystem === parentSystem)) {
-          alert("⚠️ ข้อมูลรายการนี้มีอยู่ในระบบแล้วครับ"); return;
+          alert("⚠️ This item already exists in the system."); return;
         }
 
         const item = { type, parentSystem, name };
@@ -3501,7 +3501,7 @@ adminBulkApply.addEventListener("click", async () => {
     }
 
     window.delMaster = async function(fbId) {
-      if (!confirm("ลบรายการ Master นี้ใช่หรือไม่? (ตัวเลือกในฟอร์มจะหายไปทันที)")) return;
+      if (!confirm("Delete this Master Data item? (It will disappear from the form's dropdown immediately)")) return;
       const idx = masterDataList.findIndex(m => m.firebaseId === fbId); if (idx === -1) return;
       await dbDelete("masterData", fbId); masterDataList.splice(idx, 1);
       populateMasterDropdowns(); renderMasterTable(); showToast("Deleted Master Data.");
@@ -3513,7 +3513,7 @@ adminBulkApply.addEventListener("click", async () => {
     if (btnExportMaster) {
       btnExportMaster.addEventListener("click", () => {
         if (masterDataList.length === 0) {
-          alert("ไม่มีข้อมูล Master Data สำหรับ Export");
+          alert("No Master Data available to export");
           return;
         }
         
@@ -3554,14 +3554,14 @@ adminBulkApply.addEventListener("click", async () => {
               if (!type || !name) continue; 
               if (type === "Module" && !parentSystem) continue; 
 
-              // ตรวจสอบว่ามีข้อมูลนี้ซ้ำในระบบอยู่แล้วหรือไม่
+              // Check whether this item already exists in the system
               const isDuplicate = masterDataList.some(m => 
                 m.type === type && 
                 m.name.toLowerCase() === name.toLowerCase() && 
                 m.parentSystem === parentSystem
               );
 
-              // ถ้ายังไม่มีถึงจะเพิ่มเข้าไป
+              // Only add it if it doesn't already exist
               if (!isDuplicate) {
                 const newItem = { type, parentSystem, name };
                 await dbAdd("masterData", newItem);
@@ -3573,10 +3573,10 @@ adminBulkApply.addEventListener("click", async () => {
             populateMasterDropdowns(); 
             renderMasterTable(); 
             
-            alert(`Import สำเร็จ!\nเพิ่ม Master Data ใหม่: ${addedCount} รายการ (ระบบได้ข้ามรายการที่มีอยู่แล้วเพื่อป้องกันข้อมูลซ้ำ)`);
+            alert(`Import successful!\nNew Master Data added: ${addedCount} item(s) (existing items were skipped to prevent duplicates)`);
           } catch (error) {
             console.error(error);
-            alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel ตรวจสอบฟอร์แมตให้ตรงกับไฟล์ที่ Export ออกมา");
+            alert("An error occurred while reading the Excel file. Please check that the format matches the exported file.");
           } finally {
             importMasterFile.value = ""; 
           }
@@ -3600,7 +3600,7 @@ adminBulkApply.addEventListener("click", async () => {
   const cc = t.ccEmails || "";
   const subject = `[ITSM Approval Request] Ticket ${t.id}: ${t.title}`;
   
-  // เพิ่มลิงก์ Portal เข้าไปในเนื้อหา
+  // Add the portal link into the body
   const body = `Dear ${appUser.name},
 
 A new Service Request has been created that requires your approval.
@@ -3624,7 +3624,7 @@ ITSM Portal Automated System`;
   
   window.location.href = mailtoUrl;
 }
-    // ฟังก์ชันสำหรับสลัด Draft อีเมล์แจ้งเตือนเมื่อมีการ Assign งานให้ IT Support
+    // Function to draft a notification email when a ticket is assigned to IT Support
 function sendAssignmentEmail(t) {
   if (!t.assignedTo) return;
   const staffUser = getUserById(t.assignedTo);
@@ -3635,7 +3635,7 @@ function sendAssignmentEmail(t) {
   const cc = t.ccEmails || "";
   const subject = `[ITSM Ticket Assigned] Ticket ${t.id}: ${t.title}`;
   
-  // เพิ่มลิงก์ Portal เข้าไปในเนื้อหาอีเมลตรงนี้ครับ
+  // Add the portal link into the email body here
   const body = `Dear ${staffUser.name},
 
 A new ticket has been assigned to you.
@@ -3659,7 +3659,7 @@ ITSM Portal Automated System`;
   }
   window.location.href = mailtoUrl;
 }
-    // ฟังก์ชันสำหรับสลัด Draft อีเมล์แจ้งผู้เปิด Ticket เมื่อ Status เปลี่ยนเป็น Resolved / Closed / Cancelled
+    // Function to draft an email notifying the ticket requester when status changes to Resolved / Closed / Cancelled
 function triggerStatusEmailDraft(t) {
   if (!t.email) return;
 
@@ -3697,7 +3697,7 @@ ITSM Portal Automated System`;
   }
   window.location.href = mailtoUrl;
 }
-    // ฟังก์ชันสำหรับดราฟต์อีเมล์แจ้ง Admin ทุกคนเมื่อมีการ Submit Incident ใหม่
+    // Function to draft an email notifying all Admins when a new Incident is submitted
 function triggerIncidentAdminEmailDraft(t) {
   const adminEmails = systemUsers.filter(u => u.role === "admin" && u.email).map(u => u.email);
   if (adminEmails.length === 0) return;
