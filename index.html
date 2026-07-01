@@ -3596,15 +3596,20 @@ adminBulkApply.addEventListener("click", async () => {
     // modal), which would otherwise pop open two identical OWA tabs.
     let _lastOwaCompose = { url: "", time: 0 };
     function openOutlookWebCompose(to, subject, body, cc) {
-      const params = new URLSearchParams();
-      if (to) params.set('to', to);
-      if (cc) params.set('cc', cc);
-      if (subject) params.set('subject', subject);
-      if (body) params.set('body', body);
-      const owaUrl = `https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
+      // Build the query string manually with encodeURIComponent instead of
+      // URLSearchParams — URLSearchParams encodes spaces as "+" (form
+      // encoding), which Outlook Web then displays as literal "+" characters
+      // instead of actual spaces/line breaks. encodeURIComponent uses %20,
+      // which OWA renders correctly.
+      const parts = [];
+      if (to) parts.push(`to=${encodeURIComponent(to)}`);
+      if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
+      if (subject) parts.push(`subject=${encodeURIComponent(subject)}`);
+      if (body) parts.push(`body=${encodeURIComponent(body)}`);
+      const owaUrl = `https://outlook.office.com/mail/deeplink/compose?${parts.join('&')}`;
 
       const now = Date.now();
-      if (_lastOwaCompose.url === owaUrl && (now - _lastOwaCompose.time) < 1500) {
+      if (_lastOwaCompose.url === owaUrl && (now - _lastOwaCompose.time) < 500) {
         // Same draft was just opened a moment ago — skip the duplicate.
         return;
       }
