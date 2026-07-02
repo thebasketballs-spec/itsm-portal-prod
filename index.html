@@ -2614,6 +2614,7 @@
       try {
         await updateTicket(kind, t); logAudit("APPROVE", t.id, `Approved by ${currentUser.name}`);
         renderAll(); showToast(`Approved ticket ${t.id}`);
+        triggerApproveAdminEmailDraft(t);
       } catch (error) {
         Object.keys(t).forEach(k => delete t[k]); Object.assign(t, snapshot);
         console.error("approveTicket failed, rolled back:", error);
@@ -2632,6 +2633,7 @@
       try {
         await updateTicket(kind, t); logAudit("REJECT", t.id, `Rejected by ${currentUser.name}. Reason: ${reason}`);
         renderAll(); showToast(`Rejected ticket ${t.id}`);
+        triggerRejectRequesterEmailDraft(t, reason);
       } catch (error) {
         Object.keys(t).forEach(k => delete t[k]); Object.assign(t, snapshot);
         console.error("rejectTicket failed, rolled back:", error);
@@ -4213,6 +4215,62 @@ Best regards,
 ITSM Portal Automated System`;
 
   openOutlookWebCompose(to, subject, body);
+}
+
+// Draft an email to ALL Admins after a request/incident is APPROVED in the Approve tab
+function triggerApproveAdminEmailDraft(t) {
+  const adminEmails = systemUsers.filter(u => u.role === "admin" && u.email).map(u => u.email);
+  if (adminEmails.length === 0) return;
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
+  const to = adminEmails.join(",");
+  const cc = t.ccEmails || "";
+  const approverName = currentUser ? currentUser.name : (getUserName(t.approver) || "");
+  const subject = `[ITSM Approved] Ticket ${t.id}: ${t.title}`;
+  const body = `Dear Admin,
+
+The following ${t.type} has been APPROVED${approverName ? " by " + approverName : ""} and is now Open for processing.
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- System: ${t.system}
+- Subject: ${t.title}
+- Priority: ${t.priority || "-"}
+- Requester: ${t.requester}
+- Status: ${t.status}
+
+Please log in to the Finance System Service Portal to assign and process this ticket:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
+  openOutlookWebCompose(to, subject, body, cc);
+}
+
+// Draft an email to the REQUESTER after their request/incident is REJECTED in the Approve tab
+function triggerRejectRequesterEmailDraft(t, reason) {
+  if (!t.email) return;
+  const portalUrl = "https://thebasketballs-spec.github.io/itsm-portal-prod/";
+  const to = t.email;
+  const cc = t.ccEmails || "";
+  const rejectedBy = currentUser ? currentUser.name : "";
+  const subject = `[ITSM Rejected] Ticket ${t.id}: ${t.title}`;
+  const body = `Dear ${t.requester},
+
+Your ${t.type} request has been REJECTED${rejectedBy ? " by " + rejectedBy : ""} and the ticket has been cancelled.
+
+Ticket Details:
+- Ticket ID: ${t.id}
+- System: ${t.system}
+- Subject: ${t.title}
+- Status: ${t.status}
+- Reason for rejection: ${reason}
+
+If you have questions or wish to resubmit, please log in to the Finance System Service Portal:
+${portalUrl}
+
+Best regards,
+ITSM Portal Automated System`;
+  openOutlookWebCompose(to, subject, body, cc);
 }
     window.togglePasswordCell = function(span) {
       const isMasked = span.textContent === "••••••••";
