@@ -3299,6 +3299,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         if (el) el.disabled = !isStaff;
       });
       if (detailSaveBtn) detailSaveBtn.style.display = !isStaff ? "none" : "";
+      // System cannot be changed after a ticket is created — always read-only in Detail (all roles).
+      if (detailSystemInput) { detailSystemInput.disabled = true; detailSystemInput.readOnly = true; detailSystemInput.style.background = "#f3f4f6"; detailSystemInput.style.color = "#6b7280"; detailSystemInput.title = "System cannot be edited after the ticket is created"; }
       // Load description into the rich-text editor (view for everyone, editable for staff)
       if (window._detailQuill) {
         window._loadQuill(window._detailQuill, t.description || "");
@@ -3405,7 +3407,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
 
       try {
         t.title = detailSubjectInput.value.trim() || t.title; 
-        t.system = detailSystemInput.value.trim(); 
+        /* System is fixed after creation — intentionally NOT updated from the detail modal. */ 
         t.module = detailModuleInput.value.trim(); 
         t.priority = detailPrioritySelect.value; 
         t.dueDate = detailDueInput.value || null; 
@@ -3449,7 +3451,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         
         // Logic to check whether to fire the draft email
         const statusChanged = t.status !== oldStatus;
-        const notifyStatuses = ["Resolved", "Closed", "Cancelled"];
+        const notifyStatuses = ["Resolved", "Closed", "Cancelled", "Pending User"];
         const isRequesterSelf = currentUser && t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase();
         const skipSelfNotify = isRequesterSelf && ["Closed", "Cancelled"].includes(t.status);
         if (newApprover && newApprover !== oldApprover) {
@@ -4373,7 +4375,8 @@ function triggerStatusEmailDraft(t) {
   const statusMessages = {
     "Resolved": "has been resolved by IT Support. Please review the resolution and confirm closure via the portal.",
     "Closed": "has been closed.",
-    "Cancelled": "has been cancelled."
+    "Cancelled": "has been cancelled.",
+    "Pending User": "requires additional information from you. Please review and reply/provide the requested details via the portal so IT can continue."
   };
   const statusMsg = statusMessages[t.status] || `status has been updated to "${t.status}".`;
 
