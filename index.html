@@ -900,9 +900,8 @@
     }
 
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
@@ -2074,7 +2073,6 @@
     const detailDueInput = document.getElementById("detail-due-input");
     const detailRequesterDeptSpan = document.getElementById("detail-requester-dept");
     const detailCreatedSpan = document.getElementById("detail-created");
-    const detailApproverSpan = document.getElementById("detail-approver");
     const detailDescriptionInput = document.getElementById("detail-description-input");
     const detailSaveBtn = document.getElementById("detail-save-btn");
     
@@ -2880,6 +2878,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const approver = "";
       const ccEmails = document.getElementById("incident-cc").value.trim();
       const description = document.getElementById("incident-description").value.trim();
+      if (description.length > 900000) { alert("เนื้อหา/รูปในช่อง Description ใหญ่เกินไป กรุณาลดขนาดรูป หรือแนบเป็นไฟล์ผ่านปุ่ม Attach แทน"); return; } // keep under Firestore 1MB doc limit
       const reference = document.getElementById("incident-reference").value.trim();
       
       if (!requester || !dept || !email || !system || !title || !category || !impact || !priority || !description) {
@@ -2922,6 +2921,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const reference = document.getElementById("request-ref").value.trim();
       const remark = document.getElementById("request-remark")?.value.trim() || "";
       const description = document.getElementById("request-description").value.trim();
+      if (description.length > 900000) { alert("เนื้อหา/รูปในช่อง Description ใหญ่เกินไป กรุณาลดขนาดรูป หรือแนบเป็นไฟล์ผ่านปุ่ม Attach แทน"); return; } // keep under Firestore 1MB doc limit
 
       if (!requester || !dept || !email || !system || !title || !type || !category || !impact || !due || !description) {
         alert("Please fill in all required (*) fields."); return;
@@ -3102,7 +3102,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     function renderIncidents() {
       const statusFilter = incidentStatusFilter.value; const categoryFilter = incidentCategoryFilter.value; const systemFilter = incidentSystemFilter.value; const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase(); const fromVal = incidentDateFrom.value; const toVal = incidentDateTo.value; const search = incidentSearch.value.trim().toLowerCase();
       incidentTableBody.innerHTML = ""; const _ownOnlyI = (currentUser && currentUser.role === "user");
-      incidents.filter(i => !_ownOnlyI || i.createdBy === currentUser.id || (i.requester && i.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
+      incidents.filter(i => !_ownOnlyI || i.createdBy === currentUser.id || (i.requester && i.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, _htmlToText(i.description), i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
           const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
           // Add <td>${formatDateOnly(i.dueDate)}</td> at the very end before closing the backtick
        tr.innerHTML = `<td>${i.id}</td>
@@ -3123,7 +3123,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     function renderRequests() {
       const statusFilter = requestStatusFilter.value; const categoryFilter = requestCategoryFilter.value; const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value; const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase(); const fromVal = requestDateFrom.value; const toVal = requestDateTo.value; const search = requestSearch.value.trim().toLowerCase();
       requestTableBody.innerHTML = ""; const _ownOnlyR = (currentUser && currentUser.role === "user");
-      requests.filter(r => !_ownOnlyR || r.createdBy === currentUser.id || (r.requester && r.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
+      requests.filter(r => !_ownOnlyR || r.createdBy === currentUser.id || (r.requester && r.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, _htmlToText(r.description), r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
           const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
           tr.innerHTML = `<td>${r.id}</td><td title="${esc(_htmlToText(r.description))}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td>`;
           requestTableBody.appendChild(tr);
@@ -3140,7 +3140,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         .filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()))
         .filter(t => !_mtStatus || t.status === _mtStatus)
         .filter(t => !_mtType || t.type === _mtType)
-        .filter(t => !_mtSearch || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(_mtSearch));
+        .filter(t => !_mtSearch || [t.id, t.title, _htmlToText(t.description), t.requester, t.system].join(" ").toLowerCase().includes(_mtSearch));
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
           tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
@@ -3153,7 +3153,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       if (!currentUser || !["admin", "manager"].includes(currentUser.role)) return;
       const statusFilter = adminStatusFilter.value; const assigneeSearch = adminAssigneeSearch.value.trim().toLowerCase(); const fromVal = adminDateFrom.value; const toVal = adminDateTo.value; const search = adminSearch.value.trim().toLowerCase(); const all = [...incidents, ...requests];
       adminTableBody.innerHTML = "";
-      all.filter(t => !statusFilter || t.status === statusFilter).filter(t => filterByDateRange(t.createdAt, fromVal, toVal)).filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(t => !search || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(search)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
+      all.filter(t => !statusFilter || t.status === statusFilter).filter(t => filterByDateRange(t.createdAt, fromVal, toVal)).filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(t => !search || [t.id, t.title, _htmlToText(t.description), t.requester, t.system].join(" ").toLowerCase().includes(search)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated); const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-"; const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-"); const kind = t.type === "Incident" ? "incident" : "request";
           tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${esc(_htmlToText(t.description))}">${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
@@ -3409,7 +3409,9 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         t.module = detailModuleInput.value.trim(); 
         t.priority = detailPrioritySelect.value; 
         t.dueDate = detailDueInput.value || null; 
-        t.description = detailDescriptionInput.value.trim();
+        const _newDesc = detailDescriptionInput.value.trim();
+        if (_newDesc.length > 900000) { alert("เนื้อหา/รูปในช่อง Description ใหญ่เกินไป กรุณาลดขนาดรูป หรือแนบเป็นไฟล์ผ่านปุ่ม Attach แทน"); return; } // keep under Firestore 1MB doc limit
+        t.description = _newDesc;
         
         // Incidents do not use the approval workflow; keep their approver untouched.
         const newApprover = (t.type === "Incident")
@@ -3850,7 +3852,7 @@ adminBulkApply.addEventListener("click", async () => {
     // Strips HTML down to safe markup and mirrors the sanitized HTML back into the
     // original (now hidden) <textarea> so all existing .value reads keep working.
     function _sanitizeHtml(html){ try { return window.DOMPurify ? DOMPurify.sanitize(String(html), {USE_PROFILES:{html:true}}) : String(html); } catch(e){ return String(html||""); } }
-    function _htmlToText(html){ if(html==null) return ""; const d=document.createElement("div"); d.innerHTML=String(html); return (d.textContent||d.innerText||"").replace(/\s+/g," ").trim(); }
+    function _htmlToText(html){ if(html==null) return ""; try { const doc=new DOMParser().parseFromString(String(html),"text/html"); return (doc.body.textContent||"").replace(/\s+/g," ").trim(); } catch(e){ return String(html).replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim(); } }
     const _rteToolbar = [ ["bold","italic"], [{ "align": [] }], [{ "list": "ordered" }, { "list": "bullet" }], [{ "indent": "-1" }, { "indent": "+1" }], ["link","image"], ["code-block"], ["clean"] ];
     function _makeQuill(editorId, hiddenTextarea){
       const host = document.getElementById(editorId);
