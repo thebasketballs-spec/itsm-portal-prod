@@ -1252,9 +1252,9 @@
                     <th>Assigned</th>
                     <th>Status</th>
                     <th>SLA</th>
-                    <th>Action</th>
                     <th>Requester</th>
                     <th>Due</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="incident-table-body"></tbody>
@@ -1453,9 +1453,9 @@
                     <th>Assigned</th>
                     <th>Status</th>
                     <th>SLA</th>
-                    <th>Action</th>
                     <th>Requester</th>
                     <th>Due</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="request-table-body"></tbody>
@@ -3112,9 +3112,9 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
                 <td>${esc(getUserName(i.assignedTo)) || "-"}</td>
                 <td><span class="status-pill ${cls}">${i.status}</span></td>
                 <td>${slaLabel(i)}</td>
-                <td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td>
                 <td>${formatRequesterObo(i.requester, i.createdBy)}</td>
-                <td>${formatDateOnly(i.dueDate)}</td>`; // <--- this part was added
+                <td>${formatDateOnly(i.dueDate)}</td>
+                <td><button class="btn-secondary btn-small" data-detail-kind="incident" data-id="${i.id}">Detail</button></td>`; // <--- this part was added
           incidentTableBody.appendChild(tr);
         });
     }
@@ -3125,7 +3125,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       requestTableBody.innerHTML = ""; const _ownOnlyR = (currentUser && currentUser.role === "user");
       requests.filter(r => !_ownOnlyR || r.createdBy === currentUser.id || (r.requester && r.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
           const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
-          tr.innerHTML = `<td>${r.id}</td><td title="${esc(_htmlToText(r.description))}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td>`;
+          tr.innerHTML = `<td>${r.id}</td><td title="${esc(_htmlToText(r.description))}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td>`;
           requestTableBody.appendChild(tr);
         });
     }
