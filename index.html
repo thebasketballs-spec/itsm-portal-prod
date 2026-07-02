@@ -696,35 +696,7 @@
       box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
       max-width: 260px;
     }
-    /* Knowledge base */
-    .kb-list {
-      list-style: none;
-      padding-left: 0;
-      margin: 6px 0 0;
-      font-size: 12px;
-    }
-    .kb-list li {
-      padding: 6px 8px;
-      border-radius: 8px;
-      background: #f9fafb;
-      border: 1px solid var(--banpu-border);
-      margin-bottom: 4px;
-    }
-    .kb-list strong {
-      display: block;
-      margin-bottom: 2px;
-    }
-    .kb-suggestion-banner {
-      display: none;
-      margin-top: 4px;
-      padding: 6px 10px;
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      border-radius: 6px;
-      font-size: 11px;
-      color: #92400e;
-      line-height: 1.4;
-    }
+    /* (KB suggestion feature removed per request) */
 
     /* ==========================================================
        MODERN BANPU THEME REFRESH (brand: #482F92 purple + #00AEEF cyan)
@@ -877,6 +849,38 @@
     body.dark-mode .detail-block h3, body.dark-mode .detail-value{ color:#eae6f7; }
     body.dark-mode .detail-label{ color:#a79fc4; }
     body.dark-mode .notes-list li{ border-bottom-color:#332e49; color:#e2ddf0; }
+
+    /* ===== RESPONSIVE — mobile & tablet (Android / iOS) ===== */
+    html { -webkit-text-size-adjust: 100%; }
+    @media (max-width: 1024px) {
+      .app-container { margin: 8px auto; padding: 12px; border-radius: 16px; }
+      .grid { grid-template-columns: 1fr; }      /* stack form + list on tablets */
+    }
+    @media (max-width: 768px) {
+      body { background-attachment: scroll; }
+      .app-container { margin: 6px; padding: 10px; border-radius: 14px; }
+      h1 { font-size: 18px; }
+      .subtitle { font-size: 12px; }
+      .sticky-header-container { position: static; -webkit-backdrop-filter: none; backdrop-filter: none; }
+      .top-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .tabs { gap: 4px; }
+      .nav-tab { padding: 8px 12px; }
+      .filters { flex-direction: column; align-items: stretch; }
+      .filters select, .filters input { width: 100%; }
+      /* >=16px font on inputs prevents iOS Safari auto-zoom on focus */
+      input, select, textarea, .btn, .btn-secondary, .btn-small, #login-btn { font-size: 16px; }
+      .btn, .btn-secondary, .btn-small { padding: 10px 14px; }   /* larger tap targets */
+      table { font-size: 12px; }
+      th, td { padding: 8px 6px; }
+      .modal { width: 96vw; max-width: 96vw; max-height: 92vh; }
+      .login-card { max-width: 94vw; }
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 16px; }
+      .app-container { padding: 8px; }
+      .user-pill { font-size: 11px; }
+      #theme-select { max-width: 120px; }
+    }
     /* any remaining small buttons/labels styled as buttons stay fully rounded */
     button, .btn, .btn-small, .btn-secondary, .btn-danger, label.btn-secondary{
       border-radius: 999px;
@@ -1100,7 +1104,6 @@
                 <div class="form-group">
                   <label>Subject *</label>
                   <input type="text" id="incident-title" required placeholder="Enter issue subject (e.g., Cannot login to TM1)..." />
-                  <div id="inc-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                 <div class="form-group">
                   <label>Category *</label>
@@ -1186,7 +1189,6 @@
               <strong>Filter:</strong>
               <select id="incident-status-filter">
                 <option value="">All Status</option>
-                <option value="Pending Approval">Pending Approval</option>
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Resolved">Resolved</option>
@@ -1292,7 +1294,6 @@
                 <div class="form-group">
                   <label>Subject *</label>
                   <input type="text" id="request-title" required placeholder="Enter request subject..." />
-                  <div id="req-kb-banner" class="kb-suggestion-banner"></div>
                 </div>
                  <div class="form-group">
                   <label>Request Type *</label>
@@ -1446,6 +1447,26 @@
         <div class="card">
           <h2>My Tickets</h2>
           <small>Tickets you created or assigned to you (Incident + Request)</small>
+          <div class="filters">
+            <strong>Filter:</strong>
+            <select id="mytickets-status-filter">
+              <option value="">All Status</option>
+              <option value="Pending Approval">Pending Approval</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Pending User">Pending User</option>
+              <option value="Closed">Closed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <select id="mytickets-type-filter">
+              <option value="">All Types</option>
+              <option value="Incident">Incident</option>
+              <option value="Request">Request</option>
+            </select>
+            <input type="text" id="mytickets-search" placeholder="Search ID/Subject" />
+            <button type="button" class="btn-secondary btn-small" id="mytickets-clear-filter">Clear</button>
+          </div>
           <div class="table-container">
             <table>
               <thead>
@@ -2561,6 +2582,10 @@
       });
       populateAssigneeDropdowns(); populateApproverDropdowns(); populateRequesterDropdowns(); applyRequesterUserLock(); renderAll();
       applyUserTheme(user.id);
+      // Export CSV is restricted to Manager/Admin only (hidden for User/Support).
+      const _canExport = ["admin","manager"].includes(user.role);
+      if (exportIncBtn) exportIncBtn.style.display = _canExport ? "" : "none";
+      if (exportReqBtn) exportReqBtn.style.display = _canExport ? "" : "none";
     }
     loginBtn.addEventListener("click", () => {
       const id = loginUserSelect.value;
@@ -3048,8 +3073,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     // แสดงตารางรายการ Incident ตามเงื่อนไขฟิลเตอร์/ค้นหา
     function renderIncidents() {
       const statusFilter = incidentStatusFilter.value; const categoryFilter = incidentCategoryFilter.value; const systemFilter = incidentSystemFilter.value; const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase(); const fromVal = incidentDateFrom.value; const toVal = incidentDateTo.value; const search = incidentSearch.value.trim().toLowerCase();
-      incidentTableBody.innerHTML = "";
-      incidents.filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
+      incidentTableBody.innerHTML = ""; const _ownOnlyI = (currentUser && currentUser.role === "user");
+      incidents.filter(i => !_ownOnlyI || i.createdBy === currentUser.id || (i.requester && i.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(i => !statusFilter || i.status === statusFilter).filter(i => !categoryFilter || i.category === categoryFilter).filter(i => !systemFilter || i.system === systemFilter).filter(i => filterByDateRange(i.createdAt, fromVal, toVal)).filter(i => !assigneeSearch || (getUserName(i.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(i => !search || [i.id, i.title, i.description, i.requester, i.system, i.category].join(" ").toLowerCase().includes(search)).forEach(i => {
           const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
           // Add <td>${formatDateOnly(i.dueDate)}</td> at the very end before closing the backtick
        tr.innerHTML = `<td>${i.id}</td>
@@ -3069,8 +3094,8 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     // แสดงตารางรายการ Request ตามเงื่อนไขฟิลเตอร์/ค้นหา
     function renderRequests() {
       const statusFilter = requestStatusFilter.value; const categoryFilter = requestCategoryFilter.value; const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value; const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase(); const fromVal = requestDateFrom.value; const toVal = requestDateTo.value; const search = requestSearch.value.trim().toLowerCase();
-      requestTableBody.innerHTML = "";
-      requests.filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
+      requestTableBody.innerHTML = ""; const _ownOnlyR = (currentUser && currentUser.role === "user");
+      requests.filter(r => !_ownOnlyR || r.createdBy === currentUser.id || (r.requester && r.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
           const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
           tr.innerHTML = `<td>${r.id}</td><td title="${esc(r.description)}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td>`;
           requestTableBody.appendChild(tr);
@@ -3080,7 +3105,14 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     // แสดงเฉพาะ ticket ที่ผู้ใช้ปัจจุบันสร้างหรือเป็น requester
     function renderMyTickets() {
       if (!currentUser) return; myTicketsBody.innerHTML = "";
-      const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
+      const _mtStatus = (document.getElementById("mytickets-status-filter")||{}).value || "";
+      const _mtType   = (document.getElementById("mytickets-type-filter")||{}).value || "";
+      const _mtSearch = ((document.getElementById("mytickets-search")||{}).value || "").trim().toLowerCase();
+      const all = [...incidents, ...requests]
+        .filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()))
+        .filter(t => !_mtStatus || t.status === _mtStatus)
+        .filter(t => !_mtType || t.type === _mtType)
+        .filter(t => !_mtSearch || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(_mtSearch));
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
           tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td>${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${t.type === "Incident" ? "incident" : "request"}" data-id="${t.id}">Detail</button></td>`;
@@ -3248,6 +3280,20 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       if (detailDropzone) detailDropzone.style.display = !canComment ? "none" : "";
       document.querySelectorAll('input[name="note-visibility"]').forEach(r => r.disabled = !canComment);
       // --- [END] Read-Only permission block for Role: User ---
+
+      // (Change) Incidents do not use the "Pending Approval" status — remove that option for Incidents (keep it for Requests).
+      if (detailStatusSelect) {
+        let _paOpt = [...detailStatusSelect.options].find(o => o.value === "Pending Approval");
+        if (t.type === "Incident") { if (_paOpt) _paOpt.remove(); }
+        else if (!_paOpt) { const _o = document.createElement("option"); _o.value = "Pending Approval"; _o.textContent = "Pending Approval"; detailStatusSelect.insertBefore(_o, detailStatusSelect.firstChild); }
+        detailStatusSelect.value = t.status;
+      }
+      // (Change) A ticket still in "Pending Approval" must be Approved/Rejected via the Approve tab first —
+      // block changing its Assignee/Status here (even for staff) until it is approved.
+      if (t.status === "Pending Approval") {
+        if (detailAssigneeSelect) detailAssigneeSelect.disabled = true;
+        if (detailStatusSelect) detailStatusSelect.disabled = true;
+      }
 
       detailBackdrop.classList.add("active");
     }
@@ -3756,6 +3802,12 @@ adminBulkApply.addEventListener("click", async () => {
     const reqFilters = [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch];
     reqFilters.forEach(el => el.addEventListener("input", renderRequests));
     requestClearFilter.addEventListener("click", () => { reqFilters.forEach(el => el.value = ""); renderRequests(); });
+
+    // My Tickets filter/search
+    const myTicketsFilters = ["mytickets-status-filter","mytickets-type-filter","mytickets-search"].map(id => document.getElementById(id)).filter(Boolean);
+    myTicketsFilters.forEach(el => el.addEventListener("input", renderMyTickets));
+    const myTicketsClear = document.getElementById("mytickets-clear-filter");
+    if (myTicketsClear) myTicketsClear.addEventListener("click", () => { myTicketsFilters.forEach(el => el.value = ""); renderMyTickets(); });
 
     const adminFilters = [adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch];
     adminFilters.forEach(el => el.addEventListener("input", renderAdminTable));
