@@ -1842,7 +1842,7 @@
         <div id="detail-resolved-confirm-banner" style="display:none; grid-column: 1 / -1; background:#eff6ff; border:1px solid #bfdbfe; padding:12px 16px; border-radius:12px; margin-bottom:8px; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <div>
             <strong style="color:#1e40af; font-size:14px;">This ticket has been Resolved.</strong><br/>
-            <span style="font-size:12px; color:#3b82f6;">Please test the system. If it works normally, confirm to close the ticket. If the issue persists, you can re-open it.</span>
+            <span style="font-size:12px; color:#3b82f6;">Please test the system. If it works normally, confirm to close the ticket. If the issue persists, you can re-open it. If the requester does not confirm within 7 days, the system will close this ticket automatically.</span>
           </div>
           <div style="display:flex; gap:8px;">
             <button class="btn badge-green" id="btn-requester-confirm-close" style="padding:6px 14px; font-size:12px;">✅ Confirm Close</button>
@@ -3434,8 +3434,9 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           assigneeChanged = true;
         }
         if (t.status === "Resolved" && oldStatus !== "Resolved") {
+          t.resolvedAt = new Date().toISOString(); // start the 7-day auto-close clock
           if(!Array.isArray(t.notes)) t.notes = [];
-          t.notes.push({ text: "✅ IT Support has resolved the issue.\nWaiting for requester to confirm and close the ticket.", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
+          t.notes.push({ text: "✅ IT Support has resolved the issue.\nWaiting for requester to confirm and close the ticket. (Will auto-close in 7 days if not confirmed.)", createdAt: new Date().toISOString(), visibility: "public", authorId: currentUser.id, authorName: currentUser.name });
         }
         if (t.sla) {
           if (t.status !== "Open" && t.status !== "Pending Approval" && !t.sla.firstResponseAt) t.sla.firstResponseAt = new Date().toISOString();
@@ -3820,6 +3821,22 @@ adminBulkApply.addEventListener("click", async () => {
         const sla = t.sla; const resDue = new Date(sla.resolutionDueAt); const respDue = new Date(sla.responseDueAt);
         if (!sla.firstResponseAt && now > respDue && !sla.responseBreached) { sla.responseBreached = true; changed = true; }
         if (!sla.resolvedAt && now > resDue && !sla.resolutionBreached) { sla.resolutionBreached = true; changed = true; }
+      });
+      // Auto-close: a "Resolved" ticket that the requester never confirms is closed automatically after 7 days.
+      const AUTO_CLOSE_MS = 7 * 24 * 60 * 60 * 1000;
+      all.forEach(t => {
+        if (t.status !== "Resolved") return;
+        if (!t.resolvedAt) { t.resolvedAt = now.toISOString(); changed = true; return; } // start the clock if it was missing
+        if (now - new Date(t.resolvedAt) >= AUTO_CLOSE_MS) {
+          t.status = "Closed"; t.updatedAt = now.toISOString();
+          if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = now.toISOString();
+          if (!Array.isArray(t.notes)) t.notes = [];
+          t.notes.push({ text: "🔒 Auto-closed by system: requester did not confirm within 7 days after the ticket was Resolved.", createdAt: now.toISOString(), visibility: "public", authorId: "system", authorName: "System" });
+          const kind = t.type === "Incident" ? "incident" : "request";
+          updateTicket(kind, t);
+          logAudit("AUTO_CLOSE", t.id, "Auto-closed: requester did not confirm within 7 days of resolution");
+          changed = true;
+        }
       });
       if (changed) renderAll();
     }
