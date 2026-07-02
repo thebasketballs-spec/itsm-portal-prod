@@ -1012,10 +1012,14 @@
                     <th>ID</th>
                     <th>Type</th>
                     <th>Subject</th>
+                    <th>Requester</th>
+                    <th>System</th>
+                    <th>Priority</th>
                     <th>Assigned To</th>
                     <th>Status</th>
                     <th>SLA</th>
                     <th>Created At</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="latest-table-body"></tbody>
@@ -3051,9 +3055,14 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         }
       });
       latestTableBody.innerHTML = "";
+      // Detail button on Latest Tickets: visible to Admin / Support / Manager, OR to the ticket's own requester.
+      const _isStaffLatest = currentUser && ["admin","support","manager"].includes(currentUser.role);
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated);
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${esc(t.description)}">${esc(t.title)}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td>`;
+          const kind = t.type === "Incident" ? "incident" : "request";
+          const _isOwnLatest = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
+          const detailCell = (_isStaffLatest || _isOwnLatest) ? `<button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button>` : "-";
+          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${esc(t.description)}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${esc(t.system) || "-"}</td><td>${t.priority ? formatPriority(t.priority) : "-"}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td>${detailCell}</td>`;
           latestTableBody.appendChild(tr);
         });
     }
