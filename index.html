@@ -850,6 +850,19 @@
     body.dark-mode .detail-label{ color:#a79fc4; }
     body.dark-mode .notes-list li{ border-bottom-color:#332e49; color:#e2ddf0; }
 
+    /* ===== Rich Text (Quill) editor styling ===== */
+    .rte-editor { background:#fff; border-radius:8px; }
+    .rte-editor .ql-toolbar { border-top-left-radius:8px; border-top-right-radius:8px; border-color: var(--banpu-border); }
+    .rte-editor .ql-container { border-bottom-left-radius:8px; border-bottom-right-radius:8px; border-color: var(--banpu-border); font-size:13px; }
+    .rte-editor .ql-editor { min-height:100px; }
+    .rte-editor .ql-editor.ql-blank::before { color:#9aa0aa; font-style:normal; }
+    body.dark-mode .rte-editor { background:#2b2740; }
+    body.dark-mode .rte-editor .ql-toolbar, body.dark-mode .rte-editor .ql-container { border-color:#3a3557; }
+    body.dark-mode .rte-editor .ql-editor { color:#e7e3f2; }
+    body.dark-mode .rte-editor .ql-toolbar .ql-stroke { stroke:#cdc7e6; }
+    body.dark-mode .rte-editor .ql-toolbar .ql-fill { fill:#cdc7e6; }
+    body.dark-mode .rte-editor .ql-toolbar .ql-picker, body.dark-mode .rte-editor .ql-toolbar button { color:#cdc7e6; }
+
     /* ===== RESPONSIVE — mobile & tablet (Android / iOS) ===== */
     html { -webkit-text-size-adjust: 100%; }
     @media (max-width: 1024px) {
@@ -891,6 +904,9 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 </head>
 <body>
   <div id="login-root">
@@ -1158,7 +1174,8 @@
 
               <div class="form-group">
                 <label>Problem Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(Press Ctrl+V to paste images)</span></label>
-                <textarea id="incident-description" required placeholder="Type problem details and press Ctrl+V here to paste images..."></textarea>
+                <textarea id="incident-description" placeholder="" style="display:none;"></textarea>
+                <div id="incident-desc-editor" class="rte-editor"></div>
                 
                 <div style="margin-top: 8px;">
                   <label for="incident-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
@@ -1355,7 +1372,8 @@
 
               <div class="form-group">
                 <label>Request Description * <span style="font-weight:normal; font-size:10px; color:#6b7280;">(Press Ctrl+V to paste images)</span></label>
-                <textarea id="request-description" required placeholder="Type request details and press Ctrl+V here to paste images..."></textarea>
+                <textarea id="request-description" placeholder="" style="display:none;"></textarea>
+                <div id="request-desc-editor" class="rte-editor"></div>
                 
                 <div style="margin-top: 8px;">
                   <label for="request-file-input" style="font-size: 11px; font-weight: 500; cursor: pointer; display: inline-block; padding: 4px 10px; background: #eef2ff; color: var(--banpu-primary); border: 1px solid #d4dcff; border-radius: 6px;">
@@ -1918,7 +1936,8 @@
             <div class="detail-label">Description</div>
           </div>
           <div class="detail-edit-field">
-            <textarea id="detail-description-input"></textarea>
+            <textarea id="detail-description-input" style="display:none;"></textarea>
+            <div id="detail-desc-editor" class="rte-editor"></div>
           </div>
           <button class="btn btn-small" id="detail-save-btn" style="margin-top:6px;">Save Changes</button>
           <button class="btn btn-small" id="detail-convert-btn" style="margin-top:6px; margin-left:6px; display:none; background:#6d28d9;">🔁 Convert</button>
@@ -2880,7 +2899,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       };
 
       await dbAdd("incidents", incident);
-      incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); 
+      incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); if(window._incQuill){window._incQuill.setText("");} if(incidentDescInput) incidentDescInput.value=""; 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
       triggerIncidentAdminEmailDraft(incident);
     });
@@ -2921,7 +2940,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       };
 
      await dbAdd("requests", req);
-      requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); 
+      requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); if(window._reqQuill){window._reqQuill.setText("");} if(requestDescInput) requestDescInput.value=""; 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
       
       if (req.status === "Pending Approval") {
@@ -2964,7 +2983,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       else { badgePendingApprove.style.display = "none"; }
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
         const tr = document.createElement("tr"); const kind = t.type === "Incident" ? "incident" : "request";
-        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${esc(t.description)}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
+        tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${esc(_htmlToText(t.description))}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
         approveTasksBody.appendChild(tr);
       });
     }
@@ -3062,7 +3081,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           const kind = t.type === "Incident" ? "incident" : "request";
           const _isOwnLatest = currentUser && (t.createdBy === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
           const detailCell = (_isStaffLatest || _isOwnLatest) ? `<button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button>` : "-";
-          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${esc(t.description)}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${esc(t.system) || "-"}</td><td>${t.priority ? formatPriority(t.priority) : "-"}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td>${detailCell}</td>`;
+          tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td title="${esc(_htmlToText(t.description))}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${esc(t.system) || "-"}</td><td>${t.priority ? formatPriority(t.priority) : "-"}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaLabel(t)}</td><td>${formatDateTime(t.createdAt)}</td><td>${detailCell}</td>`;
           latestTableBody.appendChild(tr);
         });
     }
@@ -3087,7 +3106,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
           const tr = document.createElement("tr"); const cls = statusClassName(i.status, i.sla && i.sla.escalated);
           // Add <td>${formatDateOnly(i.dueDate)}</td> at the very end before closing the backtick
        tr.innerHTML = `<td>${i.id}</td>
-                <td title="${esc(i.description)}">${esc(i.title)}</td>
+                <td title="${esc(_htmlToText(i.description))}">${esc(i.title)}</td>
                 <td>${esc(i.system)}</td>
                 <td>${formatPriority(i.priority)}</td>
                 <td>${esc(getUserName(i.assignedTo)) || "-"}</td>
@@ -3106,7 +3125,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       requestTableBody.innerHTML = ""; const _ownOnlyR = (currentUser && currentUser.role === "user");
       requests.filter(r => !_ownOnlyR || r.createdBy === currentUser.id || (r.requester && r.requester.toLowerCase() === currentUser.name.toLowerCase())).filter(r => !statusFilter || r.status === statusFilter).filter(r => !categoryFilter || r.category === categoryFilter).filter(r => !systemFilter || r.system === systemFilter).filter(r => !typeFilter || r.requestType === typeFilter).filter(r => filterByDateRange(r.createdAt, fromVal, toVal)).filter(r => !assigneeSearch || (getUserName(r.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(r => !search || [r.id, r.title, r.description, r.requester, r.system, r.requestType, r.category].join(" ").toLowerCase().includes(search)).forEach(r => {
           const tr = document.createElement("tr"); const cls = statusClassName(r.status, r.sla && r.sla.escalated);
-          tr.innerHTML = `<td>${r.id}</td><td title="${esc(r.description)}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td>`;
+          tr.innerHTML = `<td>${r.id}</td><td title="${esc(_htmlToText(r.description))}"><strong style="color:var(--banpu-primary);">${esc(r.title)}</strong></td><td>${esc(r.system)}</td><td>${formatPriority(r.priority)}</td><td>${esc(r.requestType)}</td><td>${esc(getUserName(r.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${r.status}</span></td><td>${slaLabel(r)}</td><td><button class="btn-secondary btn-small" data-detail-kind="request" data-id="${r.id}">Detail</button></td><td>${formatRequesterObo(r.requester, r.createdBy)}</td><td>${formatDateOnly(r.dueDate)}</td>`;
           requestTableBody.appendChild(tr);
         });
     }
@@ -3136,7 +3155,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       adminTableBody.innerHTML = "";
       all.filter(t => !statusFilter || t.status === statusFilter).filter(t => filterByDateRange(t.createdAt, fromVal, toVal)).filter(t => !assigneeSearch || (getUserName(t.assignedTo) || "").toLowerCase().includes(assigneeSearch)).filter(t => !search || [t.id, t.title, t.description, t.requester, t.system].join(" ").toLowerCase().includes(search)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
           const tr = document.createElement("tr"); const cls = statusClassName(t.status, t.sla && t.sla.escalated); const sla = t.sla ? (t.sla.resolutionBreached || t.sla.responseBreached ? "breach" : t.sla.resolvedAt ? "met" : "inprogress") : "-"; const slaHtml = t.status === "Pending Approval" ? "-" : (t.sla ? `<span class="${sla === "breach" ? "pill-sla-breach" : sla === "met" ? "pill-sla-ok" : "badge"}">${sla}</span>` : "-"); const kind = t.type === "Incident" ? "incident" : "request";
-          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${esc(t.description)}">${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
+          tr.innerHTML = `<td><input type="checkbox" class="admin-select" data-kind="${kind}" data-id="${t.id}" /></td><td>${t.id}</td><td>${t.type}</td><td title="${esc(_htmlToText(t.description))}">${esc(t.title)} <span class="muted" style="font-size:10px;">(${formatRequesterObo(t.requester, t.createdBy)})</span></td><td>${formatPriority(t.priority)}</td><td>${esc(getUserName(t.assignedTo)) || "-"}</td><td><span class="status-pill ${cls}">${t.status}</span></td><td>${slaHtml}</td><td>${calcAgeDays(t.createdAt)}</td><td><button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button> <button class="btn-danger btn-small" data-admin-delete-kind="${kind}" data-id="${t.id}">Delete</button></td>`;
           adminTableBody.appendChild(tr);
         });
       const adminSelectAllCb = document.getElementById("admin-select-all"); if (adminSelectAllCb) adminSelectAllCb.checked = false;
@@ -3280,6 +3299,12 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         if (el) el.disabled = !isStaff;
       });
       if (detailSaveBtn) detailSaveBtn.style.display = !isStaff ? "none" : "";
+      // Load description into the rich-text editor (view for everyone, editable for staff)
+      if (window._detailQuill) {
+        window._loadQuill(window._detailQuill, t.description || "");
+        if (detailDescriptionInput) detailDescriptionInput.value = t.description || "";
+        window._detailQuill.enable(!!isStaff);
+      }
 
       // 2. If it's someone else's ticket -> lock Note input and disallow file uploads too (100% Read-Only)
       const canComment = isStaff || isMyTicket;
@@ -3803,6 +3828,29 @@ adminBulkApply.addEventListener("click", async () => {
 
     // เรียก render ทุกส่วนของหน้าใหม่ทั้งหมด (ใช้หลังข้อมูลเปลี่ยน)
     function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable();renderReports();renderMasterTable(); }
+
+    // ===== Rich Text (Quill) for Description fields, sanitized with DOMPurify =====
+    // Strips HTML down to safe markup and mirrors the sanitized HTML back into the
+    // original (now hidden) <textarea> so all existing .value reads keep working.
+    function _sanitizeHtml(html){ try { return window.DOMPurify ? DOMPurify.sanitize(String(html), {USE_PROFILES:{html:true}}) : String(html); } catch(e){ return String(html||""); } }
+    function _htmlToText(html){ if(html==null) return ""; const d=document.createElement("div"); d.innerHTML=String(html); return (d.textContent||d.innerText||"").replace(/\s+/g," ").trim(); }
+    const _rteToolbar = [ ["bold","italic"], [{ "align": [] }], [{ "list": "ordered" }, { "list": "bullet" }], [{ "indent": "-1" }, { "indent": "+1" }], ["link","image"], ["code-block"], ["clean"] ];
+    function _makeQuill(editorId, hiddenTextarea){
+      const host = document.getElementById(editorId);
+      if(!window.Quill || !host) return null;
+      const q = new Quill("#"+editorId, { theme:"snow", placeholder:"Type details… (formatting supported)", modules:{ toolbar:_rteToolbar } });
+      q.on("text-change", () => {
+        let html = q.root.innerHTML;
+        if(html === "<p><br></p>") html = "";
+        if(hiddenTextarea) hiddenTextarea.value = _sanitizeHtml(html);
+      });
+      return q;
+    }
+    window._incQuill = _makeQuill("incident-desc-editor", incidentDescInput);
+    window._reqQuill = _makeQuill("request-desc-editor", requestDescInput);
+    window._detailQuill = _makeQuill("detail-desc-editor", detailDescriptionInput);
+    // helper to load HTML into a Quill editor safely
+    window._loadQuill = function(q, html){ if(!q) return; q.setText(""); if(html) q.clipboard.dangerouslyPasteHTML(_sanitizeHtml(html)); };
 
     const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
     incFilters.forEach(el => el.addEventListener("input", renderIncidents));
