@@ -526,6 +526,8 @@
       justify-content: center;
       z-index: 1000;
     }
+    /* CSAT survey pops ON TOP of the ticket Detail modal */
+    #csat-backdrop { z-index: 1200; }
     .modal-backdrop.active {
       display: flex;
     }
@@ -3918,6 +3920,7 @@ adminBulkApply.addEventListener("click", async () => {
           if (t.sla && !t.sla.resolvedAt) t.sla.resolvedAt = now.toISOString();
           if (!Array.isArray(t.notes)) t.notes = [];
           t.notes.push({ text: "🔒 Auto-closed by system: requester did not confirm within 7 days after the ticket was Resolved.", createdAt: now.toISOString(), visibility: "public", authorId: "system", authorName: "System" });
+          if (!t.csat) { t.csat = { q1: 2, q2: 2, comment: "Auto-closed (no response within 7 days) — auto-rated Very satisfied (2/2).", submittedBy: "system", submittedByName: "System (auto)", submittedAt: now.toISOString() }; }
           const kind = t.type === "Incident" ? "incident" : "request";
           updateTicket(kind, t);
           logAudit("AUTO_CLOSE", t.id, "Auto-closed: requester did not confirm within 7 days of resolution");
