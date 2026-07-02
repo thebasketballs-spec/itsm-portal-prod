@@ -842,6 +842,41 @@
     .chart-legend .legend-title{ font-weight:600; color:var(--banpu-primary); }
     .chart-legend .legend-item{ display:inline-flex; align-items:center; gap:5px; }
     .chart-legend .legend-item i{ width:11px; height:11px; border-radius:3px; display:inline-block; flex-shrink:0; }
+    /* ===== DARK MODE (layers on top of any colour theme) ===== */
+    body.dark-mode{ background: linear-gradient(160deg,#17141f 0%,#12171c 100%) fixed; color:#e7e3f2; }
+    body.dark-mode .app-container{ background:#1e1b2b; border-color:#302b43; box-shadow:0 24px 60px rgba(0,0,0,.55); }
+    body.dark-mode .subtitle, body.dark-mode .muted, body.dark-mode .card small, body.dark-mode .note-meta{ color:#a79fc4; }
+    body.dark-mode label, body.dark-mode .login-field label{ color:#d3cdea; }
+    body.dark-mode .sticky-header-container{ background:rgba(30,27,43,.92); border-bottom-color:#302b43; }
+    body.dark-mode .nav-tab{ color:#b9b2d6; }
+    body.dark-mode .nav-tab:hover{ background:#2a2540; }
+    body.dark-mode .card{ background:#242032; border-color:#332e49; box-shadow:0 2px 12px rgba(0,0,0,.3); }
+    body.dark-mode .user-pill{ background:#2a2540; border-color:#3a3557; color:#d9d3f2; }
+    body.dark-mode .btn-secondary{ background:#2a2540; color:#cdbcff; border-color:#3a3557; }
+    body.dark-mode .btn-secondary:hover{ background:#332c4d; }
+    body.dark-mode input[type="text"], body.dark-mode input[type="email"], body.dark-mode input[type="tel"],
+    body.dark-mode input[type="date"], body.dark-mode input[type="number"], body.dark-mode input[type="search"],
+    body.dark-mode select, body.dark-mode textarea{ background:#2b2740; color:#e7e3f2; border-color:#3a3557; }
+    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder{ color:#8b83a8; }
+    body.dark-mode input[readonly]{ background:#241f33 !important; color:#a79fc4 !important; }
+    body.dark-mode .table-container{ border-color:#332e49; }
+    body.dark-mode table{ background:#201c2e; border-color:#332e49; }
+    body.dark-mode thead{ background:linear-gradient(180deg,#2c2743,#241f38); }
+    body.dark-mode thead th{ color:#c9c1ec; }
+    body.dark-mode th, body.dark-mode td{ border-bottom-color:#322d4a; color:#e2ddf0; }
+    body.dark-mode tbody tr:nth-child(even){ background:#241f38; }
+    body.dark-mode tbody tr:hover{ background:#2f2947; }
+    body.dark-mode .login-card{ background:#1e1b2b; border-color:#302b43; }
+    body.dark-mode .login-note{ color:#a79fc4; }
+    body.dark-mode .login-note code{ background:#2b2740; color:#cdbcff; }
+    body.dark-mode .modal{ background:#1e1b2b; border-color:#302b43; color:#e7e3f2; }
+    body.dark-mode .modal-title{ color:#cdbcff; }
+    body.dark-mode .modal-header{ border-bottom-color:#302b43; }
+    body.dark-mode .close-btn{ color:#cbb8ff; }
+    body.dark-mode .detail-block{ background:#242032; border-color:#332e49; }
+    body.dark-mode .detail-block h3, body.dark-mode .detail-value{ color:#eae6f7; }
+    body.dark-mode .detail-label{ color:#a79fc4; }
+    body.dark-mode .notes-list li{ border-bottom-color:#332e49; color:#e2ddf0; }
     /* any remaining small buttons/labels styled as buttons stay fully rounded */
     button, .btn, .btn-small, .btn-secondary, .btn-danger, label.btn-secondary{
       border-radius: 999px;
@@ -893,6 +928,14 @@
               <span id="current-user-label">User: -</span>
               <span class="role-badge" id="current-role-label">-</span>
             </div>
+            <select id="theme-select" class="btn-small" title="Colour theme" style="max-width:150px;">
+              <option value="purple">🎨 Banpu Purple</option>
+              <option value="royal">🎨 Royal Violet</option>
+              <option value="indigo">🎨 Indigo</option>
+              <option value="ocean">🎨 Ocean Blue</option>
+              <option value="graphite">🎨 Graphite</option>
+            </select>
+            <button class="btn-secondary btn-small" id="dark-toggle" title="Toggle dark mode" style="min-width:40px;">🌙</button>
             <button class="btn-secondary btn-small" id="logout-btn">Log out</button>
           </div>
         </div>
@@ -2472,6 +2515,7 @@
         }
       });
       populateAssigneeDropdowns(); populateApproverDropdowns(); populateRequesterDropdowns(); applyRequesterUserLock(); renderAll();
+      applyUserTheme(user.id);
     }
     loginBtn.addEventListener("click", () => {
       const id = loginUserSelect.value;
@@ -2492,6 +2536,55 @@
       currentUser = null;
       appRoot.style.display = "none"; loginRoot.style.display = "flex";
     });
+
+    // ================== THEME (per-user colour theme, all within Banpu brand) ==================
+    const BANPU_THEMES = {
+      purple:   { primary:"#482f92", primaryDark:"#34216e", accent:"#00aeef" }, // Banpu purple
+      royal:    { primary:"#6600cc", primaryDark:"#4c0099", accent:"#00aeef" }, // bright Banpu violet
+      indigo:   { primary:"#2a2681", primaryDark:"#1d1a5e", accent:"#4f46e5" }, // indigo
+      ocean:    { primary:"#0072b8", primaryDark:"#005a94", accent:"#00aeef" }, // Banpu blue/cyan
+      graphite: { primary:"#242d2e", primaryDark:"#10161a", accent:"#00aeef" }  // graphite + cyan
+    };
+    function applyTheme(key) {
+      const t = BANPU_THEMES[key] || BANPU_THEMES.purple;
+      const r = document.documentElement.style;
+      r.setProperty("--banpu-primary", t.primary);
+      r.setProperty("--banpu-primary-dark", t.primaryDark);
+      r.setProperty("--banpu-accent", t.accent);
+    }
+    function applyDarkMode(on) {
+      document.body.classList.toggle("dark-mode", !!on);
+      const b = document.getElementById("dark-toggle");
+      if (b) b.textContent = on ? "☀️" : "🌙";
+      // improve chart text contrast + re-render dashboard charts if already drawn
+      if (window.Chart) { Chart.defaults.color = on ? "#d7d1ee" : "#666666"; }
+      if (typeof renderDashboard === "function" && currentUser) { try { renderDashboard(); } catch (e) {} }
+    }
+    function applyUserTheme(uid) {
+      const key = (uid && localStorage.getItem("itsm_theme_" + uid)) || "purple";
+      const safeKey = BANPU_THEMES[key] ? key : "purple";
+      applyTheme(safeKey);
+      const sel = document.getElementById("theme-select");
+      if (sel) sel.value = safeKey;
+      const darkOn = !!(uid && localStorage.getItem("itsm_dark_" + uid) === "1");
+      applyDarkMode(darkOn);
+    }
+    const themeSelect = document.getElementById("theme-select");
+    if (themeSelect) {
+      themeSelect.addEventListener("change", () => {
+        const key = themeSelect.value;
+        applyTheme(key);
+        if (currentUser) localStorage.setItem("itsm_theme_" + currentUser.id, key);
+      });
+    }
+    const darkToggle = document.getElementById("dark-toggle");
+    if (darkToggle) {
+      darkToggle.addEventListener("click", () => {
+        const on = !document.body.classList.contains("dark-mode");
+        applyDarkMode(on);
+        if (currentUser) localStorage.setItem("itsm_dark_" + currentUser.id, on ? "1" : "0");
+      });
+    }
 
     // ================== TABS ==================
     tabs.forEach(tab => {
