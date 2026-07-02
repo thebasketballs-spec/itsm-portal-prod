@@ -1938,6 +1938,22 @@
 </div><!-- /modal-backdrop -->
 <div id="toast-container">
   <script type="module">
+    /* ============================================================================
+       Service GU RU — Finance System Service Portal (Incident & Request)
+       ----------------------------------------------------------------------------
+       ภาพรวมสถาปัตยกรรม (อ่านก่อนแก้โค้ด):
+       • Backend: Firebase Firestore (เรียลไทม์ผ่าน onSnapshot) — collections:
+           users, incidents, requests, auditLogs, masterData, counters
+       • สถานะข้อมูลในหน่วยความจำ: systemUsers[], incidents[], requests[],
+           masterDataList[] — ถูก 'แทนที่ทั้งก้อน' ทุกครั้งที่ onSnapshot ยิง
+           (จึงไม่ push/splice เอง เพื่อกันข้อมูลซ้ำ)
+       • การไหลของงาน: สร้าง Incident/Request → (ถ้ามี Approver) รออนุมัติ →
+           Approve/Reject (แท็บ My Tasks) → Assign → เปลี่ยนสถานะ → ปิดงาน
+       • RBAC: 4 บทบาท (User/Support/Manager/Admin) ควบคุมการแสดงเมนูใน setCurrentUser()
+       • อีเมล: ทุกจุดเป็น 'draft' ผ่าน Outlook Web (openOutlookWebCompose) ไม่ส่งอัตโนมัติ
+       • ธีม: 5 ธีมสี (โทน Banpu) + Dark mode เก็บค่าแยกตามผู้ใช้ใน localStorage
+       หมายเหตุ: โครงหลักคือ SPA หน้าเดียว สลับ section ด้วย .nav-tab / .section.active
+       ============================================================================ */
     // --- Import Firebase ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
@@ -1982,6 +1998,7 @@
     const MAX_ATTACHMENT_SIZE_BYTES = 500 * 1024;       // 500KB per file (raw)
     const MAX_TOTAL_ATTACHMENTS_BYTES = 700 * 1024;     // 700KB total per ticket (raw, before Base64 inflation)
 
+    // รวมขนาด (ไบต์) ของไฟล์แนบที่เตรียมไว้ (staged) ก่อนบันทึก เพื่อเช็ก limit
     function getStagedAttachmentsTotalSize(list) {
       return list.reduce((sum, a) => sum + (a.size || 0), 0);
     }
@@ -2097,6 +2114,7 @@
       "Others": ["General UI", "Login / SSO", "Performance", "Data Export"]
     };
 
+  // ผูก dropdown System กับ datalist Module ให้ Module ที่เลือกได้เปลี่ยนตาม System
   function setupCascadingModule(sysSelectId, datalistId) {
    const sysEl = document.getElementById(sysSelectId);
    const listEl = document.getElementById(datalistId);
@@ -2130,6 +2148,7 @@
       }
     }
 
+    // อัปเดตเอกสารใน Firestore ตาม id (ไม่ทำอะไรถ้าไม่มี id)
     async function dbUpdate(colName, id, data) {
       if (!id) return;
       try {
@@ -2141,6 +2160,7 @@
       }
     }
 
+    // ลบเอกสารออกจาก Firestore ตาม id
     async function dbDelete(colName, id) {
       if (!id) return;
       try {
@@ -2159,6 +2179,7 @@
     // them into a single animation-frame pass avoids redundant full-table
     // rebuilds and keeps the UI responsive as data grows.
     let renderAllScheduled = false;
+    // หน่วง (debounce) การ render ทั้งหน้า เมื่อ snapshot อัปเดตหลายครั้งติดกัน
     function scheduleRenderAll() {
       if (renderAllScheduled) return;
       renderAllScheduled = true;
@@ -2173,6 +2194,7 @@
     let appBootstrapped = false;
     let masterDataSeeded = false;
 
+    // เริ่มต้นแอปเมื่อโหลดข้อมูลชุดแรกจากทุก collection ครบแล้ว
     function maybeBootstrapApp() {
       if (appBootstrapped) return;
       if (!Object.values(initialLoadDone).every(Boolean)) return;
@@ -2184,6 +2206,7 @@
       renderUserTable();
     }
 
+    // ตั้ง onSnapshot ฟังการเปลี่ยนแปลงแบบเรียลไทม์ของทุก collection + seed ค่าเริ่มต้นครั้งแรก
     function setupRealtimeListeners() {
       onSnapshot(collection(db, "users"), async (snap) => {
         systemUsers = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
@@ -2261,16 +2284,20 @@
       return `${ymPrefix}${String(nextNum).padStart(4, "0")}`;
     }
 
+    // ค้นหาผู้ใช้จาก id
     function getUserById(id) { return systemUsers.find(u => u.id === id) || null; }
+    // คืนชื่อผู้ใช้จาก id (คืนค่าว่างถ้าไม่พบ)
     function getUserName(id) { const u = getUserById(id); return u ? u.name : ""; }
 
     // Escapes free-text values before they are injected into innerHTML, to
     // prevent stored XSS from ticket titles, notes, names, etc.
     const HTML_ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    // escape ข้อความก่อนใส่ลง innerHTML เพื่อป้องกัน XSS
     function esc(value) {
       return String(value ?? "").replace(/[&<>"']/g, ch => HTML_ESCAPE_MAP[ch]);
     }
 
+    // จัดรูปแบบชื่อผู้ร้องขอ พร้อมป้าย OBO เมื่อสร้างแทนผู้อื่น
     function formatRequesterObo(requesterName, createdById) {
       if (!requesterName) return "-";
       const creatorName = getUserName(createdById);
@@ -2280,6 +2307,7 @@
       return esc(requesterName);
     }
 
+    // จัดรูปแบบข้อความ/ไอคอนของ Priority (P1-P4)
     function formatPriority(p) {
       if (!p) return "-";
       if (p.includes("P1")) return "🔴 " + p;
@@ -2288,6 +2316,7 @@
       if (p.includes("P4")) return "🟢 " + p;
       return p;
     }
+    // จัดรูปแบบวันที่ + เวลา
     function formatDateTime(d) {
       const date = new Date(d);
       if (isNaN(date.getTime())) return "-";
@@ -2298,6 +2327,7 @@
       const mi = String(date.getMinutes()).padStart(2, "0");
       return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
     }
+    // จัดรูปแบบเฉพาะวันที่
     function formatDateOnly(d) {
       if (!d) return "-";
       const date = new Date(d);
@@ -2307,10 +2337,12 @@
       const dd = String(date.getDate()).padStart(2, "0");
       return `${dd}/${mm}/${yyyy}`;
     }
+    // ดึงรหัส P1-P4 จากข้อความ priority
     function getPriorityCode(priorityText) {
       if (!priorityText) return "P3";
       return priorityText.split(" ")[0] || "P3";
     }
+    // คำนวณกำหนดเวลา SLA (response/resolution) ตาม priority ที่เลือก
     function computeSlaForTicket(priorityText, createdISO) {
       const code = getPriorityCode(priorityText);
       const tpl = SLA_TEMPLATES[code] || SLA_TEMPLATES.P3;
@@ -2326,12 +2358,14 @@
         escalated: false
       };
     }
+    // คำนวณอายุของ ticket เป็นจำนวนวัน
     function calcAgeDays(createdISO) {
       const c = new Date(createdISO);
       if (isNaN(c.getTime())) return "-";
       const diff = Date.now() - c.getTime();
       return Math.floor(diff / (1000 * 60 * 60 * 24));
     }
+    // แสดงข้อความแจ้งเตือนชั่วคราว (toast)
     function showToast(msg) {
       const div = document.createElement("div");
       div.className = "toast";
@@ -2339,6 +2373,7 @@
       toastContainer.appendChild(div);
       setTimeout(() => div.remove(), 4000);
     }
+    // บันทึกเหตุการณ์ลง Audit Log (collection auditLogs) พร้อมผู้ทำ/เวลา
     async function logAudit(action, ticketId, message) {
       if (!currentUser) return;
       const entry = {
@@ -2354,6 +2389,7 @@
       auditLogs.unshift(entry);
       renderAuditLog();
     }
+    // คืนชื่อ CSS class ตามสถานะ (+escalated) สำหรับแสดงเป็น status pill
     function statusClassName(status, escalated) {
       if (escalated) return "status-escalated";
       if (status === "Pending Approval") return "status-pending-approval";
@@ -2365,6 +2401,7 @@
       if (status === "Cancelled") return "status-cancelled";
       return "";
     }
+    // คืนป้ายสถานะ SLA: Met / Breach / In progress
     function slaLabel(ticket) {
       if (ticket.status === "Pending Approval") return "-"; 
       if (!ticket.sla) return "-";
@@ -2374,6 +2411,7 @@
       return "In Progress";
     }
 
+    // เติมรายชื่อผู้รับมอบหมาย (Support/Admin) ลง dropdown
     function populateAssigneeDropdowns() {
       const validAssignees = systemUsers.filter(u => u.assignTo === true);
       adminBulkAssignee.innerHTML = `<option value="">Assign To...</option>`;
@@ -2392,6 +2430,7 @@
       });
     }
 
+   // เติมรายชื่อผู้อนุมัติ (approver) ลง dropdown ของฟอร์ม Request และหน้า Detail
    function populateApproverDropdowns() {
       const requestApp = document.getElementById("request-approver");
       const approvers = systemUsers.filter(u => u.isApprover === true);
@@ -2403,6 +2442,7 @@
       if(detailApp) detailApp.innerHTML = html;
     }
 
+    // แสดงตารางจัดการสิทธิ์ Approver (หน้า Approvers)
     function renderApproverTable() {
       approverTableBody.innerHTML = "";
       systemUsers.forEach((u, i) => {
@@ -2416,6 +2456,7 @@
       });
     }
 
+    // เปิด/ปิดสิทธิ์ Approver ของผู้ใช้ผ่าน checkbox ในหน้า Approvers
     window.toggleApprover = async function(index, isApproverChecked) {
       const u = systemUsers[index];
       u.isApprover = isApproverChecked;
@@ -2425,6 +2466,7 @@
       showToast(`Approver permission updated for ${u.name}`);
     };
 
+    // เติมรายชื่อผู้ร้องขอ (requester) ลง dropdown ของฟอร์ม
     function populateRequesterDropdowns() {
       const incReqSelect = document.getElementById("incident-requester");
       const reqReqSelect = document.getElementById("request-requester");
@@ -2437,6 +2479,7 @@
       if (reqReqSelect) reqReqSelect.innerHTML = html;
     }
 
+    // เมื่อเลือก Requester ให้เติม Department/Email อัตโนมัติ (รองรับ OBO)
     function setupRequesterAutoFill(selectId, deptInputId, emailInputId) {
       const selectEl = document.getElementById(selectId);
       const deptEl = document.getElementById(deptInputId);
@@ -2460,6 +2503,7 @@
     setupRequesterAutoFill("incident-requester", "incident-dept", "incident-email");
     setupRequesterAutoFill("request-requester", "request-dept", "request-email");
 
+    // ถ้าเป็น role User ล็อกให้สร้าง ticket ในนามตัวเองเท่านั้น
     function applyRequesterUserLock() {
       if (!currentUser) return;
       const incReqEl = document.getElementById("incident-requester");
@@ -2500,6 +2544,7 @@
       }
       loginRoot.style.display = "flex"; appRoot.style.display = "none";
     }
+    // ตั้งผู้ใช้ปัจจุบัน แสดง/ซ่อนเมนูตามสิทธิ์ (RBAC) และโหลดธีมของผู้ใช้
     function setCurrentUser(user) {
       currentUser = user;
       localStorage.setItem("itsm_current_user", user.id);
@@ -2545,6 +2590,7 @@
       ocean:    { primary:"#0072b8", primaryDark:"#005a94", accent:"#00aeef" }, // Banpu blue/cyan
       graphite: { primary:"#242d2e", primaryDark:"#10161a", accent:"#00aeef" }  // graphite + cyan
     };
+    // ตั้งค่าตัวแปรสีหลัก/รอง ตามธีมที่เลือก (โทน Banpu)
     function applyTheme(key) {
       const t = BANPU_THEMES[key] || BANPU_THEMES.purple;
       const r = document.documentElement.style;
@@ -2552,6 +2598,7 @@
       r.setProperty("--banpu-primary-dark", t.primaryDark);
       r.setProperty("--banpu-accent", t.accent);
     }
+    // เปิด/ปิดโหมดมืด และปรับสีตัวอักษรของกราฟให้อ่านง่ายในโหมดมืด
     function applyDarkMode(on) {
       document.body.classList.toggle("dark-mode", !!on);
       const b = document.getElementById("dark-toggle");
@@ -2560,6 +2607,7 @@
       if (window.Chart) { Chart.defaults.color = on ? "#d7d1ee" : "#666666"; }
       if (typeof renderDashboard === "function" && currentUser) { try { renderDashboard(); } catch (e) {} }
     }
+    // โหลดธีมสี + สถานะโหมดมืดที่ผู้ใช้เคยตั้งไว้ (localStorage) มาใช้
     function applyUserTheme(uid) {
       const key = (uid && localStorage.getItem("itsm_theme_" + uid)) || "purple";
       const safeKey = BANPU_THEMES[key] ? key : "purple";
@@ -2621,6 +2669,7 @@
       }
     };
 
+    // ปฏิเสธ ticket: บังคับกรอกเหตุผล, เปลี่ยนเป็น Cancelled, บันทึก Audit, เด้ง draft email แจ้ง requester
     window.rejectTicket = async function(kind, id) {
       const reason = prompt(`Please provide a reason for rejecting ticket ${id}:`);
       if (!reason || reason.trim() === "") { alert("⚠️ Required: You must provide a reason for rejection."); return; }
@@ -2683,6 +2732,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     });
 
+    // แสดงรายการไฟล์แนบที่เตรียมไว้ในฟอร์ม Incident
     function renderIncidentStagedAttachments() {
       incidentStagedList.innerHTML = "";
       incidentStagedAttachments.forEach((a, index) => {
@@ -2692,6 +2742,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     }
 
+    // ลบไฟล์แนบที่เตรียมไว้ (Incident) ออกจากรายการ
     window.removeIncidentStaged = function(index) { incidentStagedAttachments.splice(index, 1); renderIncidentStagedAttachments(); };
 
     const incidentFileInput = document.getElementById("incident-file-input");
@@ -2734,6 +2785,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     });
 
+    // แสดงรายการไฟล์แนบที่เตรียมไว้ในฟอร์ม Request
     function renderRequestStagedAttachments() {
       requestStagedList.innerHTML = "";
       requestStagedAttachments.forEach((a, index) => {
@@ -2743,6 +2795,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     }
 
+    // ลบไฟล์แนบที่เตรียมไว้ (Request)
     window.removeRequestStaged = function(index) { requestStagedAttachments.splice(index, 1); renderRequestStagedAttachments(); };
 
     const requestFileInput = document.getElementById("request-file-input");
@@ -2887,6 +2940,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     }
 
+    // คำนวณสรุป + วาดกราฟโดนัท (Incident/Request แยกตาม status) กราฟแท่ง status และตาราง Latest Tickets
     function renderDashboard() {
       if (dashboardMonthFilter && !dashboardMonthFilter.value && !dashboardMonthFilter.dataset.cleared) {
         const now = new Date();
@@ -2984,12 +3038,14 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       dashboardMonthFilter.value = ""; dashboardMonthFilter.dataset.cleared = "1"; renderDashboard();
     });
 
+    // ตรวจว่าวันที่สร้างของ ticket อยู่ในช่วงวันที่ที่กรองหรือไม่
     function filterByDateRange(createdISO, fromVal, toVal) {
       const dt = new Date(createdISO); if (isNaN(dt.getTime())) return false;
       if (fromVal && dt < new Date(fromVal + "T00:00:00")) return false;
       if (toVal && dt > new Date(toVal + "T23:59:59")) return false; return true;
     }
 
+    // แสดงตารางรายการ Incident ตามเงื่อนไขฟิลเตอร์/ค้นหา
     function renderIncidents() {
       const statusFilter = incidentStatusFilter.value; const categoryFilter = incidentCategoryFilter.value; const systemFilter = incidentSystemFilter.value; const assigneeSearch = incidentAssigneeSearch.value.trim().toLowerCase(); const fromVal = incidentDateFrom.value; const toVal = incidentDateTo.value; const search = incidentSearch.value.trim().toLowerCase();
       incidentTableBody.innerHTML = "";
@@ -3010,6 +3066,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         });
     }
 
+    // แสดงตารางรายการ Request ตามเงื่อนไขฟิลเตอร์/ค้นหา
     function renderRequests() {
       const statusFilter = requestStatusFilter.value; const categoryFilter = requestCategoryFilter.value; const systemFilter = requestSystemFilter.value; const typeFilter = requestTypeFilter.value; const assigneeSearch = requestAssigneeSearch.value.trim().toLowerCase(); const fromVal = requestDateFrom.value; const toVal = requestDateTo.value; const search = requestSearch.value.trim().toLowerCase();
       requestTableBody.innerHTML = "";
@@ -3020,6 +3077,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         });
     }
 
+    // แสดงเฉพาะ ticket ที่ผู้ใช้ปัจจุบันสร้างหรือเป็น requester
     function renderMyTickets() {
       if (!currentUser) return; myTicketsBody.innerHTML = "";
       const all = [...incidents, ...requests].filter(t => t.createdBy === currentUser.id || t.assignedTo === currentUser.id || (t.requester && t.requester.toLowerCase() === currentUser.name.toLowerCase()));
@@ -3030,6 +3088,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         });
     }
 
+    // แสดงตารางในหน้า Admin Dashboard (bulk action / assign / delete)
     function renderAdminTable() {
       if (!currentUser || !["admin", "manager"].includes(currentUser.role)) return;
       const statusFilter = adminStatusFilter.value; const assigneeSearch = adminAssigneeSearch.value.trim().toLowerCase(); const fromVal = adminDateFrom.value; const toVal = adminDateTo.value; const search = adminSearch.value.trim().toLowerCase(); const all = [...incidents, ...requests];
@@ -3042,6 +3101,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const adminSelectAllCb = document.getElementById("admin-select-all"); if (adminSelectAllCb) adminSelectAllCb.checked = false;
     }
 
+    // แสดงตาราง Audit Log
     function renderAuditLog() {
       auditTableBody.innerHTML = "";
       auditLogs.forEach(a => {
@@ -3054,12 +3114,14 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
     // ================== DETAIL MODAL & UPDATING TICKETS ==================
     function findTicket(kind, id) { return kind === "incident" ? incidents.find(i => i.id === id) : requests.find(r => r.id === id); }
     
+    // บันทึก ticket ลง Firestore แล้วอัปเดต array ในหน่วยความจำ
     async function updateTicket(kind, ticket) {
       const colName = kind === "incident" ? "incidents" : "requests"; await dbUpdate(colName, ticket.firebaseId, ticket);
       if (kind === "incident") { const idx = incidents.findIndex(i => i.id === ticket.id); if (idx >= 0) incidents[idx] = ticket; } 
       else { const idx = requests.findIndex(r => r.id === ticket.id); if (idx >= 0) requests[idx] = ticket; }
     }
 
+    // แสดงโน้ตในหน้า Detail (กรองโน้ต internal ตามสิทธิ์ผู้ดู)
     function renderDetailNotes(t) {
       detailNotesList.innerHTML = ""; if (!t.notes || !t.notes.length) return;
       const isStaff = currentUser && ["admin", "manager", "support"].includes(currentUser.role);
@@ -3078,6 +3140,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     }
 
+    // แสดงไฟล์แนบในหน้า Detail
     function renderDetailAttachments(t) {
       detailAttachmentsList.innerHTML = ""; if (!t.attachments || !t.attachments.length) return;
       const isStaff = currentUser && ["admin", "manager", "support"].includes(currentUser.role);
@@ -3091,6 +3154,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     }
 
+    // ลบไฟล์แนบของ ticket ในหน้า Detail
     window.removeDetailAttachment = async function(index) {
       if (!currentDetail) return;
       const t = findTicket(currentDetail.kind, currentDetail.id); if (!t || !Array.isArray(t.attachments)) return;
@@ -3106,6 +3170,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       }
     };
 
+    // เปิดหน้าต่างรายละเอียด ticket + เติมค่าในฟอร์มแก้ไข (ซ่อน Approver ถ้าเป็น Incident, ปุ่ม Convert เฉพาะ Admin)
     function openDetail(kind, id) {
       const t = findTicket(kind, id); if (!t) return;
       currentDetail = { kind, id };
@@ -3187,6 +3252,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       detailBackdrop.classList.add("active");
     }
 
+    // ปิดหน้าต่างรายละเอียด ticket
     function closeDetail() { detailBackdrop.classList.remove("active"); currentDetail = null; }
     detailCloseBtn.addEventListener("click", closeDetail);
 
@@ -3399,6 +3465,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     });
 
+    // แสดงไฟล์แนบที่เตรียมจะแนบไปกับโน้ต
     function renderDetailNoteStagedAttachments() {
       detailNoteStagedList.innerHTML = "";
       detailNoteStagedAttachments.forEach((a, index) => {
@@ -3408,6 +3475,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       });
     }
 
+    // ลบไฟล์แนบที่เตรียมไว้ของโน้ต
     window.removeDetailNoteStaged = function(index) { detailNoteStagedAttachments.splice(index, 1); renderDetailNoteStagedAttachments(); };
 
     detailAddNoteBtn.addEventListener("click", async () => {
@@ -3526,6 +3594,7 @@ adminBulkApply.addEventListener("click", async () => {
     // ================== USER MANAGEMENT ==================
     userCancelBtn.addEventListener("click", resetUserForm);
 
+    // แสดงตารางจัดการผู้ใช้ (หน้า User Management)
     function renderUserTable() {
       userTableBody.innerHTML = "";
       systemUsers.forEach((u) => { 
@@ -3571,6 +3640,7 @@ adminBulkApply.addEventListener("click", async () => {
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     });
 
+    // โหลดข้อมูลผู้ใช้ขึ้นฟอร์มเพื่อแก้ไข
     window.editUser = function(userId) {
       const targetIndex = systemUsers.findIndex(item => item.id === userId);
       if (targetIndex === -1) return;
@@ -3593,6 +3663,7 @@ adminBulkApply.addEventListener("click", async () => {
       userForm.scrollIntoView({ behavior: "smooth" });
     };
 
+    // ลบผู้ใช้ (เฉพาะ Admin)
     window.deleteUser = async function(userId) {
       if (!confirm("Are you sure you want to delete this user?")) return;
       const actualIndex = systemUsers.findIndex(item => item.id === userId);
@@ -3608,6 +3679,7 @@ adminBulkApply.addEventListener("click", async () => {
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     };
 
+    // ล้างฟอร์มเพิ่ม/แก้ไขผู้ใช้
     function resetUserForm() {
       editingUserIndex = -1; userForm.reset();
       document.getElementById("user-id").readOnly = false;
@@ -3660,6 +3732,7 @@ adminBulkApply.addEventListener("click", async () => {
       }
     }
     
+    // ตรวจ SLA breach ทุก ๆ 1 นาที และเปลี่ยนสถานะเป็น Escalated พร้อมบันทึก Audit
     function checkSLA() { 
       const all = [...incidents, ...requests]; const now = new Date(); let changed = false;
       all.forEach(t => {
@@ -3673,6 +3746,7 @@ adminBulkApply.addEventListener("click", async () => {
     
 
 
+    // เรียก render ทุกส่วนของหน้าใหม่ทั้งหมด (ใช้หลังข้อมูลเปลี่ยน)
     function renderAll() { renderIncidents(); renderRequests(); renderMyTickets(); renderDashboard(); renderAdminTable(); renderApproveTasks(); renderUserTable(); renderApproverTable();renderReports();renderMasterTable(); }
 
     const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
@@ -3824,6 +3898,7 @@ adminBulkApply.addEventListener("click", async () => {
       if (items.includes(cur)) el.value = cur;
     }
 
+    // เติมค่า System/Category/Module/RequestType จาก Master Data ลง dropdown ต่าง ๆ
     function populateMasterDropdowns() {
       const sysList = [...new Set(masterDataList.filter(m => m.type === "System").map(m => m.name))].sort();
       const catList = [...new Set(masterDataList.filter(m => m.type === "Category").map(m => m.name))].sort();
@@ -3874,6 +3949,7 @@ adminBulkApply.addEventListener("click", async () => {
       });
     }
 
+    // แสดงตาราง Master Data
     function renderMasterTable() {
       const tbody = document.getElementById("master-table-body"); if (!tbody) return;
       tbody.innerHTML = "";
@@ -3885,6 +3961,7 @@ adminBulkApply.addEventListener("click", async () => {
       });
     }
 
+    // ลบรายการ Master Data ตาม firebaseId
     window.delMaster = async function(fbId) {
       if (!confirm("Delete this Master Data item? (It will disappear from the form's dropdown immediately)")) return;
       const idx = masterDataList.findIndex(m => m.firebaseId === fbId); if (idx === -1) return;
@@ -4018,6 +4095,7 @@ adminBulkApply.addEventListener("click", async () => {
     // save/submit handler that ends up bound more than once on a re-rendered
     // modal), which would otherwise pop open two identical OWA tabs.
     let _lastOwaCompose = { url: "", time: 0 };
+    // เปิดหน้าต่างร่างอีเมลผ่าน Outlook Web (ถ้าเปิดไม่ได้จะ fallback เป็น mailto) — เป็นแค่ draft ไม่ส่งอัตโนมัติ
     function openOutlookWebCompose(to, subject, body, cc) {
       // Build the query string manually with encodeURIComponent instead of
       // URLSearchParams — URLSearchParams encodes spaces as "+" (form
@@ -4064,6 +4142,7 @@ adminBulkApply.addEventListener("click", async () => {
       }, 1200);
     }
 
+    // ร่างอีเมลแจ้ง Approver เมื่อมีคำขอที่ต้องอนุมัติ
     function triggerEmailDraft(t) {
   if (!t.approver) return;
   const appUser = getUserById(t.approver);
