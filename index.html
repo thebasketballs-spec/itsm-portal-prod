@@ -754,6 +754,33 @@
       box-shadow: 0 0 0 3px rgba(0,174,239,.16) !important;
       background:#fff;
     }
+    /* Dropdowns (select): no coloured focus ring/outline — keep a plain neutral border */
+    select:focus, select:focus-visible{
+      border-color: var(--banpu-border) !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+    body.dark-mode select:focus, body.dark-mode select:focus-visible{
+      border-color: #3a3557 !important;
+    }
+    /* ===== Custom dropdown (themed replacement for native <select>) ===== */
+    .cs-wrap{ position:relative; }
+    .cs-native-hidden{ display:none !important; }
+    .cs-trigger{ width:100%; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 11px; border:1px solid var(--banpu-border); border-radius:999px; background:#fff; font-size:12px; color:var(--banpu-text); cursor:pointer; line-height:1.4; }
+    .cs-trigger:hover{ border-color:var(--banpu-accent); }
+    .cs-trigger .cs-label{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cs-trigger .cs-arrow{ color:var(--banpu-muted); font-size:10px; transition:transform .15s; flex-shrink:0; }
+    .cs-trigger.open .cs-arrow{ transform:rotate(180deg); }
+    .cs-trigger.cs-disabled{ background:#f3f4f6; color:#9aa0aa; cursor:not-allowed; pointer-events:none; }
+    .cs-panel{ position:absolute; z-index:60; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow:auto; background:#fff; border:1px solid var(--banpu-border); border-radius:12px; box-shadow:0 12px 28px rgba(72,47,146,.16); padding:4px; }
+    .cs-opt{ padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer; color:var(--banpu-text); white-space:nowrap; }
+    .cs-opt:hover{ background:#f1ecfc; }
+    .cs-opt.selected{ background:linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent)); color:#fff; }
+    body.dark-mode .cs-trigger{ background:#2b2740; color:#e7e3f2; border-color:#3a3557; }
+    body.dark-mode .cs-trigger.cs-disabled{ background:#241f33; color:#8b83a8; }
+    body.dark-mode .cs-panel{ background:#241f38; border-color:#3a3557; }
+    body.dark-mode .cs-opt{ color:#e7e3f2; }
+    body.dark-mode .cs-opt:hover{ background:#2f2947; }
     /* Pills / badges */
     .user-pill{ background:#f2effb; border:1px solid var(--banpu-border); color:var(--banpu-primary); }
     .role-badge{ background: linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent)); }
@@ -3446,6 +3473,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
         if (detailStatusSelect) detailStatusSelect.disabled = true;
       }
 
+      if (window._syncEnhancedSelects) window._syncEnhancedSelects();
       detailBackdrop.classList.add("active");
     }
 
@@ -3859,6 +3887,7 @@ adminBulkApply.addEventListener("click", async () => {
       document.getElementById("user-is-requester").checked = u.isRequester !== false;document.getElementById("user-is-supervisor").checked = u.isSupervisor === true;
       document.getElementById("user-password").value = u.password || "";
       document.getElementById("user-supervisor").value = u.supervisorId || "";
+      if (window._syncEnhancedSelects) window._syncEnhancedSelects();
       document.getElementById("user-id").readOnly = true;
       userSubmitBtn.textContent = "Update User"; userCancelBtn.style.display = "inline-block";
       userForm.scrollIntoView({ behavior: "smooth" });
@@ -4118,23 +4147,76 @@ adminBulkApply.addEventListener("click", async () => {
       bind("csat-export",      ()=>exportTablesToXlsx([[_tbl("csat-by-staff-body"),"By Support"],[_tbl("csat-table-body"),"By Ticket"]], "Satisfaction.xlsx"));
     })();
 
+    // ===== Themed custom dropdown: wraps a native <select> (kept as the source of truth) =====
+    // The real <select> stays in the DOM (hidden) so all existing .value reads + change handlers work.
+    function enhanceSelect(sel){
+      if(!sel || sel.dataset.enhanced) return;
+      sel.dataset.enhanced = "1";
+      sel.removeAttribute("required"); // manual validation covers these; avoids hidden-required focus error
+      const wrap = document.createElement("div"); wrap.className = "cs-wrap";
+      sel.parentNode.insertBefore(wrap, sel);
+      wrap.appendChild(sel);
+      sel.classList.add("cs-native-hidden");
+      const trigger = document.createElement("button");
+      trigger.type = "button"; trigger.className = "cs-trigger";
+      trigger.innerHTML = '<span class="cs-label"></span><span class="cs-arrow">\u25be</span>';
+      wrap.appendChild(trigger);
+      const panel = document.createElement("div"); panel.className = "cs-panel"; panel.style.display = "none";
+      wrap.appendChild(panel);
+      const labelEl = trigger.querySelector(".cs-label");
+      function syncLabel(){
+        const o = sel.options[sel.selectedIndex];
+        labelEl.textContent = o ? o.text : "";
+        trigger.classList.toggle("cs-disabled", sel.disabled);
+      }
+      function buildPanel(){
+        panel.innerHTML = "";
+        [...sel.options].forEach((o,i)=>{
+          const it = document.createElement("div");
+          it.className = "cs-opt" + (i===sel.selectedIndex ? " selected" : "");
+          it.textContent = o.text;
+          it.addEventListener("click", (e)=>{
+            e.stopPropagation();
+            sel.selectedIndex = i;
+            sel.dispatchEvent(new Event("input", {bubbles:true}));
+            sel.dispatchEvent(new Event("change", {bubbles:true}));
+            syncLabel(); close();
+          });
+          panel.appendChild(it);
+        });
+      }
+      function open(){ if(sel.disabled) return; buildPanel(); panel.style.display = "block"; trigger.classList.add("open"); }
+      function close(){ panel.style.display = "none"; trigger.classList.remove("open"); }
+      trigger.addEventListener("click", (e)=>{ e.stopPropagation(); (panel.style.display==="block") ? close() : open(); });
+      document.addEventListener("click", (e)=>{ if(!wrap.contains(e.target)) close(); });
+      sel.addEventListener("change", syncLabel);
+      if(sel.form) sel.form.addEventListener("reset", ()=> setTimeout(syncLabel, 0));
+      // React to option repopulation + disabled toggles done programmatically
+      new MutationObserver(syncLabel).observe(sel, { childList:true, attributes:true, attributeFilter:["disabled"] });
+      sel._csSync = syncLabel;
+      syncLabel();
+    }
+    window._syncEnhancedSelects = function(){ document.querySelectorAll("select[data-enhanced]").forEach(s=>{ if(s._csSync) s._csSync(); }); };
+    // Enhance every native <select> into a themed dropdown (skip the small header theme picker).
+    document.querySelectorAll("select").forEach(s=>{ if(s.id !== "theme-select") enhanceSelect(s); });
+
     const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
     incFilters.forEach(el => el.addEventListener("input", renderIncidents));
-    incidentClearFilter.addEventListener("click", () => { incFilters.forEach(el => el.value = ""); renderIncidents(); });
+    incidentClearFilter.addEventListener("click", () => { incFilters.forEach(el => el.value = ""); renderIncidents(); if(window._syncEnhancedSelects) window._syncEnhancedSelects(); });
 
     const reqFilters = [requestStatusFilter, requestCategoryFilter, requestSystemFilter, requestTypeFilter, requestAssigneeSearch, requestDateFrom, requestDateTo, requestSearch];
     reqFilters.forEach(el => el.addEventListener("input", renderRequests));
-    requestClearFilter.addEventListener("click", () => { reqFilters.forEach(el => el.value = ""); renderRequests(); });
+    requestClearFilter.addEventListener("click", () => { reqFilters.forEach(el => el.value = ""); renderRequests(); if(window._syncEnhancedSelects) window._syncEnhancedSelects(); });
 
     // My Tickets filter/search
     const myTicketsFilters = ["mytickets-status-filter","mytickets-type-filter","mytickets-search"].map(id => document.getElementById(id)).filter(Boolean);
     myTicketsFilters.forEach(el => el.addEventListener("input", renderMyTickets));
     const myTicketsClear = document.getElementById("mytickets-clear-filter");
-    if (myTicketsClear) myTicketsClear.addEventListener("click", () => { myTicketsFilters.forEach(el => el.value = ""); renderMyTickets(); });
+    if (myTicketsClear) myTicketsClear.addEventListener("click", () => { myTicketsFilters.forEach(el => el.value = ""); renderMyTickets(); if(window._syncEnhancedSelects) window._syncEnhancedSelects(); });
 
     const adminFilters = [adminStatusFilter, adminAssigneeSearch, adminDateFrom, adminDateTo, adminSearch];
     adminFilters.forEach(el => el.addEventListener("input", renderAdminTable));
-    adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); });
+    adminClearFilter.addEventListener("click", () => { adminFilters.forEach(el => el.value = ""); renderAdminTable(); if(window._syncEnhancedSelects) window._syncEnhancedSelects(); });
 
     // Close all sections before starting
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
