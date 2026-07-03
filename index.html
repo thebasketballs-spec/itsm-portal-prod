@@ -911,6 +911,7 @@
   </style>
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
@@ -2971,6 +2972,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       };
 
       await dbAdd("incidents", incident);
+      ensureMasterModule(system, module);
       incidentForm.reset(); incidentStagedAttachments = []; renderIncidentStagedAttachments(); applyRequesterUserLock(); if(window._incQuill){window._incQuill.setText("");} if(incidentDescInput) incidentDescInput.value=""; 
       logAudit("CREATE_INCIDENT", incident.id, `Created incident: ${incident.title}`); renderAll(); showToast(`Created Incident ${incident.id}`);
       triggerIncidentAdminEmailDraft(incident);
@@ -3013,6 +3015,7 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       };
 
      await dbAdd("requests", req);
+      ensureMasterModule(system, module);
       requestForm.reset(); requestStagedAttachments = []; renderRequestStagedAttachments(); applyRequesterUserLock(); if(window._reqQuill){window._reqQuill.setText("");} if(requestDescInput) requestDescInput.value=""; 
       logAudit("CREATE_REQUEST", req.id, `Created request: ${req.title}`); renderAll(); showToast(`Created Request ${req.id}`);
       
@@ -3103,11 +3106,29 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
             { data: outerData, backgroundColor: outerColors, borderColor: "#fff", borderWidth: 2, _labels: outerLabels, weight: 1 }
           ]
         },
+        plugins: (typeof ChartDataLabels !== "undefined") ? [ChartDataLabels] : [],
         options: {
           cutout: "35%",
+          layout: { padding: 4 },
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: (ctx) => { const arr = ctx.dataset._labels || []; const l = arr[ctx.dataIndex] != null ? arr[ctx.dataIndex] : (ctx.label || ""); return `${l}: ${ctx.parsed}`; } } }
+            tooltip: { callbacks: { label: (ctx) => { const arr = ctx.dataset._labels || []; const l = arr[ctx.dataIndex] != null ? arr[ctx.dataIndex] : (ctx.label || ""); return `${l}: ${ctx.parsed}`; } } },
+            datalabels: {
+              color: "#ffffff",
+              textStrokeColor: "rgba(0,0,0,.5)",
+              textStrokeWidth: 3,
+              textAlign: "center",
+              font: { size: 10, weight: "600" },
+              display: "auto",
+              formatter: (value, ctx) => {
+                if (!value) return null;
+                const arr = ctx.dataset._labels || [];
+                if (ctx.datasetIndex === 0) { return (arr[ctx.dataIndex] || "") + "\n" + value; }
+                const l = arr[ctx.dataIndex] || "";
+                const st = l.split("\u00b7").pop().trim();
+                return st + "\n" + value;
+              }
+            }
           }
         }
       });
@@ -4191,6 +4212,17 @@ adminBulkApply.addEventListener("click", async () => {
     }
 
     // Populate System/Category/Module/RequestType dropdowns from Master Data
+    // Auto-add a Module to Master Data when a requester types a new one on the ticket form
+    // (Type = Module, Parent System = the selected system). Skips if it already exists.
+    async function ensureMasterModule(system, moduleName){
+      const m = (moduleName || "").trim();
+      if (!system || !m) return;
+      const exists = masterDataList.some(x => x.type === "Module" && x.parentSystem === system && (x.name || "").toLowerCase() === m.toLowerCase());
+      if (exists) return;
+      try { await dbAdd("masterData", { type: "Module", parentSystem: system, name: m }); logAudit("MASTER_ADD", "-", `Auto-added Module "${m}" under system ${system} (from ticket form)`); }
+      catch (e) { console.error("ensureMasterModule failed:", e); }
+    }
+
     function populateMasterDropdowns() {
       const sysList = [...new Set(masterDataList.filter(m => m.type === "System").map(m => m.name))].sort();
       const catList = [...new Set(masterDataList.filter(m => m.type === "Category").map(m => m.name))].sort();
