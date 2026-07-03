@@ -1031,6 +1031,7 @@
           <div class="card">
             <h2>Latest Tickets</h2>
             <small>All tickets from Incident and Request</small>
+            <button type="button" class="btn-secondary btn-small" id="dashboard-export" style="margin:6px 0; display:none;">📥 Export Excel</button>
             <div class="table-container">
               <table>
                 <thead>
@@ -1479,6 +1480,7 @@
         <div class="card">
           <h2>My Tickets</h2>
           <small>Tickets you created or assigned to you (Incident + Request)</small>
+          <button type="button" class="btn-secondary btn-small" id="mytickets-export" style="margin:6px 0;">📥 Export Excel</button>
           <div class="filters">
             <strong>Filter:</strong>
             <select id="mytickets-status-filter">
@@ -1523,6 +1525,7 @@
           <div class="card">
             <h2>Advanced Report</h2>
             <small>Aging, Resolution Rate, Staff Performance</small>
+            <button type="button" class="btn-secondary btn-small" id="reports-export" style="margin:6px 0;">📥 Export Excel</button>
             <div class="table-container">
               <table>
                 <thead>
@@ -1577,6 +1580,7 @@
               <div>
                 <h2>Admin Dashboard</h2>
                 <small>Assign / Re-assign / Close / Reopen / Delete / Bulk Actions / SLA view</small>
+                <button type="button" class="btn-secondary btn-small" id="admin-export" style="margin:6px 0;">📥 Export Excel</button>
               </div>
               <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <select id="admin-bulk-action" style="font-size:11px; padding:4px 8px; border-radius:999px;">
@@ -1639,6 +1643,7 @@
         <div class="card">
           <h2>Audit Log</h2>
           <small>Records all key actions: create, update, assign, close, reopen, delete, SLA auto escalation, etc.</small>
+          <button type="button" class="btn-secondary btn-small" id="audit-export" style="margin:6px 0;">📥 Export Excel</button>
           <div class="table-container">
             <table>
               <thead>
@@ -1662,6 +1667,7 @@
         <div class="card">
           <h2>Satisfaction (CSAT)</h2>
           <small>Customer satisfaction ratings submitted by requesters at ticket close (0 = Dissatisfied, 1 = Satisfied, 2 = Very satisfied)</small>
+          <button type="button" class="btn-secondary btn-small" id="csat-export" style="margin:6px 0;">📥 Export Excel</button>
           <div id="csat-summary" style="margin:10px 0;"></div>
           <h3 style="margin:14px 0 4px; color:var(--banpu-primary);">By Support Staff (Assignee)</h3>
           <div class="table-container">
@@ -1785,6 +1791,7 @@
         <div class="card">
           <h2>Approver Management</h2>
           <small>Manage approver permissions (Check the box to show the name in the 'Approver' dropdown when creating a ticket)</small>
+          <button type="button" class="btn-secondary btn-small" id="approver-export" style="margin:6px 0;">📥 Export Excel</button>
           <div class="table-container" style="margin-top: 12px;">
             <table>
               <thead>
@@ -2681,6 +2688,7 @@
       const _canExport = ["admin","manager"].includes(user.role);
       if (exportIncBtn) exportIncBtn.style.display = _canExport ? "" : "none";
       if (exportReqBtn) exportReqBtn.style.display = _canExport ? "" : "none";
+      const _dashExp = document.getElementById("dashboard-export"); if (_dashExp) _dashExp.style.display = _canExport ? "" : "none";
     }
     loginBtn.addEventListener("click", () => {
       const id = loginUserSelect.value;
@@ -4059,6 +4067,56 @@ adminBulkApply.addEventListener("click", async () => {
         }
       }
     }
+
+    // ===== Export any on-screen table to Excel (.xlsx). Skips button columns; checkbox columns become Yes/No. =====
+    function _tableToAoa(table){
+      if(!table) return [];
+      const heads=[...table.querySelectorAll("thead th")];
+      const bodyRows=[...table.querySelectorAll("tbody tr")];
+      const n=heads.length; if(!n) return [];
+      const isBtn=new Array(n).fill(false), isChk=new Array(n).fill(false);
+      for(let c=0;c<n;c++){
+        isBtn[c]=bodyRows.some(tr=>tr.children[c] && tr.children[c].querySelector("button"));
+        isChk[c]=!isBtn[c] && bodyRows.some(tr=>tr.children[c] && tr.children[c].querySelector('input[type="checkbox"]'));
+      }
+      const cols=[]; for(let c=0;c<n;c++){ const ht=(heads[c].innerText||"").trim(); if(!isBtn[c] && (ht!=="" || isChk[c])) cols.push(c); }
+      const aoa=[ cols.map(c=>(heads[c].innerText||"").trim() || ("Col"+(c+1))) ];
+      bodyRows.forEach(tr=>{
+        if(tr.children.length < n) return; // skip placeholder/colspan rows
+        aoa.push(cols.map(c=>{
+          const cell=tr.children[c];
+          if(isChk[c]){ const cb=cell.querySelector('input[type="checkbox"]'); return cb&&cb.checked?"Yes":"No"; }
+          return (cell.innerText||"").replace(/\s+/g," ").trim();
+        }));
+      });
+      return aoa;
+    }
+    function exportTableToXlsx(table, filename, sheetName){
+      if(typeof XLSX==="undefined"){ alert("Export library not loaded."); return; }
+      const aoa=_tableToAoa(table);
+      if(aoa.length<=1){ alert("No data to export."); return; }
+      const wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), (sheetName||"Sheet1").slice(0,31));
+      XLSX.writeFile(wb, filename);
+    }
+    function exportTablesToXlsx(pairs, filename){
+      if(typeof XLSX==="undefined"){ alert("Export library not loaded."); return; }
+      const wb=XLSX.utils.book_new(); let any=false;
+      pairs.forEach(([table,sheet])=>{ const aoa=_tableToAoa(table); if(aoa.length>1){ XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), (sheet||"Sheet").slice(0,31)); any=true; } });
+      if(!any){ alert("No data to export."); return; }
+      XLSX.writeFile(wb, filename);
+    }
+    const _tbl=(id)=>{ const b=document.getElementById(id); return b?b.closest("table"):null; };
+    (function initTabExports(){
+      const bind=(id,fn)=>{ const b=document.getElementById(id); if(b) b.addEventListener("click", fn); };
+      bind("dashboard-export", ()=>exportTableToXlsx(_tbl("latest-table-body"), "Dashboard_Latest_Tickets.xlsx", "Latest Tickets"));
+      bind("mytickets-export", ()=>exportTableToXlsx(_tbl("mytickets-table-body"), "My_Tickets.xlsx", "My Tickets"));
+      bind("admin-export",     ()=>exportTableToXlsx(_tbl("admin-table-body"),     "Admin_Dashboard.xlsx", "Tickets"));
+      bind("audit-export",     ()=>exportTableToXlsx(_tbl("audit-table-body"),     "Audit_Log.xlsx", "Audit"));
+      bind("approver-export",  ()=>exportTableToXlsx(_tbl("approver-table-body"),  "Approvers.xlsx", "Approvers"));
+      bind("reports-export",   ()=>exportTablesToXlsx([[_tbl("aging-row"),"Aging"],[_tbl("resolution-row"),"Metrics"],[_tbl("staff-row"),"Staff Performance"]], "Reports.xlsx"));
+      bind("csat-export",      ()=>exportTablesToXlsx([[_tbl("csat-by-staff-body"),"By Support"],[_tbl("csat-table-body"),"By Ticket"]], "Satisfaction.xlsx"));
+    })();
 
     const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
     incFilters.forEach(el => el.addEventListener("input", renderIncidents));
