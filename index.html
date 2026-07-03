@@ -2576,6 +2576,7 @@
       const u = systemUsers[index];
       u.isApprover = isApproverChecked;
       await dbUpdate("users", u.firebaseId, u);
+      logAudit("TOGGLE_APPROVER", "N/A", `Set Approver = ${isApproverChecked} for ${u.name} (${u.id})`);
       populateApproverDropdowns();
       renderAll();
       showToast(`Approver permission updated for ${u.name}`);
@@ -2693,9 +2694,10 @@
       // into by leaving the password field blank.
       if ((user.password || "") !== password) { alert("Incorrect password."); return; }
       passwordInput.value = "";
-      setCurrentUser(user); showToast(`Welcome, ${user.name}`);
+      setCurrentUser(user); logAudit("LOGIN", "N/A", `Logged in: ${user.name} (${user.id}, role ${user.role})`); showToast(`Welcome, ${user.name}`);
     });
     logoutBtn.addEventListener("click", () => {
+      if (currentUser) logAudit("LOGOUT", "N/A", `Logged out: ${currentUser.name} (${currentUser.id})`);
       localStorage.removeItem("itsm_current_user");
       currentUser = null;
       appRoot.style.display = "none"; loginRoot.style.display = "flex";
@@ -3821,11 +3823,12 @@ adminBulkApply.addEventListener("click", async () => {
         const u = systemUsers[editingUserIndex];
         u.name = name; u.email = email; u.department = department; u.role = role; u.assignTo = assignTo; u.isApprover = isApprover; u.isRequester = isRequester; u.password = password;u.supervisorId = supervisorId;u.isSupervisor = isSupervisor;
         await dbUpdate("users", u.firebaseId, u);
+        logAudit("EDIT_USER", u.id, `Edited user: ${u.name} (role ${u.role})`);
         alert("User updated successfully!"); resetUserForm();
       } else {
         if (systemUsers.some(u => u.id === id)) { alert("This User ID is already in use."); return; }
         const newUser = { id, name, department, email, role, assignTo, isApprover, isRequester, password , supervisorId, isSupervisor };
-        await dbAdd("users", newUser); alert("User added successfully!"); userForm.reset();
+        await dbAdd("users", newUser); logAudit("CREATE_USER", id, `Created user: ${name} (role ${role})`); alert("User added successfully!"); userForm.reset();
       }
       populateApproverDropdowns(); populateRequesterDropdowns(); renderAll(); 
     });
@@ -3861,6 +3864,7 @@ adminBulkApply.addEventListener("click", async () => {
 
       const u = systemUsers[actualIndex];
       await dbDelete("users", u.firebaseId);
+      logAudit("DELETE_USER", u.id, `Deleted user: ${u.name}`);
 
       if (editingUserIndex === actualIndex) resetUserForm();
       else if (editingUserIndex > actualIndex) editingUserIndex--;
@@ -4190,6 +4194,7 @@ adminBulkApply.addEventListener("click", async () => {
             populateRequesterDropdowns();
             renderAll();
 
+            logAudit("IMPORT_USERS", "N/A", `Imported users from Excel: added ${addedCount}, updated ${updatedCount}, deleted ${deletedCount}`);
             alert(`Import complete (file is the source of truth).\nAdded: ${addedCount}\nUpdated: ${updatedCount}\nDeleted: ${deletedCount}` + (protectedSelf ? `\n\nNote: your own account was not in the file but was kept to avoid locking you out.` : ``));
           } catch (error) {
             console.error(error);
@@ -4268,6 +4273,7 @@ adminBulkApply.addEventListener("click", async () => {
 
         const item = { type, parentSystem, name };
         await dbAdd("masterData", item);
+        logAudit("MASTER_ADD", "N/A", `Added Master Data: ${type}${parentSystem ? " ("+parentSystem+")" : ""} = ${name}`);
         masterForm.reset(); masterParentGrp.style.display = "none";
         populateMasterDropdowns(); renderMasterTable(); showToast(`Added Master: ${name}`);
       });
@@ -4289,7 +4295,9 @@ adminBulkApply.addEventListener("click", async () => {
     window.delMaster = async function(fbId) {
       if (!confirm("Delete this Master Data item? (It will disappear from the form's dropdown immediately)")) return;
       const idx = masterDataList.findIndex(m => m.firebaseId === fbId); if (idx === -1) return;
+      const _delItem = masterDataList[idx];
       await dbDelete("masterData", fbId); masterDataList.splice(idx, 1);
+      logAudit("MASTER_DELETE", "N/A", `Deleted Master Data: ${_delItem.type}${_delItem.parentSystem ? " ("+_delItem.parentSystem+")" : ""} = ${_delItem.name}`);
       populateMasterDropdowns(); renderMasterTable(); showToast("Deleted Master Data.");
     };
 // ================== MASTER DATA IMPORT / EXPORT (EXCEL) ==================
@@ -4394,6 +4402,7 @@ adminBulkApply.addEventListener("click", async () => {
             populateMasterDropdowns();
             renderMasterTable();
 
+            logAudit("IMPORT_MASTER", "N/A", `Imported Master Data from Excel: added ${addedCount}, deleted ${deletedCount}`);
             alert(`Import complete (file is the source of truth).\nAdded: ${addedCount}\nDeleted: ${deletedCount}`);
           } catch (error) {
             console.error(error);
