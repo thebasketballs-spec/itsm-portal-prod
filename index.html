@@ -15,6 +15,12 @@
       --banpu-border: #e6e2f5;       /* lavender-tinted */
       --banpu-text: #1b1630;
       --banpu-muted: #6b7280;
+      --banpu-primary-soft: rgba(72,47,146,0.09);
+      --banpu-primary-soft2: rgba(72,47,146,0.16);
+      --banpu-primary-soft-dark: rgba(0,174,239,0.22);
+      --banpu-glow: rgba(72,47,146,0.30);
+      --banpu-thead1: rgba(72,47,146,0.06);
+      --banpu-thead2: rgba(72,47,146,0.13);
     }
     * {
       box-sizing: border-box;
@@ -32,7 +38,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 24px 0;
       background: radial-gradient(circle at top, #e7ebff, #f4f6fb);
+    }
+    .login-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      padding: 24px;
+      max-width: 1180px;
+      width: 100%;
+    }
+    .login-vm-link { flex: 1 1 460px; max-width: 620px; display: block; }
+    .login-vm {
+      width: 100%; height: auto; display: block;
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(72, 47, 146, 0.18);
+    }
+    @media (max-width: 860px) {
+      .login-vm-link { flex-basis: 320px; max-width: 420px; }
+      .login-wrap { gap: 22px; }
     }
     .login-card {
       background: var(--banpu-card-bg);
@@ -726,18 +753,18 @@
     }
     /* Tabs: pill + brand gradient when active */
     .nav-tab{ border-radius: 10px; color:#4b4763; font-weight:500; }
-    .nav-tab:hover{ background:#f1ecfc; }
+    .nav-tab:hover{ background:var(--banpu-primary-soft2); }
     .nav-tab.active{
       color:#fff;
       background: linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent));
       border-bottom-color: transparent;
-      box-shadow: 0 8px 18px rgba(72,47,146,.28);
+      box-shadow: 0 8px 18px var(--banpu-glow);
     }
     .nav-tab.active .badge{ background:#fff !important; color:var(--banpu-primary) !important; }
     /* Buttons */
-    .btn{ box-shadow: 0 8px 20px rgba(72,47,146,.26); }
-    .btn-secondary{ background:#f2effb; color:var(--banpu-primary); border:1px solid var(--banpu-border); box-shadow:none; }
-    .btn-secondary:hover{ background:#e8e1fb; }
+    .btn{ box-shadow: 0 8px 20px var(--banpu-glow); }
+    .btn-secondary{ background:var(--banpu-primary-soft); color:var(--banpu-primary); border:1px solid var(--banpu-border); box-shadow:none; }
+    .btn-secondary:hover{ background:var(--banpu-primary-soft2); }
     #login-btn{ box-shadow: 0 14px 26px rgba(72,47,146,.42); }
     /* Cards */
     .card{
@@ -774,20 +801,20 @@
     .cs-trigger.cs-disabled{ background:#f3f4f6; color:#9aa0aa; cursor:not-allowed; pointer-events:none; }
     .cs-panel{ position:absolute; z-index:60; top:calc(100% + 4px); left:0; right:0; max-height:240px; overflow:auto; background:#fff; border:1px solid var(--banpu-border); border-radius:12px; box-shadow:0 12px 28px rgba(72,47,146,.16); padding:4px; }
     .cs-opt{ padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer; color:var(--banpu-text); white-space:nowrap; }
-    .cs-opt:hover{ background:#f1ecfc; }
+    .cs-opt:hover{ background:var(--banpu-primary-soft2); }
     .cs-opt.selected{ background:linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent)); color:#fff; }
     body.dark-mode .cs-trigger{ background:#2b2740; color:#e7e3f2; border-color:#3a3557; }
     body.dark-mode .cs-trigger.cs-disabled{ background:#241f33; color:#8b83a8; }
     body.dark-mode .cs-panel{ background:#241f38; border-color:#3a3557; }
     body.dark-mode .cs-opt{ color:#e7e3f2; }
-    body.dark-mode .cs-opt:hover{ background:#2f2947; }
+    body.dark-mode .cs-opt:hover{ background:var(--banpu-primary-soft-dark); }
     /* Pills / badges */
-    .user-pill{ background:#f2effb; border:1px solid var(--banpu-border); color:var(--banpu-primary); }
+    .user-pill{ background:var(--banpu-primary-soft); border:1px solid var(--banpu-border); color:var(--banpu-primary); }
     .role-badge{ background: linear-gradient(135deg,var(--banpu-primary),var(--banpu-accent)); }
     /* Tables: soft rounded, zebra rows, brand header, row hover */
     .table-container{ border:1px solid var(--banpu-border); border-radius:14px; }
     table{ border:none; }
-    thead{ background: linear-gradient(180deg,#f3efff,#ece6fb); }
+    thead{ background: linear-gradient(180deg,var(--banpu-thead1),var(--banpu-thead2)); }
     thead th{ color:var(--banpu-primary); font-weight:600; letter-spacing:.01em; }
     th, td{ border-bottom:1px solid #efeafb; }
     tbody tr{ transition: background .12s; }
@@ -850,7 +877,7 @@
     body.dark-mode label, body.dark-mode .login-field label{ color:#d3cdea; }
     body.dark-mode .sticky-header-container{ background:rgba(30,27,43,.92); border-bottom-color:#302b43; }
     body.dark-mode .nav-tab{ color:#b9b2d6; }
-    body.dark-mode .nav-tab:hover{ background:#2a2540; }
+    body.dark-mode .nav-tab:hover{ background:var(--banpu-primary-soft-dark); }
     body.dark-mode .card{ background:#242032; border-color:#332e49; box-shadow:0 2px 12px rgba(0,0,0,.3); }
     body.dark-mode .user-pill{ background:#2a2540; border-color:#3a3557; color:#d9d3f2; }
     body.dark-mode .btn-secondary{ background:#2a2540; color:#cdbcff; border-color:#3a3557; }
@@ -946,6 +973,13 @@
 </head>
 <body>
   <div id="login-root">
+    <div class="login-wrap">
+      <div class="login-vm-link">
+        <picture>
+          <source media="(max-width: 860px)" srcset="https://www.banpu.com/wp-content/uploads/2023/06/banpu-vision-mission-en-mobile.png">
+          <img class="login-vm" src="https://www.banpu.com/wp-content/uploads/2020/10/banpu-vision-mission-en.png" alt="Banpu Vision & Mission" loading="lazy">
+        </picture>
+      </div>
     <div class="login-card">
       <h1>Service GU RU</h1>
       <p>Select a user to test Role-Based Access (Admin / Manager / Support / User)</p>
@@ -966,6 +1000,7 @@
         <br/>- <code>User</code>: Create Incident/Request + view own My Tickets
       </div>
     </div>
+    </div>
   </div>
 
   <div id="app-root">
@@ -985,11 +1020,11 @@
               <span class="role-badge" id="current-role-label">-</span>
             </div>
             <select id="theme-select" class="btn-small" title="Colour theme" style="max-width:150px;">
-              <option value="purple">🎨 Banpu Purple</option>
-              <option value="royal">🎨 Royal Violet</option>
-              <option value="indigo">🎨 Indigo</option>
-              <option value="ocean">🎨 Ocean Blue</option>
-              <option value="graphite">🎨 Graphite</option>
+              <option value="purple">🟣 Banpu Purple</option>
+              <option value="royal">🟢 Emerald</option>
+              <option value="indigo">🔵 Ocean Blue</option>
+              <option value="ocean">🟠 Sunset</option>
+              <option value="graphite">🌸 Rose</option>
             </select>
             <button class="btn-secondary btn-small" id="dark-toggle" title="Toggle dark mode" style="min-width:40px;">🌙</button>
             <button class="btn-secondary btn-small" id="logout-btn">Log out</button>
@@ -2731,6 +2766,11 @@
       passwordInput.value = "";
       setCurrentUser(user); logAudit("LOGIN", "N/A", `Logged in: ${user.name} (${user.id}, role ${user.role})`); showToast(`Welcome, ${user.name}`);
     });
+    // Allow logging in by pressing Enter from the account select or password field (no need to click the button).
+    ["login-user", "login-password"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); loginBtn.click(); } });
+    });
     logoutBtn.addEventListener("click", () => {
       if (currentUser) logAudit("LOGOUT", "N/A", `Logged out: ${currentUser.name} (${currentUser.id})`);
       localStorage.removeItem("itsm_current_user");
@@ -2740,19 +2780,32 @@
 
     // ================== THEME (per-user colour theme, all within Banpu brand) ==================
     const BANPU_THEMES = {
-      purple:   { primary:"#482f92", primaryDark:"#34216e", accent:"#00aeef" }, // Banpu purple
-      royal:    { primary:"#6600cc", primaryDark:"#4c0099", accent:"#00aeef" }, // bright Banpu violet
-      indigo:   { primary:"#2a2681", primaryDark:"#1d1a5e", accent:"#4f46e5" }, // indigo
-      ocean:    { primary:"#0072b8", primaryDark:"#005a94", accent:"#00aeef" }, // Banpu blue/cyan
-      graphite: { primary:"#242d2e", primaryDark:"#10161a", accent:"#00aeef" }  // graphite + cyan
+      purple:   { primary:"#482f92", primaryDark:"#34216e", accent:"#00aeef" }, // Banpu Purple (default)
+      royal:    { primary:"#047857", primaryDark:"#065f46", accent:"#10b981" }, // Emerald green
+      indigo:   { primary:"#1d4ed8", primaryDark:"#1e3a8a", accent:"#06b6d4" }, // Ocean blue
+      ocean:    { primary:"#c2410c", primaryDark:"#9a3412", accent:"#f59e0b" }, // Sunset orange
+      graphite: { primary:"#be185d", primaryDark:"#9d174b", accent:"#fb7185" }  // Rose pink
     };
-    // Set primary/accent colour variables from the selected theme (Banpu)
+    function _hexToRgba(hex, a) {
+      const h = hex.replace("#", "");
+      const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16);
+      return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+    }
+    // Set primary/accent + derived tint variables so the whole UI (tabs, buttons,
+    // table headers, pills, dropdowns, shadows) re-colours per theme in light AND dark mode.
     function applyTheme(key) {
       const t = BANPU_THEMES[key] || BANPU_THEMES.purple;
       const r = document.documentElement.style;
       r.setProperty("--banpu-primary", t.primary);
       r.setProperty("--banpu-primary-dark", t.primaryDark);
       r.setProperty("--banpu-accent", t.accent);
+      r.setProperty("--banpu-primary-soft", _hexToRgba(t.primary, 0.09));   // light tint backgrounds
+      r.setProperty("--banpu-primary-soft2", _hexToRgba(t.primary, 0.16));  // hover backgrounds
+      r.setProperty("--banpu-primary-soft-dark", _hexToRgba(t.accent, 0.22)); // dark-mode hover/tint
+      r.setProperty("--banpu-accent-soft", _hexToRgba(t.accent, 0.12));
+      r.setProperty("--banpu-glow", _hexToRgba(t.primary, 0.30));           // themed shadows
+      r.setProperty("--banpu-thead1", _hexToRgba(t.primary, 0.06));
+      r.setProperty("--banpu-thead2", _hexToRgba(t.primary, 0.13));
     }
     // Toggle dark mode and adjust chart text colour for dark mode
     function applyDarkMode(on) {
@@ -3094,6 +3147,17 @@ async function assignTicket(ticket, newAssigneeId, fromDetail = false) {
       const all = [...incidents, ...requests].filter(t => t.status === "Pending Approval" && t.approver === currentUser.id);
       if (all.length > 0) { badgePendingApprove.textContent = all.length; badgePendingApprove.style.display = "inline-flex"; } 
       else { badgePendingApprove.style.display = "none"; }
+      // User/Support only see the "My Tasks (Approve)" tab when they actually have something to approve; other roles always see it.
+      const _apprTab = document.querySelector('.nav-tab[data-target="approve-tasks-section"]');
+      if (_apprTab) {
+        const _condRole = (currentUser.role === "user" || currentUser.role === "support");
+        if (_condRole && all.length === 0) {
+          if (_apprTab.classList.contains("active")) { const _dash = document.querySelector('.nav-tab[data-target="dashboard-section"]'); if (_dash) _dash.click(); }
+          _apprTab.style.display = "none";
+        } else {
+          _apprTab.style.display = "inline-flex";
+        }
+      }
       all.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(t => {
         const tr = document.createElement("tr"); const kind = t.type === "Incident" ? "incident" : "request";
         tr.innerHTML = `<td>${t.id}</td><td>${t.type}</td><td>${formatPriority(t.priority)}</td><td title="${esc(_htmlToText(t.description))}">${esc(t.title)}</td><td>${formatRequesterObo(t.requester, t.createdBy)}</td><td>${formatDateTime(t.createdAt)}</td><td><button class="btn btn-small" onclick="window.approveTicket('${kind}', '${t.id}')">✅ Approve</button> <button class="btn-danger btn-small" onclick="window.rejectTicket('${kind}', '${t.id}')">❌ Reject</button> <button class="btn-secondary btn-small" data-detail-kind="${kind}" data-id="${t.id}">Detail</button></td>`;
