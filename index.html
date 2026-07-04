@@ -188,9 +188,12 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       margin-bottom: 8px;
     }
+    /* Left title block shrinks; right-hand controls stay pinned to the right on a single line */
+    .top-bar > div:first-child { flex: 1 1 auto; min-width: 0; }
+    .header-controls { flex-wrap: nowrap !important; flex-shrink: 0; margin-left: auto; }
     .user-pill {
       display: inline-flex;
       align-items: center;
@@ -938,7 +941,8 @@
       h1 { font-size: 18px; }
       .subtitle { font-size: 12px; }
       .sticky-header-container { position: static; -webkit-backdrop-filter: none; backdrop-filter: none; }
-      .top-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .top-bar { gap: 6px; }
+      .header-controls { overflow-x: auto; }
       .tabs { gap: 4px; }
       .nav-tab { padding: 8px 12px; }
       .filters { flex-direction: column; align-items: stretch; }
@@ -993,7 +997,7 @@
       <p>Select a user to test Role-Based Access (Admin / Manager / Support / User)</p>
       <div class="login-field">
         <label for="login-user">Select Account</label>
-        <select id="login-user"></select>
+        <select id="login-user" class="notranslate"></select>
       </div>
       <div class="login-field">
         <label for="login-password">Password</label>
@@ -1022,8 +1026,8 @@
               Create incidents and service requests, track SLA, assignment, escalation, and audit log in a single page (Firebase Integration).
            </div>
           </div>
-          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <div class="user-pill">
+          <div class="header-controls" style="display:flex; gap:8px; align-items:center; flex-wrap:nowrap; margin-left:auto; flex-shrink:0;">
+            <div class="user-pill notranslate">
               <span id="current-user-label">User: -</span>
               <span class="role-badge" id="current-role-label">-</span>
             </div>
@@ -2410,13 +2414,7 @@
     function setupRealtimeListeners() {
       onSnapshot(collection(db, "users"), async (snap) => {
         systemUsers = snap.docs.map(d => ({ ...d.data(), firebaseId: d.id }));
-        if (!initialLoadDone.users && systemUsers.length === 0) {
-          const defaultUsers = [
-            { id: "admin", name: "Admin", role: "admin", department: "IT Systems", email: "admin@example.com", password: "12345", assignTo: false, isApprover: true, isRequester: true },
-          ];
-          for (let u of defaultUsers) { await dbAdd("users", u); }
-          // onSnapshot will fire again automatically once these writes land.
-        }
+        // No default users are auto-created; accounts are managed via User Management.
         initialLoadDone.users = true;
         if (appBootstrapped) { scheduleRenderAll(); renderUserTable(); } else { maybeBootstrapApp(); }
       }, (error) => { console.error("users sync error:", error); showToast("Error connecting to Database."); });
@@ -2862,6 +2860,14 @@
     // ================== LANGUAGE (Google Website Translate; no strings embedded in the app) ==================
     // The dropdown drives Google's hidden translate combo, which translates the whole page (incl. dynamic content) client-side.
     const langSelect = document.getElementById("lang-select");
+    let _gtLoaded = false;
+    function _loadGoogleTranslate() {
+      if (_gtLoaded) return;
+      _gtLoaded = true;
+      const sc = document.createElement("script");
+      sc.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      document.body.appendChild(sc);
+    }
     function _applyGoogTrans(lang, tries) {
       tries = tries || 0;
       const combo = document.querySelector(".goog-te-combo");
@@ -2874,11 +2880,17 @@
     if (langSelect) {
       const savedLang = localStorage.getItem("itsm_lang") || "en";
       langSelect.value = savedLang;
-      if (savedLang !== "en") _applyGoogTrans(savedLang);
+      // Only spin up Google Translate for a non-English language; English keeps the original page untouched.
+      if (savedLang !== "en") { _loadGoogleTranslate(); _applyGoogTrans(savedLang); }
       langSelect.addEventListener("change", () => {
         const lang = langSelect.value;
         localStorage.setItem("itsm_lang", lang);
-        _applyGoogTrans(lang);
+        if (lang === "en") {
+          if (_gtLoaded) _applyGoogTrans("en"); // revert to original only if the widget was ever loaded
+        } else {
+          _loadGoogleTranslate();
+          _applyGoogTrans(lang);
+        }
       });
     }
 
@@ -5050,6 +5062,5 @@ ITSM Portal Automated System`;
       }, "google_translate_element");
     }
   </script>
-  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
