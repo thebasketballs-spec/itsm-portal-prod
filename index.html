@@ -961,6 +961,14 @@
     button, .btn, .btn-small, .btn-secondary, .btn-danger, label.btn-secondary{
       border-radius: 999px;
     }
+    /* Google Website Translate: keep functional but hide its default banner/gadget UI */
+    #google_translate_element { display: none; }
+    .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
+    body { top: 0 !important; }
+    .goog-te-gadget { height: 0; overflow: hidden; }
+    .goog-tooltip, .goog-tooltip:hover { display: none !important; }
+    .goog-text-highlight { background: none !important; box-shadow: none !important; }
+    iframe.skiptranslate, .skiptranslate iframe { visibility: hidden !important; height: 0 !important; border: 0 !important; }
 
   </style>
   </style>
@@ -1019,7 +1027,15 @@
               <span id="current-user-label">User: -</span>
               <span class="role-badge" id="current-role-label">-</span>
             </div>
-            <select id="theme-select" class="btn-small" title="Colour theme" style="max-width:150px;">
+            <select id="lang-select" class="btn-small notranslate" title="Language / ภาษา" style="max-width:150px;">
+              <option value="en">🌐 English</option>
+              <option value="th">🇹🇭 ไทย</option>
+              <option value="id">🇮🇩 Indonesia</option>
+              <option value="zh-CN">🇨🇳 中文</option>
+              <option value="ja">🇯🇵 日本語</option>
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+            </select>
+            <select id="theme-select" class="btn-small notranslate" title="Colour theme" style="max-width:150px;">
               <option value="purple">🟣 Banpu Purple</option>
               <option value="royal">🟢 Emerald</option>
               <option value="indigo">🔵 Ocean Blue</option>
@@ -2843,6 +2859,29 @@
       });
     }
 
+    // ================== LANGUAGE (Google Website Translate; no strings embedded in the app) ==================
+    // The dropdown drives Google's hidden translate combo, which translates the whole page (incl. dynamic content) client-side.
+    const langSelect = document.getElementById("lang-select");
+    function _applyGoogTrans(lang, tries) {
+      tries = tries || 0;
+      const combo = document.querySelector(".goog-te-combo");
+      if (combo) {
+        if (combo.value !== lang) { combo.value = lang; combo.dispatchEvent(new Event("change")); }
+      } else if (tries < 60) {
+        setTimeout(() => _applyGoogTrans(lang, tries + 1), 200); // widget script may still be loading
+      }
+    }
+    if (langSelect) {
+      const savedLang = localStorage.getItem("itsm_lang") || "en";
+      langSelect.value = savedLang;
+      if (savedLang !== "en") _applyGoogTrans(savedLang);
+      langSelect.addEventListener("change", () => {
+        const lang = langSelect.value;
+        localStorage.setItem("itsm_lang", lang);
+        _applyGoogTrans(lang);
+      });
+    }
+
     // ================== TABS ==================
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
@@ -4262,7 +4301,7 @@ adminBulkApply.addEventListener("click", async () => {
     }
     window._syncEnhancedSelects = function(){ document.querySelectorAll("select[data-enhanced]").forEach(s=>{ if(s._csSync) s._csSync(); }); };
     // Enhance every native <select> into a themed dropdown (skip the small header theme picker).
-    document.querySelectorAll("select").forEach(s=>{ if(s.id !== "theme-select") enhanceSelect(s); });
+    document.querySelectorAll("select").forEach(s=>{ if(s.id !== "theme-select" && s.id !== "lang-select") enhanceSelect(s); });
 
     const incFilters = [incidentStatusFilter, incidentCategoryFilter, incidentSystemFilter, incidentAssigneeSearch, incidentDateFrom, incidentDateTo, incidentSearch];
     incFilters.forEach(el => el.addEventListener("input", renderIncidents));
@@ -5000,5 +5039,17 @@ ITSM Portal Automated System`;
       }
     })();
   </script>
+  <div id="google_translate_element"></div>
+  <script>
+    // Classic (non-module) so Google's callback can find this global function.
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: "en",
+        includedLanguages: "en,th,id,zh-CN,ja,vi",
+        autoDisplay: false
+      }, "google_translate_element");
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
