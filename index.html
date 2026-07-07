@@ -1735,19 +1735,9 @@
           <button type="button" class="btn-secondary btn-small" id="csat-export" style="margin:6px 0;">📥 Export Excel</button>
           <div id="csat-summary" style="margin:10px 0;"></div>
           <h3 style="margin:14px 0 4px; color:var(--banpu-primary);">By Support Staff (Assignee)</h3>
-          <div class="table-container">
-            <table>
-              <thead><tr><th>Support</th><th>Responses</th><th>Q1 Avg</th><th>Q2 Avg</th><th>Overall Avg (/2)</th><th>Satisfaction (%)</th></tr></thead>
-              <tbody id="csat-by-staff-body"></tbody>
-            </table>
-          </div>
+          <div id="csat-staff-groups"></div>
           <h3 style="margin:16px 0 4px; color:var(--banpu-primary);">By Ticket</h3>
-          <div class="table-container">
-            <table>
-              <thead><tr><th>ID</th><th>Type</th><th>Requester</th><th>Assigned</th><th>Q1 (Outcome)</th><th>Q2 (Service)</th><th>Avg</th><th>Comment</th><th>Submitted</th></tr></thead>
-              <tbody id="csat-table-body"></tbody>
-            </table>
-          </div>
+          <div id="csat-ticket-groups"></div>
         </div>
       </div>
 
@@ -4118,42 +4108,69 @@ adminBulkApply.addEventListener("click", async () => {
     })();
     // Render the satisfaction (CSAT) tables (Satisfaction tab)
     function renderCsat(){
-      const body=document.getElementById("csat-table-body"); const sum=document.getElementById("csat-summary");
-      if(!body) return;
+      const staffWrap=document.getElementById("csat-staff-groups");
+      const tktWrap=document.getElementById("csat-ticket-groups");
+      const sum=document.getElementById("csat-summary");
+      if(!staffWrap && !tktWrap && !sum) return;
       const all=[...incidents,...requests].filter(t=>t.csat).sort((a,b)=>new Date(b.csat.submittedAt)-new Date(a.csat.submittedAt));
-      body.innerHTML="";
-      let sq1=0,sq2=0; const byStaff={};
-      all.forEach(t=>{
-        sq1+=t.csat.q1; sq2+=t.csat.q2; const avg=(t.csat.q1+t.csat.q2)/2;
-        const staffName=getUserName(t.assignedTo)||"(Unassigned)";
-        if(!byStaff[staffName]) byStaff[staffName]={n:0,q1:0,q2:0};
-        byStaff[staffName].n++; byStaff[staffName].q1+=t.csat.q1; byStaff[staffName].q2+=t.csat.q2;
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${t.id}</td><td>${t.type}</td><td>${esc(t.csat.submittedByName||t.requester||"")}</td><td>${esc(staffName)}</td><td>${CSAT_LABELS[t.csat.q1]} (${t.csat.q1})</td><td>${CSAT_LABELS[t.csat.q2]} (${t.csat.q2})</td><td>${avg.toFixed(1)}</td><td>${esc(t.csat.comment||"")||"-"}</td><td>${formatDateTime(t.csat.submittedAt)}</td>`;
-        body.appendChild(tr);
-      });
-      // per-staff breakdown
-      const staffBody=document.getElementById("csat-by-staff-body");
-      if(staffBody){
-        staffBody.innerHTML="";
+      const incArr=all.filter(t=>t.type==="Incident");
+      const reqArr=all.filter(t=>t.type==="Request");
+      const S_INC="background:var(--banpu-primary);color:#fff;border:none;";
+      const S_REQ="background:var(--banpu-accent);color:#fff;border:none;";
+      const S_ALL="background:#16a34a;color:#fff;border:none;font-weight:700;";
+      const chip=(title,style)=>`<div style="margin:12px 0 4px;"><span class="badge" style="min-width:96px;${style}">${title}</span></div>`;
+
+      // ----- By Support Staff (Assignee), split per scope then combined -----
+      function staffTable(arr, scope){
+        const byStaff={};
+        arr.forEach(t=>{ const name=getUserName(t.assignedTo)||"(Unassigned)"; if(!byStaff[name]) byStaff[name]={n:0,q1:0,q2:0}; byStaff[name].n++; byStaff[name].q1+=t.csat.q1; byStaff[name].q2+=t.csat.q2; });
         const rows=Object.entries(byStaff).sort((a,b)=>((b[1].q1+b[1].q2)/(2*b[1].n))-((a[1].q1+a[1].q2)/(2*a[1].n)));
-        if(rows.length===0){ staffBody.innerHTML='<tr><td colspan="6" class="muted">No data yet</td></tr>'; }
-        rows.forEach(([name,d])=>{
-          const a1=d.q1/d.n, a2=d.q2/d.n, ov=(d.q1+d.q2)/(2*d.n); const pct=(ov/2*100).toFixed(0);
-          const tr=document.createElement("tr");
-          tr.innerHTML=`<td>${esc(name)}</td><td>${d.n}</td><td>${a1.toFixed(2)}</td><td>${a2.toFixed(2)}</td><td>${ov.toFixed(2)}</td><td>${pct}%</td>`;
-          staffBody.appendChild(tr);
-        });
+        let tb="";
+        if(rows.length===0){ tb='<tr><td colspan="6" class="muted">No responses</td></tr>'; }
+        else rows.forEach(([name,d])=>{ const a1=d.q1/d.n,a2=d.q2/d.n,ov=(d.q1+d.q2)/(2*d.n),pct=(ov/2*100).toFixed(0); tb+=`<tr><td>${esc(name)}</td><td>${d.n}</td><td>${a1.toFixed(2)}</td><td>${a2.toFixed(2)}</td><td>${ov.toFixed(2)}</td><td>${pct}%</td></tr>`; });
+        return `<div class="table-container"><table class="csat-staff-tbl" data-scope="${scope}"><thead><tr><th>Support</th><th>Responses</th><th>Q1 Avg</th><th>Q2 Avg</th><th>Overall Avg (/2)</th><th>Satisfaction (%)</th></tr></thead><tbody>${tb}</tbody></table></div>`;
       }
+      if(staffWrap){
+        staffWrap.innerHTML =
+          chip("🔧 Incident",S_INC)+staffTable(incArr,"Incident")+
+          chip("📋 Request",S_REQ)+staffTable(reqArr,"Request")+
+          chip("Σ Combined",S_ALL)+staffTable(all,"Combined");
+      }
+
+      // ----- By Ticket, split per scope then combined -----
+      function ticketTable(arr, scope){
+        let tb="";
+        if(arr.length===0){ tb='<tr><td colspan="9" class="muted">No responses</td></tr>'; }
+        else arr.forEach(t=>{ const avg=(t.csat.q1+t.csat.q2)/2; const staffName=getUserName(t.assignedTo)||"(Unassigned)"; tb+=`<tr><td>${t.id}</td><td>${t.type}</td><td>${esc(t.csat.submittedByName||t.requester||"")}</td><td>${esc(staffName)}</td><td>${CSAT_LABELS[t.csat.q1]} (${t.csat.q1})</td><td>${CSAT_LABELS[t.csat.q2]} (${t.csat.q2})</td><td>${avg.toFixed(1)}</td><td>${esc(t.csat.comment||"")||"-"}</td><td>${formatDateTime(t.csat.submittedAt)}</td></tr>`; });
+        return `<div class="table-container"><table class="csat-ticket-tbl" data-scope="${scope}"><thead><tr><th>ID</th><th>Type</th><th>Requester</th><th>Assigned</th><th>Q1 (Outcome)</th><th>Q2 (Service)</th><th>Avg</th><th>Comment</th><th>Submitted</th></tr></thead><tbody>${tb}</tbody></table></div>`;
+      }
+      if(tktWrap){
+        tktWrap.innerHTML =
+          chip("🔧 Incident",S_INC)+ticketTable(incArr,"Incident")+
+          chip("📋 Request",S_REQ)+ticketTable(reqArr,"Request")+
+          chip("Σ Combined",S_ALL)+ticketTable(all,"Combined");
+      }
+
+      // ----- Summary: Incident / Request / Combined -----
       if(sum){
         const n=all.length;
         if(n===0){ sum.innerHTML='<span class="muted">No survey results yet</span>'; }
-        else { const a1=sq1/n,a2=sq2/n,ov=(sq1+sq2)/(2*n); const pct=(ov/2*100).toFixed(0);
-          sum.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">`+
-            `<span class="badge">Responses: ${n}</span>`+
-            `<span class="badge badge-green">Overall avg: ${ov.toFixed(2)}/2 (${pct}%)</span>`+
-            `<span class="badge">Q1 (Outcome): ${a1.toFixed(2)}</span>`+
-            `<span class="badge">Q2 (Service): ${a2.toFixed(2)}</span></div>`;
+        else {
+          const stat=(arr)=>{ const m=arr.length; let q1=0,q2=0; arr.forEach(t=>{ q1+=t.csat.q1; q2+=t.csat.q2; }); const a1=m?q1/m:0,a2=m?q2/m:0,ov=m?(q1+q2)/(2*m):0,pct=m?(ov/2*100).toFixed(0):"0"; return {m,a1,a2,ov,pct}; };
+          const block=(title,chipStyle,st)=>{
+            const head=`<span class="badge" style="min-width:96px;${chipStyle}">${title}</span>`;
+            if(st.m===0) return `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0;">${head}<span class="muted">No responses</span></div>`;
+            return `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0;">${head}`+
+              `<span class="badge">Responses: ${st.m}</span>`+
+              `<span class="badge badge-green">Overall: ${st.ov.toFixed(2)}/2 (${st.pct}%)</span>`+
+              `<span class="badge">Q1 (Outcome): ${st.a1.toFixed(2)}</span>`+
+              `<span class="badge">Q2 (Service): ${st.a2.toFixed(2)}</span></div>`;
+          };
+          sum.innerHTML =
+            block("🔧 Incident",S_INC,stat(incArr))+
+            block("📋 Request",S_REQ,stat(reqArr))+
+            `<div style="border-top:1px dashed var(--banpu-border);margin:8px 0 6px;"></div>`+
+            block("Σ Combined",S_ALL,stat(all));
         }
       }
     }
@@ -4205,7 +4222,7 @@ adminBulkApply.addEventListener("click", async () => {
       bind("audit-export",     ()=>exportTableToXlsx(_tbl("audit-table-body"),     "Audit_Log.xlsx", "Audit"));
       bind("approver-export",  ()=>exportTableToXlsx(_tbl("approver-table-body"),  "Approvers.xlsx", "Approvers"));
       bind("reports-export",   ()=>exportTablesToXlsx([[_tbl("aging-row"),"Aging"],[_tbl("resolution-row"),"Metrics"],[_tbl("staff-row"),"Staff Performance"]], "Reports.xlsx"));
-      bind("csat-export",      ()=>exportTablesToXlsx([[_tbl("csat-by-staff-body"),"By Support"],[_tbl("csat-table-body"),"By Ticket"]], "Satisfaction.xlsx"));
+      bind("csat-export",      ()=>{ const pairs=[]; document.querySelectorAll("#csat-staff-groups table").forEach(t=>pairs.push([t,"Staff-"+(t.dataset.scope||"")])); document.querySelectorAll("#csat-ticket-groups table").forEach(t=>pairs.push([t,"Ticket-"+(t.dataset.scope||"")])); exportTablesToXlsx(pairs, "Satisfaction.xlsx"); });
     })();
 
     // ===== Themed custom dropdown: wraps a native <select> (kept as the source of truth) =====
