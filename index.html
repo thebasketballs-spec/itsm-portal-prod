@@ -965,6 +965,27 @@
     button, .btn, .btn-small, .btn-secondary, .btn-danger, label.btn-secondary{
       border-radius: 999px;
     }
+    /* CSAT tables: identical fixed column widths across Incident/Request/Combined so numbers line up; numeric columns centered */
+    .csat-staff-tbl { table-layout: fixed; width: 100%; }
+    .csat-staff-tbl th, .csat-staff-tbl td { text-align: center; }
+    .csat-staff-tbl th:first-child, .csat-staff-tbl td:first-child { text-align: left; }
+    .csat-staff-tbl th:nth-child(1), .csat-staff-tbl td:nth-child(1) { width: 28%; }
+    .csat-staff-tbl th:nth-child(2), .csat-staff-tbl td:nth-child(2) { width: 12%; }
+    .csat-staff-tbl th:nth-child(3), .csat-staff-tbl td:nth-child(3) { width: 13%; }
+    .csat-staff-tbl th:nth-child(4), .csat-staff-tbl td:nth-child(4) { width: 13%; }
+    .csat-staff-tbl th:nth-child(5), .csat-staff-tbl td:nth-child(5) { width: 17%; }
+    .csat-staff-tbl th:nth-child(6), .csat-staff-tbl td:nth-child(6) { width: 17%; }
+    .csat-ticket-tbl { table-layout: fixed; width: 100%; }
+    .csat-ticket-tbl th, .csat-ticket-tbl td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .csat-ticket-tbl th:nth-child(1), .csat-ticket-tbl td:nth-child(1) { width: 8%; }
+    .csat-ticket-tbl th:nth-child(2), .csat-ticket-tbl td:nth-child(2) { width: 8%; text-align: center; }
+    .csat-ticket-tbl th:nth-child(3), .csat-ticket-tbl td:nth-child(3) { width: 14%; }
+    .csat-ticket-tbl th:nth-child(4), .csat-ticket-tbl td:nth-child(4) { width: 12%; }
+    .csat-ticket-tbl th:nth-child(5), .csat-ticket-tbl td:nth-child(5) { width: 12%; text-align: center; }
+    .csat-ticket-tbl th:nth-child(6), .csat-ticket-tbl td:nth-child(6) { width: 12%; text-align: center; }
+    .csat-ticket-tbl th:nth-child(7), .csat-ticket-tbl td:nth-child(7) { width: 7%; text-align: center; }
+    .csat-ticket-tbl th:nth-child(8), .csat-ticket-tbl td:nth-child(8) { width: 15%; }
+    .csat-ticket-tbl th:nth-child(9), .csat-ticket-tbl td:nth-child(9) { width: 12%; }
   </style>
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.js"></script>
