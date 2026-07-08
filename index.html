@@ -2681,16 +2681,23 @@
 
       selectEl.addEventListener("change", (e) => {
         const selectedOption = e.target.options[e.target.selectedIndex];
+        // Default the Approver (optional) to the selected requester's supervisor/approver.
+        // Dispatch "change" so the themed custom dropdown refreshes its label and any dependents.
+        const syncApprover = (val) => {
+          const appEl = document.getElementById("request-approver");
+          if (!appEl) return;
+          const hasOpt = [...appEl.options].some(o => o.value === val);
+          appEl.value = hasOpt ? val : ""; // only apply if that supervisor is actually an approver; else blank
+          appEl.dispatchEvent(new Event("change", { bubbles: true }));
+        };
         if (!selectedOption || !selectedOption.value) {
           deptEl.value = ""; emailEl.value = "";
+          if (selectId === "request-requester") syncApprover("");
           return;
         }
         deptEl.value = selectedOption.getAttribute("data-dept") || "N/A";
         emailEl.value = selectedOption.getAttribute("data-email") || "";
-        if (selectId === "request-requester") {
-        const appEl = document.getElementById("request-approver");
-        if (appEl) appEl.value = selectedOption.getAttribute("data-supervisor") || "";
-      }
+        if (selectId === "request-requester") syncApprover(selectedOption.getAttribute("data-supervisor") || "");
       });
     }
     setupRequesterAutoFill("incident-requester", "incident-dept", "incident-email");
